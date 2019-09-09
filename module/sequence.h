@@ -76,6 +76,7 @@ public:
     Q_INVOKABLE bool startView(int id);
     Q_INVOKABLE bool stopView();
     Q_INVOKABLE void lxDebug();
+    Q_INVOKABLE void showAnaImg(int type,int light);
     ImageProvider *imageProvider;
 
 signals:

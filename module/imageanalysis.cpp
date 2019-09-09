@@ -29,42 +29,53 @@ QString ImageAnalysis::QRDecode(QString img){
     return result;
 }
 
-QImage ImageAnalysis::getMainImg(){
-    for(size_t i = 0; i < x.size(); i++){
-        line(firstImg,Point(x[i],0),Point(x[i],firstImg.rows-1),Scalar(255),4);
-        putText(firstImg,to_string(i),Point(x[i],40),FONT_HERSHEY_PLAIN,4,Scalar(255),4);
-    }
-    for(size_t i = 0; i < y.size(); i++){
-        line(firstImg,Point(0,y[i]),Point(firstImg.cols-1,y[i]),Scalar(255),4);
-        putText(firstImg,to_string(i),Point(0,y[i]),FONT_HERSHEY_PLAIN,4,Scalar(255),4);
-    }
+QImage ImageAnalysis::getMainImg(int type,int light){
+    qDebug()<<"getMainImg,type="<<type<<",light:"<<light;
+    Mat tempImg = firstImg.clone();
+    if(light == 1)
+        tempImg = tempImg*3;
+    else if(light == 2)
+        tempImg = tempImg*6;
+    else if(light == 3)
+        tempImg = tempImg*10;
 
-    for (int i = 0; i < firstImg.rows; i++)
-    {
-        const uchar* indata = mask1.ptr(i);
-        const uchar* indata2 = mask2.ptr(i);
-        uchar* outdata = firstImg.ptr(i);
-        for (int j = 0; j < firstImg.cols; j++)
+    if (type == 0){
+        for(size_t i = 0; i < x.size(); i++){
+            line(tempImg,Point(x[i],0),Point(x[i],tempImg.rows-1),Scalar(255),4);
+            putText(tempImg,to_string(i),Point(x[i],40),FONT_HERSHEY_PLAIN,4,Scalar(255),4);
+        }
+        for(size_t i = 0; i < y.size(); i++){
+            line(tempImg,Point(0,y[i]),Point(tempImg.cols-1,y[i]),Scalar(255),4);
+            putText(tempImg,to_string(i),Point(0,y[i]),FONT_HERSHEY_PLAIN,4,Scalar(255),4);
+        }
+
+        for (int i = 0; i < tempImg.rows; i++)
         {
-            if (*indata != 0 || *indata2 != 0)
-                *outdata = 255;
-            indata++;
-            indata2++;
-            outdata++;
+            const uchar* indata = mask1.ptr(i);
+            const uchar* indata2 = mask2.ptr(i);
+            uchar* outdata = tempImg.ptr(i);
+            for (int j = 0; j < tempImg.cols; j++)
+            {
+                if (*indata != 0 || *indata2 != 0)
+                    *outdata = 255;
+                indata++;
+                indata2++;
+                outdata++;
+            }
         }
     }
 
-    QImage image(firstImg.cols,firstImg.rows,QImage::Format_Indexed8);
+    QImage image(tempImg.cols,tempImg.rows,QImage::Format_Indexed8);
     image.setColorCount(256);
     for (int i = 0; i < 256; i++)
         image.setColor(i,qRgb(i,i,i));
-    firstImg = firstImg*3;
-    uchar *pSrc = firstImg.data;
-    for (int row = 0; row < firstImg.rows; row++)
+
+    uchar *pSrc = tempImg.data;
+    for (int row = 0; row < tempImg.rows; row++)
     {
         uchar *pDest = image.scanLine(row);
-        memcpy(pDest, pSrc, firstImg.cols);
-        pSrc += firstImg.step;
+        memcpy(pDest, pSrc, tempImg.cols);
+        pSrc += tempImg.step;
     }
     return image;
 }

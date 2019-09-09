@@ -6,6 +6,8 @@ import Dx.Sequence 1.0
 import Dx.Global 1.0
 
 Page {
+    property int showtype: 0
+    property int showlight: 1
     id: testProcessT
 
     Rectangle{
@@ -29,6 +31,46 @@ Page {
             source: ""
         }
     }
+
+    Button{
+        id:removemask
+        anchors.left: mainAnaImage.left
+        anchors.leftMargin: 50
+        anchors.top: mainAnaImage.bottom
+        anchors.topMargin: 10
+        text: qsTr("去除蒙板")
+        font.pixelSize: 30
+        onClicked: {
+            showtype = 1;
+            Sequence.showAnaImg(showtype,showlight);
+        }
+    }
+    Button{
+        id:addmask
+        anchors.left: removemask.right
+        anchors.leftMargin: 20
+        anchors.top: mainAnaImage.bottom
+        anchors.topMargin: 10
+        text: qsTr("显示蒙板")
+        font.pixelSize: 30
+        onClicked: {
+            showtype = 0;
+            Sequence.showAnaImg(showtype,showlight);
+        }
+    }
+    Button{
+        id:updatelight
+        anchors.left: addmask.right
+        anchors.leftMargin: 20
+        anchors.top: mainAnaImage.bottom
+        anchors.topMargin: 10
+        text: qsTr("调整亮度")
+        font.pixelSize: 30
+        onClicked: {
+            showlight = (showlight+1)%4;
+            Sequence.showAnaImg(showtype,showlight);
+        }
+    }
     Text{
         id: message
         height: 100
@@ -37,7 +79,7 @@ Page {
         font.pixelSize: 20
         anchors.left: parent.left
         anchors.leftMargin: 20
-        anchors.top: mainAnaImage.bottom
+        anchors.top: removemask.bottom
         anchors.topMargin: 40
         wrapMode: Text.Wrap
     }
@@ -106,8 +148,8 @@ Page {
             if (total == finish)
             {
                 headerMsg.text = "测试完成！";
-                stackView.pop();
-                stackView.push("qrc:/HomeUI/Idle.qml");
+                //stackView.pop();
+                //stackView.push("qrc:/HomeUI/Idle.qml");
             }
             else
                 headerMsg.text = "预计剩余"+((total-finish)/1000)+"秒";

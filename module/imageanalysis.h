@@ -17,7 +17,7 @@ public:
     static QString QRDecode(QString img);
     void FirstImage(void *data, int imageType);
     void AddImage(void *data, int imageType);
-    QImage getMainImg();
+    QImage getMainImg(int type,int light);
     void SetDebugPos(size_t x, size_t y){debugx = x;debugy = y;}
 private:
     int subsize = 160;
@@ -26,7 +26,7 @@ private:
     int imageCount = 0;
     int mpp = 120;
     int md1 = 10;
-    int md2 = 10;
+    int md2 = 20;
     int gridRows = 11;
     int gridCols = 11;
     Mat firstImg,mask1,mask2;

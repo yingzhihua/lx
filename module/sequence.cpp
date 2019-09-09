@@ -201,7 +201,7 @@ void Sequence::ActionFinish(QByteArray data)
             qDebug()<<"CameraCapture ActionFinish,type="<<currCameraCaptureType;
             if (data[7] == '\xa0' && data[10] == '\x00' && currCameraCaptureType == 5){
                 imageAna->FirstImage(imageCapture->getyData(),0);
-                imageProvider->anaMainImg = imageAna->getMainImg();
+                imageProvider->anaMainImg = imageAna->getMainImg(0,1);
                 emit callQmlRefeshAnaMainImg();
             }
             currCameraCaptureType = 0;
@@ -616,4 +616,9 @@ bool Sequence::setGain(int value){
 void Sequence::lxDebug(){
     //qDebug()<<"Cycle00.tif";
     //ImageAnalysis::QRDecode(QCoreApplication::applicationDirPath()+"/codebar/Cycle00.tif");    
+}
+
+void Sequence::showAnaImg(int type, int light){
+    imageProvider->anaMainImg = imageAna->getMainImg(type,light);
+    emit callQmlRefeshAnaMainImg();
 }
