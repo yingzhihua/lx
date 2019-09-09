@@ -1,9 +1,9 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.5
 
-import Dx.SqliteMgr 1.0
+//import Dx.SqliteMgr 1.0
 import Dx.Sequence 1.0
-import Dx.ParmMgr 1.0
+//import Dx.ParmMgr 1.0
 import Dx.UserMgr 1.0
 import Dx.Global 1.0
 Page {
@@ -126,7 +126,7 @@ Page {
     }
 
     function createtable(){
-        SqliteMgr.init();
-        ParmMgr.init();
+        //SqliteMgr.init();
+        //ParmMgr.init();
     }
 }

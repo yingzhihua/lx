@@ -1,4 +1,5 @@
-#include <QGuiApplication>
+//#include <QGuiApplication>
+#include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QFont>
 
@@ -6,6 +7,7 @@
 #include "module/exglobal.h"
 #include "module/sequence.h"
 #include "module/log.h"
+#include "module/dao/usermgr.h"
 
 int main(int argc, char *argv[])
 {
@@ -13,7 +15,7 @@ int main(int argc, char *argv[])
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
-    QGuiApplication app(argc, argv);
+    QApplication app(argc, argv);
 
     QFont font;
     font.setPixelSize(30);
@@ -26,12 +28,13 @@ int main(int argc, char *argv[])
     ExGlobal::exInit();
 
     sequence = new Sequence();
-
+    usermgrinstance = new UserMgr();
     if (argc > 1 && strcmp(argv[1],"debug")==0)
         ExGlobal::setDebug(true);
 
     qmlRegisterSingletonType<ExGlobal>("Dx.Global",1,0,"ExGlobal",exglobal_provider);
     qmlRegisterSingletonType<Sequence>("Dx.Sequence",1,0,"Sequence",sequence_provider);
+    qmlRegisterSingletonType<UserMgr>("Dx.UserMgr",1,0,"UserMgr",usermgr_provider);
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));

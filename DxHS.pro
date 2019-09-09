@@ -1,4 +1,4 @@
-QT += quick
+QT += charts quick
 QT += serialport sql xml printsupport
 CONFIG += c++11
 
@@ -13,7 +13,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-SOURCES += \
+SOURCES += \        
     module/actionparser.cpp \
     module/exglobal.cpp \
     module/imageanalysis.cpp \
@@ -24,7 +24,8 @@ SOURCES += \
     module/serialmgr.cpp \
     module/sqlitemgr.cpp \
     module/v4l.cpp \
-    main.cpp
+    main.cpp \   
+    module/dao/usermgr.cpp
 
 RESOURCES += qml.qrc
 
@@ -51,7 +52,9 @@ HEADERS += \
     module/sequence.h \
     module/serialmgr.h \
     module/sqlitemgr.h \
-    module/v4l.h
+    module/v4l.h \
+    module/entity/User.h \
+    module/dao/usermgr.h
 
 if(contains(DEFINES,PLUTFORM_ARM)){
 INCLUDEPATH += /opt/opencv-4.1.1/include \
