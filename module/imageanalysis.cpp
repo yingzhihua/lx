@@ -431,5 +431,7 @@ void ImageAnalysis::FindGrid(Mat img, int mpp, vector<int> &x, vector<int> &y){
 }
 
 void ImageAnalysis::SetMask(void *data, int maskType){
+    if (maskType == 0){
 
+    }
 }
