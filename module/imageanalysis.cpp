@@ -29,7 +29,7 @@ QString ImageAnalysis::QRDecode(QString img){
     return result;
 }
 
-QImage ImageAnalysis::getMainImg(){
+QImage ImageAnalysis::getMainImg(int type){
     for(size_t i = 0; i < x.size(); i++){
         line(firstImg,Point(x[i],0),Point(x[i],firstImg.rows-1),Scalar(255),4);
         putText(firstImg,to_string(i),Point(x[i],40),FONT_HERSHEY_PLAIN,4,Scalar(255),4);
