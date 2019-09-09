@@ -1,4 +1,5 @@
 QT += quick
+QT += serialport sql xml printsupport
 CONFIG += c++11
 
 # The following define makes your compiler emit warnings if you use
@@ -13,7 +14,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        main.cpp
+    module/actionparser.cpp \
+    module/exglobal.cpp \
+    module/imageanalysis.cpp \
+    module/imagecapture.cpp \
+    module/imageprovider.cpp \
+    module/log.cpp \
+    module/sequence.cpp \
+    module/serialmgr.cpp \
+    module/sqlitemgr.cpp \
+    module/v4l.cpp \
+    main.cpp
 
 RESOURCES += qml.qrc
 
@@ -27,3 +38,38 @@ QML_DESIGNER_IMPORT_PATH =
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+HEADERS += \
+    module/actionparser.h \
+    module/exglobal.h \
+    module/imageanalysis.h \
+    module/imagecapture.h \
+    module/imageprovider.h \
+    module/log.h \
+    module/sequence.h \
+    module/serialmgr.h \
+    module/sqlitemgr.h \
+    module/v4l.h
+
+if(contains(DEFINES,PLUTFORM_ARM)){
+INCLUDEPATH += /opt/opencv-4.1.1/include \
+                /opt/opencv-4.1.1/include/opencv4 \
+                /opt/opencv-4.1.1/include/opencv4/opencv2
+
+LIBS += /opt/opencv-4.1.1/lib/libopencv_highgui.so \
+        /opt/opencv-4.1.1/lib/libopencv_core.so \
+        /opt/opencv-4.1.1/lib/libopencv_imgproc.so \
+        /opt/opencv-4.1.1/lib/libopencv_objdetect.so \
+        /opt/opencv-4.1.1/lib/libopencv_imgcodecs.so
+}else{
+INCLUDEPATH += /opt/opencv-4.1.1L/include \
+                /opt/opencv-4.1.1L/include/opencv4 \
+                /opt/opencv-4.1.1L/include/opencv4/opencv2
+
+LIBS += /opt/opencv-4.1.1L/lib/libopencv_highgui.so \
+        /opt/opencv-4.1.1L/lib/libopencv_core.so \
+        /opt/opencv-4.1.1L/lib/libopencv_imgproc.so \
+        /opt/opencv-4.1.1L/lib/libopencv_objdetect.so \
+        /opt/opencv-4.1.1L/lib/libopencv_imgcodecs.so
+
+}
