@@ -4,8 +4,6 @@
 #include <QDateTime>
 
 #include "imageanalysis.h"
-using namespace std;
-
 static void GetCenter(vector<Point> &c, Point &center)
 {
     int pointCount = c.size();
@@ -32,38 +30,6 @@ QString ImageAnalysis::QRDecode(QString img){
 }
 
 QImage ImageAnalysis::getMainImg(){
-    QImage image(firstImg.cols,firstImg.rows,QImage::Format_Indexed8);
-    image.setColorCount(256);
-    for (int i = 0; i < 256; i++)
-        image.setColor(i,qRgb(i,i,i));
-    firstImg = firstImg*3;
-    uchar *pSrc = firstImg.data;
-    for (int row = 0; row < firstImg.rows; row++)
-    {
-        uchar *pDest = image.scanLine(row);
-        memcpy(pDest, pSrc, firstImg.cols);
-        pSrc += firstImg.step;
-    }
-    return image;
-}
-
-void ImageAnalysis::FirstImage(void *data, int imageType){
-    QDateTime start_time = QDateTime::currentDateTime();
-    imageCount = 1;
-    if (imageType == 0)
-        firstImg = Mat(1944,2592,CV_8U,data);
-
-    vector<int> x,y;
-    FindGrid(firstImg,mpp,x,y);
-    if (x.size()<gridCols || y.size()<gridRows)
-        return;
-
-    mask1 = Mat::zeros(firstImg.rows,firstImg.cols,firstImg.type());
-    mask2 = Mat::zeros(firstImg.rows,firstImg.cols,firstImg.type());
-    SpotMask(firstImg,mask1,mask2, x,y,subsize,md1,md2);
-    qDebug()<<"FirstImage starttime="<<start_time.toString("hh:mm:ss.zzz");
-    qDebug()<<"FirstImage endtime="<<QDateTime::currentDateTime().toString("hh:mm:ss.zzz");
-
     for(size_t i = 0; i < x.size(); i++){
         line(firstImg,Point(x[i],0),Point(x[i],firstImg.rows-1),Scalar(255),4);
         putText(firstImg,to_string(i),Point(x[i],40),FONT_HERSHEY_PLAIN,4,Scalar(255),4);
@@ -87,6 +53,36 @@ void ImageAnalysis::FirstImage(void *data, int imageType){
             outdata++;
         }
     }
+
+    QImage image(firstImg.cols,firstImg.rows,QImage::Format_Indexed8);
+    image.setColorCount(256);
+    for (int i = 0; i < 256; i++)
+        image.setColor(i,qRgb(i,i,i));
+    firstImg = firstImg*3;
+    uchar *pSrc = firstImg.data;
+    for (int row = 0; row < firstImg.rows; row++)
+    {
+        uchar *pDest = image.scanLine(row);
+        memcpy(pDest, pSrc, firstImg.cols);
+        pSrc += firstImg.step;
+    }
+    return image;
+}
+
+void ImageAnalysis::FirstImage(void *data, int imageType){
+    QDateTime start_time = QDateTime::currentDateTime();
+    imageCount = 1;
+    if (imageType == 0)
+        firstImg = Mat(1944,2592,CV_8U,data);
+    FindGrid(firstImg,mpp,x,y);
+    if (x.size()<gridCols || y.size()<gridRows)
+        return;
+
+    mask1 = Mat::zeros(firstImg.rows,firstImg.cols,firstImg.type());
+    mask2 = Mat::zeros(firstImg.rows,firstImg.cols,firstImg.type());
+    SpotMask(firstImg,mask1,mask2, x,y,subsize,md1,md2);
+    qDebug()<<"FirstImage starttime="<<start_time.toString("hh:mm:ss.zzz");
+    qDebug()<<"FirstImage endtime="<<QDateTime::currentDateTime().toString("hh:mm:ss.zzz");
 
     if (cvDebug){
         line(firstImg,Point(x[debugx] - (subsize>>1),y[debugy] - (subsize>>1)),Point(x[debugx] + (subsize>>1),y[debugy] - (subsize>>1)),Scalar(255));

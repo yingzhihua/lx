@@ -7,6 +7,7 @@
 #include "opencv2/imgproc.hpp"
 
 using namespace cv;
+using namespace std;
 
 class ImageAnalysis : public QObject
 {
@@ -29,6 +30,7 @@ private:
     int gridRows = 11;
     int gridCols = 11;
     Mat firstImg,mask1,mask2;
+    vector<int> x,y;
     void SpotMask(Mat img, Mat &mask1, Mat &mask2,std::vector<int>& x,std::vector<int>& y,int subsize,int d1, int d2);
     void FindPeaks(int *number, int numberLen, int mpp, std::vector<int>& pos);
     void FindGrid(Mat img, int mpp, std::vector<int>& x, std::vector<int>& y);
