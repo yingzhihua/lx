@@ -1,5 +1,34 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
+        <file>Setup.qml</file>
+        <file>Home.qml</file>
+        <file>Data.qml</file>
+        <file>ErrPage.qml</file>
+        <file>SetupUI/CameraSetup.qml</file>
+        <file>SetupUI/Incomplete.qml</file>
+        <file>SetupUI/MachineCalibration.qml</file>
+        <file>SetupUI/SetupMenu.qml</file>
+        <file>SetupUI/TempCali.qml</file>
+        <file>SetupUI/TempCtrl.qml</file>
+        <file>SetupUI/TestSetup.qml</file>
+        <file>SetupUI/Version.qml</file>
+        <file>components/Bt1.qml</file>
+        <file>components/OneImageBt.qml</file>
+        <file>components/waitDialog.qml</file>
+        <file>HomeUI/BoxReady.qml</file>
+        <file>HomeUI/Idle.qml</file>
+        <file>HomeUI/Login.qml</file>
+        <file>HomeUI/Startup.qml</file>
+        <file>HomeUI/TestProcess.qml</file>
+        <file>HomeUI/TestProcessT.qml</file>
+        <file>image/Dxlogo.png</file>
+        <file>image/editInfo.png</file>
+        <file>image/footerbk.jpg</file>
+        <file>image/line.png</file>
+        <file>image/LOGO.png</file>
+        <file>image/openDoor.png</file>
+        <file>image/quit.png</file>
+        <file>image/start.png</file>
     </qresource>
 </RCC>
