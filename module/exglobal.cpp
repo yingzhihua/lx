@@ -16,7 +16,7 @@ bool ExGlobal::test = false;
 QString ExGlobal::t_sysName = "样机02";
 int ExGlobal::t_sysLanguageCode = 1;
 
-QString ExGlobal::t_version = "V1.07";
+QString ExGlobal::t_version = "V1.08";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
