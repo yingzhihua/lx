@@ -429,3 +429,7 @@ void ImageAnalysis::FindGrid(Mat img, int mpp, vector<int> &x, vector<int> &y){
     }
     qDebug()<<"findgrid:"<<*(it+w*y[8]+x[8]);
 }
+
+void ImageAnalysis::SetMask(void *data, int maskType){
+
+}

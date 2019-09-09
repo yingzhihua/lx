@@ -18,6 +18,7 @@ public:
     void FirstImage(void *data, int imageType);
     void AddImage(void *data, int imageType);
     QImage getMainImg(int type,int light);
+    void SetMask(void *data, int maskType);
     void SetDebugPos(size_t x, size_t y){debugx = x;debugy = y;}
 private:
     int subsize = 160;
