@@ -118,7 +118,7 @@ void ImageAnalysis::SpotMask(Mat img, Mat &mask1, Mat &mask2, vector<int> &x, ve
     int h = img.rows;
 
     Mat subImage = Mat::zeros(subsize+1,subsize+1,img.type());
-    vector<vector<Point>> matPoint(x.size(),vector<Point>(y.size()));
+    vector<vector<Point>> matPoint(y.size(),vector<Point>(x.size()));
     for (size_t i = 0; i < y.size(); i++)
     {
         int topsub = y[i] - (subsize>>1);
@@ -141,9 +141,9 @@ void ImageAnalysis::SpotMask(Mat img, Mat &mask1, Mat &mask2, vector<int> &x, ve
             normalize(img(Rect(leftsub,topsub,subsize+1,subsize+1)),subImage,0,255,NORM_MINMAX);
             if (cvDebug && j == debugx && i == debugy)
                 imshow("sub Image",subImage);
-            medianBlur(subImage,subImage,5);
+            //medianBlur(subImage,subImage,5);
 
-            threshold(subImage,subImage,150,255,THRESH_BINARY);
+            threshold(subImage,subImage,170,255,THRESH_BINARY);
             if (cvDebug && j == debugx && i == debugy)
                 imshow("threshold Image",subImage);
 
@@ -252,8 +252,8 @@ void ImageAnalysis::SpotMask(Mat img, Mat &mask1, Mat &mask2, vector<int> &x, ve
 
             if (center != -1)
             {
-                matPoint[j][i].x = centerPoint.x;
-                matPoint[j][i].y = centerPoint.y;
+                matPoint[i][j].x = centerPoint.x;
+                matPoint[i][j].y = centerPoint.y;
                 Mat subImage1 = Mat::zeros(subsize+1,subsize+1,img.type());
                 Mat subImage2 = Mat::zeros(subsize+1,subsize+1,img.type());
                 Mat subImage3 = Mat::zeros(subsize+1,subsize+1,img.type());
@@ -284,7 +284,7 @@ void ImageAnalysis::SpotMask(Mat img, Mat &mask1, Mat &mask2, vector<int> &x, ve
         {
             for (size_t j = 0; j < y.size(); j++)
             {
-            if (matPoint[i][j].x != 0 || matPoint[i][j].y != 0)
+            if (matPoint[j][i].x != 0 || matPoint[j][i].y != 0)
                 tempPointCount++;
             }
         }
@@ -301,7 +301,7 @@ void ImageAnalysis::SpotMask(Mat img, Mat &mask1, Mat &mask2, vector<int> &x, ve
         for (int j = z; j < z + gridRows; j++){
             for (size_t i = 0; i < x.size(); i++)
             {
-            if (matPoint[i][j].x != 0 || matPoint[i][j].y != 0)
+            if (matPoint[j][i].x != 0 || matPoint[j][i].y != 0)
                 tempPointCount++;
             }
         }
@@ -318,7 +318,7 @@ void ImageAnalysis::SpotMask(Mat img, Mat &mask1, Mat &mask2, vector<int> &x, ve
         for (size_t j = 0; j < x.size(); j++){
             if ((i < topPointy || i >= topPointy+gridRows) || (j < topPointx || j >= topPointx+gridCols) || maskPos.at<uchar>(i-topPointy,j-topPointx) == 0)
             {
-                if (matPoint[j][i].x != 0 || matPoint[j][i].y != 0)
+                if (matPoint[i][j].x != 0 || matPoint[i][j].y != 0)
                 {
                     int topsub = y[i] - (subsize>>1);
                     int leftsub = x[j] - (subsize>>1);
