@@ -22,7 +22,7 @@ public:
     void SetMask(void *data, int maskType);
     void SetDebugPos(size_t x, size_t y){debugx = x;debugy = y;}
 private:
-    int subsize = 160;
+    int subsize = 130;
     size_t debugx = 9;
     size_t debugy = 8;
     int imageCount = 0;
@@ -31,7 +31,8 @@ private:
     int md2 = 20;
     int gridRows = 11;
     int gridCols = 11;
-    Mat firstImg,mask1,mask2;
+    Mat firstImg,mask1,mask2,maskPos;
+    Point **basePos;
     vector<int> x,y;
     void SpotMask(Mat img, Mat &mask1, Mat &mask2,std::vector<int>& x,std::vector<int>& y,int subsize,int d1, int d2);
     void FindPeaks(int *number, int numberLen, int mpp, std::vector<int>& pos);

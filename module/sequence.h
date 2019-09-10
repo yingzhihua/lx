@@ -100,6 +100,7 @@ public slots:
 private:
     bool ReadTestProcess(QString panel);
     bool WriteTestProcess(QString panel);
+    bool ReadMask(QString mask);
     bool DoAction(QDomElement action,bool isChild);
     bool FindAction(bool bFinishAction);
     int CalSteps(QDomElement element);

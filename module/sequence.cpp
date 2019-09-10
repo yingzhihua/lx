@@ -35,6 +35,7 @@ Sequence::Sequence(QObject *parent) : QObject(parent)
 
     //actionDo("Sensor",0,0,0);
     serialMgr->serialWrite(ActionParser::ParamToByte("AutoData",1,0,0,0));
+    ReadMask(QCoreApplication::applicationDirPath()+"/pos");
 }
 
 bool Sequence::sequenceInit(){
@@ -288,6 +289,26 @@ bool Sequence::ReadTestProcess(QString panel)
             }
         }
     }
+
+    return true;
+}
+
+bool Sequence::ReadMask(QString mask)
+{
+    qDebug()<<"ReadMask:"<<mask;
+    QFile maskfile(mask+".bin");
+    if (!maskfile.open(QFile::ReadOnly))
+    {
+        errReceive(0x403);
+        qDebug()<<"file err:"<<maskfile.error()<<",string:"<<maskfile.errorString()<<",file:"<<maskfile.fileName()<<",dir:"<<QDir::currentPath()<<",apppath:"<<QCoreApplication::applicationDirPath();
+        return false;
+    }
+    QDataStream in(&maskfile);
+    char r[121];
+    int readlen = in.readRawData(r,121);
+    qDebug()<<"ReadMask:readlen="<<readlen;
+    imageAna->SetMask(r,0);
+    maskfile.close();
     return true;
 }
 
@@ -594,6 +615,8 @@ void Sequence::errReceive(int code){
         errStr = "配置文件读取出错！";
     else if(code == 0x402)
         errStr = "配置文件格式出错！";
+    else if(code == 0x403)
+        errStr = "模板文件读取出错！";
     emit errOccur(errStr);
 }
 

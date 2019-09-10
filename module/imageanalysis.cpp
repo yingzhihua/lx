@@ -20,8 +20,8 @@ static void GetCenter(vector<Point> &c, Point &center)
 static bool cvDebug = false;
 ImageAnalysis::ImageAnalysis(QObject *parent) : QObject(parent)
 {
-
 }
+
 QString ImageAnalysis::QRDecode(QString img){
     QString result;
 
@@ -291,7 +291,7 @@ void ImageAnalysis::SpotMask(Mat img, Mat &mask1, Mat &mask2, vector<int> &x, ve
         if (tempPointCount > pointCount)
         {
             pointCount = tempPointCount;
-            topPointx = z;
+            topPointx = static_cast<int>(z);
         }
     }
 
@@ -308,7 +308,7 @@ void ImageAnalysis::SpotMask(Mat img, Mat &mask1, Mat &mask2, vector<int> &x, ve
         if (tempPointCount > pointCount)
         {
             pointCount = tempPointCount;
-            topPointy = z;
+            topPointy = static_cast<int>(z);
         }
     }
     qDebug()<<"topPointx:"<<topPointx<<"topPointy:"<<topPointy;
@@ -316,23 +316,24 @@ void ImageAnalysis::SpotMask(Mat img, Mat &mask1, Mat &mask2, vector<int> &x, ve
     for (size_t i = 0; i < y.size(); i++)
     {
         for (size_t j = 0; j < x.size(); j++){
-            if ((i < topPointy || i >= topPointy+gridRows) || (j < topPointx || j >= topPointx+gridCols)
-                ||(i == topPointy && j == topPointx)||(i == topPointy+gridRows-1 && j == topPointx+gridCols-1)
-                    ||(i == topPointy+1 && j == topPointx)||(i == topPointy && j == topPointx+1)
-                    ||(i == topPointy+gridRows-2 && j == topPointx+gridCols-1)||(i == topPointy+gridRows-1 && j == topPointx+gridCols-2)
-                    ||(i == topPointy+1 && j == topPointx+gridCols-1)||(i == topPointy+gridRows-2 && j == topPointx)
-                    ||(i == topPointy+gridRows-2 && j == topPointx+gridCols-1)||(i == topPointy+gridRows-1 && j == topPointx+gridCols-2)
-                    ||(i == topPointy+gridRows-1 && j == topPointx+1)||(i == topPointy+gridRows-2 && j == topPointx)
-                        ||(i == topPointy+gridRows-1 && j == topPointx)||(i == topPointy && j == topPointx+gridCols-1))
-            if (matPoint[j][i].x != 0 || matPoint[j][i].y != 0)
+            if ((i < topPointy || i >= topPointy+gridRows) || (j < topPointx || j >= topPointx+gridCols) || maskPos.at<uchar>(i-topPointy,j-topPointx) == 0)
             {
-                int topsub = y[i] - (subsize>>1);
-                int bottom = y[i] + (subsize>>1);
-                int leftsub = x[j] - (subsize>>1);
-                int rightsub = x[j] + (subsize>>1);
-                mask1(Rect(leftsub,topsub,subsize+1,subsize+1)) = 0;
-                mask2(Rect(leftsub,topsub,subsize+1,subsize+1)) = 0;
+                if (matPoint[j][i].x != 0 || matPoint[j][i].y != 0)
+                {
+                    int topsub = y[i] - (subsize>>1);
+                    int leftsub = x[j] - (subsize>>1);
+                    mask1(Rect(leftsub,topsub,subsize+1,subsize+1)) = 0;
+                    mask2(Rect(leftsub,topsub,subsize+1,subsize+1)) = 0;
+                }
             }
+        }
+    }
+
+    for (size_t i = 0; i < y.size(); i++)
+    {
+        for (size_t j = 0; j < x.size(); j++)
+        {
+
         }
     }
 }
@@ -430,8 +431,15 @@ void ImageAnalysis::FindGrid(Mat img, int mpp, vector<int> &x, vector<int> &y){
     qDebug()<<"findgrid:"<<*(it+w*y[8]+x[8]);
 }
 
-void ImageAnalysis::SetMask(void *data, int maskType){
-    if (maskType == 0){
-
+void ImageAnalysis::SetMask(void *data, int maskType){    
+    if (maskType == 0){        
+        gridRows = 11;
+        gridCols = 11;
+        maskPos = Mat::zeros(11,11,CV_8UC1);
+        basePos = new Point*[11];
+        for (int i = 0; i < 11; i++)
+            basePos[i] = new Point[11];
+        memcpy(maskPos.data,data,121);
+        cout<<maskPos<<endl;
     }
 }

@@ -8,6 +8,7 @@ import Dx.Global 1.0
 Page {
     property int showtype: 0
     property int showlight: 1
+    property bool idle: false
     id: testProcessT
 
     Rectangle{
@@ -130,7 +131,13 @@ Page {
         anchors.right: parent.right
         anchors.rightMargin: 20
         onClicked: {
-            Sequence.sequenceCancel();
+            if (idle == true)
+            {
+                stackView.pop();
+                stackView.push("qrc:/HomeUI/Idle.qml");
+            }
+            else
+                Sequence.sequenceCancel();
         }
     }
 
@@ -142,12 +149,12 @@ Page {
         target: Sequence
         onProcessFinish:{
             console.log("TestProcess.qml,total:"+total+",finish:"+finish);
-            var ffinish = finish*1000/total;
-            //if (ffinish == 0) ffinish = 1;
+            var ffinish = finish*1000/total;            
             home_page.testprocess = ffinish;
             if (total == finish)
             {
                 headerMsg.text = "测试完成！";
+                idle = true;
                 //stackView.pop();
                 //stackView.push("qrc:/HomeUI/Idle.qml");
             }
