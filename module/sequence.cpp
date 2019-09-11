@@ -9,7 +9,7 @@
 static QDomDocument doc;
 static char currOrder = 0;
 static int currCameraCaptureType = 0;
-
+static int currCameraCycle = 0;
 Sequence::Sequence(QObject *parent) : QObject(parent)
 {    
     imageAna = new ImageAnalysis();
@@ -201,7 +201,10 @@ void Sequence::ActionFinish(QByteArray data)
         {
             qDebug()<<"CameraCapture ActionFinish,type="<<currCameraCaptureType;
             if (data[7] == '\xa0' && data[10] == '\x00' && currCameraCaptureType == 5){
-                imageAna->FirstImage(imageCapture->getyData(),0);
+                if (currCameraCycle < 2)
+                    imageAna->FirstImage(imageCapture->getyData(),0);
+                else
+                    imageAna->FirstImage(imageCapture->getyData(),0);
                 imageProvider->anaMainImg = imageAna->getMainImg(0,1);
                 emit callQmlRefeshAnaMainImg();
             }
@@ -339,9 +342,11 @@ bool Sequence::DoAction(QDomElement action,bool isChild)
     if (action.attribute("Device")=="CameraCapture")
     {
         currCameraCaptureType = action.attribute("ActionValue").toInt();
+        currCameraCycle = 0;
         if(isChild){
             QDomElement p = action.parentNode().toElement();
             int cycle = p.attribute("currcycle").toInt();
+            currCameraCycle = cycle;
             if (cycle < 10)
             {
                 if (action.attribute("ActionValue") == "4")

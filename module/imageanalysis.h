@@ -31,12 +31,16 @@ private:
     int md2 = 20;
     int gridRows = 11;
     int gridCols = 11;
+    int topPointx = 0;
+    int topPointy = 0;
     Mat firstImg,mask1,mask2,maskPos;
     Point **basePos;
     vector<int> x,y;
+    vector<int> posValue;
     void SpotMask(Mat img, Mat &mask1, Mat &mask2,std::vector<int>& x,std::vector<int>& y,int subsize,int d1, int d2);
     void FindPeaks(int *number, int numberLen, int mpp, std::vector<int>& pos);
     void FindGrid(Mat img, int mpp, std::vector<int>& x, std::vector<int>& y);
+    int SpotCal(int x, int y);
 
 signals:
 
