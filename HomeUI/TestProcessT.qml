@@ -97,7 +97,7 @@ Page {
         legend.alignment: Qt.AlignTop
         animationOptions: ChartView.SeriesAnimations
         antialiasing: true
-
+/*
         ValueAxis{
             id: axisX
             min: 0
@@ -119,6 +119,7 @@ Page {
             id:serial1
             name:"FLUB"
         }
+        */
     }
 
     Button {
@@ -143,6 +144,11 @@ Page {
 
     Component.onCompleted: {
         Sequence.sequenceDo(Sequence.Sequence_Test);
+        var newline = chartView.createSeries(ChartView.SeriesTypeLine,"lx");
+        newline.axisX.max = 40;
+        newline.axisY.max = 400;
+        newline.append(2,30);
+        newline.append(12,60);
     }
 
     Connections{
@@ -182,6 +188,26 @@ Page {
             anaMainBox.source = "";
             anaMainBox.source = "image://CodeImg/AnaMain";
             console.log("CameraSetup.qml,onCallQmlRefeshAnaMainImg");
+        }
+
+        onCallQmlRefeshData:{
+            if (index == 1){
+                chartView.removeAllSeries();
+                for (var i = 0; i < item.length; i++)
+                {
+                    chartView.createSeries(ChartView.SeriesTypeLine,item[i]);
+                    chartView.series(i).axisX.max = 42;
+                    chartView.series(i).axisY.max = 400;
+                    chartView.series(i).append(1,value[i]);
+                }
+            }
+            else
+            {
+                for (var i = 0; i < item.length; i++)
+                    chartView.series(i).append(index,value[i]);
+            }
+
+            console.log(index,item,value);
         }
     }
 }

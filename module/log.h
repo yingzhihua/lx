@@ -12,6 +12,8 @@ public:
     static void LogWithTime(QString log);
     static void LogCam(QString log);
     static void LogTemp(QByteArray data);
+    static void LogPos(QString log);
+    static QString getPosName(int pos);
 };
 
 #endif // LOG_H

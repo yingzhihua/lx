@@ -79,4 +79,11 @@ Item {
 
     }
 
+    Connections{
+        target: Sequence
+        onCallQmlRefeshData:{
+            console.log(data.length,data);
+        }
+    }
+
 }

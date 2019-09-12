@@ -5,6 +5,7 @@
 #include "opencv2/opencv.hpp"
 #include "opencv2/objdetect.hpp"
 #include "opencv2/imgproc.hpp"
+#include <QVector>
 
 using namespace cv;
 using namespace std;
@@ -21,6 +22,8 @@ public:
     QImage getMainImg(int type,int light);
     void SetMask(void *data, int maskType);
     void SetDebugPos(size_t x, size_t y){debugx = x;debugy = y;}
+    QVector<int> getItem(){return posItem;}
+    QVector<int> getValue(){return posValue;}
 private:
     int subsize = 130;
     size_t debugx = 9;
@@ -36,7 +39,7 @@ private:
     Mat firstImg,mask1,mask2,maskPos;
     Point **basePos;
     vector<int> x,y;
-    vector<int> posValue;
+    QVector<int> posItem,posValue;
     void SpotMask(Mat img, Mat &mask1, Mat &mask2,std::vector<int>& x,std::vector<int>& y,int subsize,int d1, int d2);
     void FindPeaks(int *number, int numberLen, int mpp, std::vector<int>& pos);
     void FindGrid(Mat img, int mpp, std::vector<int>& x, std::vector<int>& y);

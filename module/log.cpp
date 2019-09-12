@@ -80,3 +80,48 @@ void Log::LogTemp(QByteArray data)
     file.write(data);
     file.close();
 }
+
+void Log::LogPos(QString log){
+    QFile file;
+
+    file.setFileName(getDir()+"/pos.csv");
+    if (!file.open(QIODevice::WriteOnly|QIODevice::Text|QIODevice::Append))
+    {
+        qDebug()<<"file open error!";
+    }
+    QTextStream textStream(&file);
+    textStream<<log<<endl;
+    textStream.flush();
+    file.close();
+}
+
+QString Log::getPosName(int pos){
+    QString name = "Ortho";
+    if (pos == 1)
+        name = "IC";
+    else if(pos == 2)
+        name = "IFA";
+    else if(pos == 3)
+        name = "IFB";
+    else if(pos == 4)
+        name = "RSV-A";
+    else if(pos == 5)
+        name = "RSV-B";
+    else if(pos == 6)
+        name = "ADV-1";
+    else if(pos == 7)
+        name = "ADV-2";
+    else if(pos == 8)
+        name = "PIV-1";
+    else if(pos == 9)
+        name = "PIV-2";
+    else if(pos == 10)
+        name = "PIV-3";
+    else if(pos == 11)
+        name = "PIV-4";
+    else if(pos == 12)
+        name = "MP";
+    else if(pos == 13)
+        name = "BP";
+    return name;
+}

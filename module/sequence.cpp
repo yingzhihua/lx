@@ -201,13 +201,35 @@ void Sequence::ActionFinish(QByteArray data)
         {
             qDebug()<<"CameraCapture ActionFinish,type="<<currCameraCaptureType;
             if (data[7] == '\xa0' && data[10] == '\x00' && currCameraCaptureType == 5){
-                if (currCameraCycle < 2)
+                if (currCameraCycle < 2)                
+                    imageAna->FirstImage(imageCapture->getyData(),0);                
+                else                
                     imageAna->FirstImage(imageCapture->getyData(),0);
-                else
-                    imageAna->FirstImage(imageCapture->getyData(),0);
+
                 imageProvider->anaMainImg = imageAna->getMainImg(0,1);
                 emit callQmlRefeshAnaMainImg();
+                QVector<int> item = imageAna->getItem();
+                QVector<int> value = imageAna->getValue();
+                emit callQmlRefeshData(currCameraCycle,item,value);
+/*
+                QString saveStr;
+                if (currCameraCycle == 1){
+                    saveStr = "cycle";
+                    for (int i = 0; i < item.size(); i++){
+                        saveStr += ",";
+                        saveStr += Log::getPosName(item[i]);
+                    }
+                    Log::LogPos(saveStr);
+                }
+                saveStr = QString::number(currCameraCycle);
+                for (int i = 0; i < item.size(); i++){
+                    saveStr += ",";
+                    saveStr += QString::number(value[i]);
+                }
+                Log::LogPos(saveStr);
+                */
             }
+
             currCameraCaptureType = 0;
         }
     }
@@ -643,7 +665,10 @@ bool Sequence::setGain(int value){
 
 void Sequence::lxDebug(){
     //qDebug()<<"Cycle00.tif";
-    //ImageAnalysis::QRDecode(QCoreApplication::applicationDirPath()+"/codebar/Cycle00.tif");    
+    //ImageAnalysis::QRDecode(QCoreApplication::applicationDirPath()+"/codebar/Cycle00.tif");
+    QVector<int> data;
+    data.push_back(4);
+    //emit callQmlRefeshData(data);
 }
 
 void Sequence::showAnaImg(int type, int light){

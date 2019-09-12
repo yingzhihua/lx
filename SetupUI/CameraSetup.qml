@@ -157,8 +157,8 @@ Page {
         anchors.verticalCenter: lbfocus.verticalCenter
         from:0
         value: ExGlobal.getCaliParam("CamFocus")
-        to:10000
-        stepSize: 100
+        to:4400
+        stepSize: 50
         width: 250
         transformOrigin: Item.Center
         font.pixelSize: 50
@@ -172,7 +172,7 @@ Page {
         text: qsTr("设置")
         font.pixelSize: 50
         onClicked: {
-            if (Sequence.actionDo("Focus",2,focusValue.value,0,0))
+            if (Sequence.actionDo("Focus",2,focusValue.value+2600,0,0))
                 ExGlobal.updateCaliParam("CamFocus",focusValue.value);
         }
 

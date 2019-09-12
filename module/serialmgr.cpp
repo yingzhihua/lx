@@ -216,7 +216,7 @@ void SerialMgr::handleErrorCtrl(QSerialPort::SerialPortError error)
 void SerialMgr::handleWriteTimeout(){
     sendCount++;
     qDebug()<<"handleWriteTimeout:"<<sendCount;
-    if (sending && sendCount < 10)
+    if (sending && sendCount < 3)
     {
         mutex.lock();
         sending = false;

@@ -17,6 +17,36 @@ static void GetCenter(vector<Point> &c, Point &center)
     center.y = y/pointCount;
 }
 
+static int getPosValue(Mat source, Mat &mask1, Mat &mask2){
+    int value = 0;
+    int value2 = 0;
+    int valuenum = 0;
+    int value2num = 0;
+    for (int i = 0; i < source.rows; i++)
+    {
+        const uchar* mask1data = mask1.ptr(i);
+        const uchar* mask2data = mask2.ptr(i);
+        uchar* sourcedata = source.ptr(i);
+        for (int j = 0; j < source.cols; j++)
+        {
+            if (*mask1data != 0)
+            {
+                value += *sourcedata;
+                valuenum++;
+            }
+            else if (*mask2data != 0)
+            {
+                value2 += *sourcedata;
+                value2num++;
+            }
+            mask1data++;
+            mask2data++;
+            sourcedata++;
+        }
+    }
+    value2 = value2*valuenum/value2num;
+    return (value-value2)*10/valuenum;
+}
 static bool cvDebug = false;
 ImageAnalysis::ImageAnalysis(QObject *parent) : QObject(parent)
 {
@@ -83,6 +113,8 @@ QImage ImageAnalysis::getMainImg(int type,int light){
 void ImageAnalysis::FirstImage(void *data, int imageType){
     QDateTime start_time = QDateTime::currentDateTime();
     imageCount = 1;
+    posValue.clear();
+    posItem.clear();
     if (imageType == 0)
         firstImg = Mat(1944,2592,CV_8U,data);
     FindGrid(firstImg,mpp,x,y);
@@ -119,6 +151,8 @@ void ImageAnalysis::AddImage(void *data, int imageType){
     QDateTime start_time = QDateTime::currentDateTime();
     if (imageCount < 1)
         return;
+    posValue.clear();
+    posItem.clear();
     if (imageType == 0)
         firstImg = Mat(1944,2592,CV_8U,data);
     GaussianBlur(firstImg, firstImg, Size(25,25),0);
@@ -126,9 +160,12 @@ void ImageAnalysis::AddImage(void *data, int imageType){
     {
         for (int i = 0; i < gridCols; i++)
         {
-            if (maskPos.at<uchar>(i,j) != 0){
+            if (maskPos.at<uchar>(j,i) != 0 && maskPos.at<uchar>(j,i) != 14){
                 int value = SpotCal(i,j);
-                qDebug()<<"value="<<value;
+                posItem.push_back(maskPos.at<uchar>(j,i));
+                posValue.push_back(value);
+                //posValue.push_back(Vec2i(maskPos.at<uchar>(j,i),value));
+                qDebug()<<"AddImage,maskPos="<<maskPos.at<uchar>(j,i)<<",value="<<value;
             }
         }
     }
@@ -361,8 +398,20 @@ void ImageAnalysis::SpotMask(Mat img, Mat &mask1, Mat &mask2, vector<int> &x, ve
             basePos[i-topPointy][j-topPointx].x = matPoint[i][j].x;
             basePos[i-topPointy][j-topPointx].y = matPoint[i][j].y;
             qDebug()<<"basePos["<<i-topPointy<<"]["<<j-topPointx<<"] = "<<"("<<basePos[i-topPointy][j-topPointx].x<<","<<basePos[i-topPointy][j-topPointx].y<<")";
+            if (maskPos.at<uchar>(i-topPointy,j-topPointx) != 0 && maskPos.at<uchar>(i-topPointy,j-topPointx) != 14){
+                int topsub = y[i] - (subsize>>1);
+                int leftsub = x[j] - (subsize>>1);
+                Mat submask1 = mask1(Rect(leftsub,topsub,subsize+1,subsize+1));
+                Mat submask2 = mask2(Rect(leftsub,topsub,subsize+1,subsize+1));
+                int value = getPosValue(img(Rect(leftsub,topsub,subsize+1,subsize+1)),submask1,submask2);
+                posItem.push_back(maskPos.at<uchar>(i-topPointy,j-topPointx));
+                posValue.push_back(value);
+                //posValue.push_back(Vec2i(maskPos.at<uchar>(i-topPointy,j-topPointx),value));
+                qDebug()<<"maskPos="<<maskPos.at<uchar>(i-topPointy,j-topPointx)<<",value="<<value;
+            }
         }
     }
+    qDebug()<<"posValue,size="<<posValue.size();
 }
 
 void ImageAnalysis::FindPeaks(int *number, int numberLen, int mpp, vector<int> &pos){
@@ -467,7 +516,7 @@ void ImageAnalysis::SetMask(void *data, int maskType){
         for (int i = 0; i < 11; i++)
             basePos[i] = new Point[11];
         memcpy(maskPos.data,data,121);
-        cout<<maskPos<<endl;
+        cout<<maskPos<<endl;        
     }
 }
 
@@ -547,11 +596,15 @@ int ImageAnalysis::SpotCal(int PosX, int PosY){
     Mat subMask2 = mask2(Rect(leftsub,topsub,subsize+1,subsize+1));
     leftsub = leftsub - basePos[PosY][PosX].x + centerPoint.x;
     if (leftsub < 0) leftsub = 0;
-    rightsub = rightsub - basePos[PosY][PosX].x + centerPoint.x;
+        rightsub = rightsub - basePos[PosY][PosX].x + centerPoint.x;
+    if (rightsub >= firstImg.cols)
+        leftsub = leftsub - (rightsub-firstImg.cols+1);
     topsub = topsub - basePos[PosY][PosX].y + centerPoint.y;
     if (topsub < 0) topsub = 0;
     bottom = bottom - basePos[PosY][PosX].y + centerPoint.y;
-    Mat subSource;
+    if (bottom >= firstImg.rows)
+        topsub = topsub - (bottom-firstImg.rows+1);
+    Mat subSource = firstImg(Rect(leftsub,topsub,subsize+1,subsize+1));
 
-    return value;
+    return getPosValue(subSource,subMask1,subMask2);
 }

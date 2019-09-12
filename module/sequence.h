@@ -89,6 +89,7 @@ signals:
     void errOccur(QString error);
     void callQmlRefeshView();
     void callQmlRefeshAnaMainImg();
+    void callQmlRefeshData(int index, QVector<int> item,QVector<int> value);
 
 public slots:
     void SequenceTimeout();
