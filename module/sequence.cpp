@@ -211,7 +211,7 @@ void Sequence::ActionFinish(QByteArray data)
                 QVector<int> item = imageAna->getItem();
                 QVector<int> value = imageAna->getValue();
                 emit callQmlRefeshData(currCameraCycle,item,value);
-/*
+//*
                 QString saveStr;
                 if (currCameraCycle == 1){
                     saveStr = "cycle";
@@ -227,7 +227,7 @@ void Sequence::ActionFinish(QByteArray data)
                     saveStr += QString::number(value[i]);
                 }
                 Log::LogPos(saveStr);
-                */
+                //*/
             }
 
             currCameraCaptureType = 0;

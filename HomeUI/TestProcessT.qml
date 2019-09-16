@@ -195,7 +195,7 @@ Page {
                 chartView.removeAllSeries();
                 for (var i = 0; i < item.length; i++)
                 {
-                    chartView.createSeries(ChartView.SeriesTypeLine,item[i]);
+                    chartView.createSeries(ChartView.SeriesTypeLine,ExGlobal.getPosName(item[i]));
                     chartView.series(i).axisX.max = 42;
                     chartView.series(i).axisY.max = 400;
                     chartView.series(i).append(1,value[i]);

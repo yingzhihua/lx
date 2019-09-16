@@ -16,7 +16,7 @@ bool ExGlobal::test = false;
 QString ExGlobal::t_sysName = "样机02";
 int ExGlobal::t_sysLanguageCode = 1;
 
-QString ExGlobal::t_version = "V1.08";
+QString ExGlobal::t_version = "V1.09";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
@@ -252,3 +252,36 @@ QStringList ExGlobal::serialPort(){
     port<<"ttyUSB0"<<"ttyS0"<<"ttyS4";
     return port;
 }
+
+
+QString ExGlobal::getPosName(int pos){
+    QString name = "Ortho";
+    if (pos == 1)
+        name = "IC";
+    else if(pos == 2)
+        name = "IFA";
+    else if(pos == 3)
+        name = "IFB";
+    else if(pos == 4)
+        name = "RSV-A";
+    else if(pos == 5)
+        name = "RSV-B";
+    else if(pos == 6)
+        name = "ADV-1";
+    else if(pos == 7)
+        name = "ADV-2";
+    else if(pos == 8)
+        name = "PIV-1";
+    else if(pos == 9)
+        name = "PIV-2";
+    else if(pos == 10)
+        name = "PIV-3";
+    else if(pos == 11)
+        name = "PIV-4";
+    else if(pos == 12)
+        name = "MP";
+    else if(pos == 13)
+        name = "BP";
+    return name;
+}
+

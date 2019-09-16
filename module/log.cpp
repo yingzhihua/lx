@@ -83,7 +83,7 @@ void Log::LogTemp(QByteArray data)
 
 void Log::LogPos(QString log){
     QFile file;
-
+qDebug()<<"LogPos:"<<log;
     file.setFileName(getDir()+"/pos.csv");
     if (!file.open(QIODevice::WriteOnly|QIODevice::Text|QIODevice::Append))
     {

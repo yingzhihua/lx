@@ -51,6 +51,7 @@ public:
     Q_INVOKABLE static int getCaliParam(const QString &caliName);
     Q_INVOKABLE static QString getIP();
     Q_INVOKABLE static void exClose();
+    Q_INVOKABLE static QString getPosName(int pos);
 
     static int V1WorkX;
     static int V2WorkX;

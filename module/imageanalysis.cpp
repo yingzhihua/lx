@@ -44,6 +44,8 @@ static int getPosValue(Mat source, Mat &mask1, Mat &mask2){
             sourcedata++;
         }
     }
+    if (valuenum == 0 || value2num == 0)
+        return 0;
     value2 = value2*valuenum/value2num;
     return (value-value2)*10/valuenum;
 }
@@ -52,10 +54,11 @@ ImageAnalysis::ImageAnalysis(QObject *parent) : QObject(parent)
 {
 }
 
-QString ImageAnalysis::QRDecode(QString img){
+QString ImageAnalysis::QRDecode(QImage img){
     QString result;
-
-
+    QZXing decoder;
+    decoder.setDecoder(QZXing::DecoderFormat_QR_CODE);
+    result = decoder.decodeImage(img);
     return result;
 }
 
@@ -84,6 +87,8 @@ QImage ImageAnalysis::getMainImg(int type,int light){
             const uchar* indata = mask1.ptr(i);
             const uchar* indata2 = mask2.ptr(i);
             uchar* outdata = tempImg.ptr(i);
+            if (indata == nullptr || indata2 == nullptr)
+                break;
             for (int j = 0; j < tempImg.cols; j++)
             {
                 if (*indata != 0 || *indata2 != 0)
