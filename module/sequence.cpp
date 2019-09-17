@@ -5,6 +5,7 @@
 #include "actionparser.h"
 #include "log.h"
 #include "imageanalysis.h"
+#include "qrcoder.h"
 
 static QDomDocument doc;
 static char currOrder = 0;
@@ -666,8 +667,8 @@ bool Sequence::setGain(int value){
 void Sequence::lxDebug(){
     //qDebug()<<"Cycle00.tif";
     //ImageAnalysis::QRDecode(QCoreApplication::applicationDirPath()+"/codebar/Cycle00.tif");
-    QVector<int> data;
-    data.push_back(4);
+
+    QRcoder::QRDecode();
     //emit callQmlRefeshData(data);
 }
 

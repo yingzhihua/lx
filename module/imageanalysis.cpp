@@ -1,4 +1,4 @@
-//#include "QZXing.h"
+#include "QZXing.h"
 #include <QDebug>
 #include <QImage>
 #include <QDateTime>

@@ -15,7 +15,7 @@ class ImageAnalysis : public QObject
     Q_OBJECT
 public:
     explicit ImageAnalysis(QObject *parent = nullptr);
-    static QString QRDecode(QString img);
+    static QString QRDecode(QImage img);
     void FirstImage(void *data, int imageType);
     void AddImage(void *data, int imageType);
 

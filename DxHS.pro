@@ -25,7 +25,8 @@ SOURCES += \
     module/sqlitemgr.cpp \
     module/v4l.cpp \
     main.cpp \   
-    module/dao/usermgr.cpp
+    module/dao/usermgr.cpp \
+    module/qrcoder.cpp
 
 RESOURCES += qml.qrc
 
@@ -54,7 +55,8 @@ HEADERS += \
     module/sqlitemgr.h \
     module/v4l.h \
     module/entity/User.h \
-    module/dao/usermgr.h
+    module/dao/usermgr.h \
+    module/qrcoder.h
 
 if(contains(DEFINES,PLUTFORM_ARM)){
 INCLUDEPATH += /opt/opencv-4.1.1/include \
@@ -63,6 +65,7 @@ INCLUDEPATH += /opt/opencv-4.1.1/include \
 
 LIBS += /opt/opencv-4.1.1/lib/libopencv_highgui.so \
         /opt/opencv-4.1.1/lib/libopencv_core.so \
+        /opt/opencv-4.1.1/lib/libopencv_videoio.so \
         /opt/opencv-4.1.1/lib/libopencv_imgproc.so \
         /opt/opencv-4.1.1/lib/libopencv_objdetect.so \
         /opt/opencv-4.1.1/lib/libopencv_imgcodecs.so
@@ -73,6 +76,7 @@ INCLUDEPATH += /opt/opencv-4.1.1L/include \
 
 LIBS += /opt/opencv-4.1.1L/lib/libopencv_highgui.so \
         /opt/opencv-4.1.1L/lib/libopencv_core.so \
+        /opt/opencv-4.1.1L/lib/libopencv_videoio.so \
         /opt/opencv-4.1.1L/lib/libopencv_imgproc.so \
         /opt/opencv-4.1.1L/lib/libopencv_objdetect.so \
         /opt/opencv-4.1.1L/lib/libopencv_imgcodecs.so
