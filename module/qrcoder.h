@@ -1,18 +1,37 @@
 #ifndef QRCODER_H
 #define QRCODER_H
 
-#include <QObject>
+#include <QThread>
+#include <QImage>
 
-class QRcoder : public QObject
+#include "opencv2/videoio.hpp"
+#include "opencv2/opencv.hpp"
+#include "opencv2/objdetect.hpp"
+#include "opencv2/imgproc.hpp"
+
+using namespace cv;
+using namespace std;
+
+class QRcoder : public QThread
 {
     Q_OBJECT
 public:
     explicit QRcoder(QObject *parent = nullptr);
-    static QString QRDecode();
+    static QImage img;
+    static QImage img2;
+    bool handleimage;
+    bool scale;
+    int binValue = 120;
+    int poxValue = 200;
+
+protected:
+    void run();
 
 signals:
+    void finishQRcode(QByteArray result);
 
 public slots:
+
 };
 
 #endif // QRCODER_H

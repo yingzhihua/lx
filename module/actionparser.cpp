@@ -97,6 +97,16 @@ QByteArray ActionParser::DrvParamToByte(const QString &action, int value, int pa
         data[10] = 0x01;
         FormatBytes(0x01,data);
     }
+    else if(action == "Led"){
+        data.resize(13);
+        data[6] = 0x00;
+        data[7] = 0x70;
+        data[8] = 0x00;
+        data[9] = 0x02;
+        data[10] = 0x01;    //保留
+        data[11] = value&0xFF;
+        FormatBytes(0x01,data);
+    }
 
     return data;
 }

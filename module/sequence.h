@@ -9,6 +9,8 @@
 #include "imagecapture.h"
 #include "imageprovider.h"
 #include "imageanalysis.h"
+#include "entity.h"
+#include "qrcoder.h"
 
 class Sequence : public QObject
 {
@@ -23,6 +25,7 @@ public:
         Sequence_CannelTest,
         Sequence_Test,
         Sequence_SimpleAction,
+        Sequence_QrDecode,
         Sequence_camView
     };
     Q_ENUM(SequenceId)
@@ -77,6 +80,8 @@ public:
     Q_INVOKABLE bool stopView();
     Q_INVOKABLE void lxDebug();
     Q_INVOKABLE void showAnaImg(int type,int light);
+    Q_INVOKABLE void qrSet(bool bopenlight, bool scale, bool handlimage, int bin,int pox);
+
     ImageProvider *imageProvider;
 
 signals:
@@ -88,14 +93,16 @@ signals:
     void boxStateChanged();
     void errOccur(QString error);
     void callQmlRefeshView();
+    void callQmlRefeshQrImg();
     void callQmlRefeshAnaMainImg();
     void callQmlRefeshData(int index, QVector<int> item,QVector<int> value);
+    void qrDecode(QString info);
 
 public slots:
     void SequenceTimeout();
     void WaitSequenceTimeout();
     void ActionFinish(QByteArray data);
-    void CameraView(QImage img);
+    void CameraView(QImage img);    
     void errReceive(int code);
 
 private:
@@ -126,6 +133,12 @@ private:
     bool bDoorState;
     bool bBoxState;
     ImageAnalysis *imageAna;
+
+    QRcoder *qr;
+    QList<action> actList;
+    bool listNextAction(bool first);
+    void qrDect();
+    bool bQrOpenLight = true;
 };
 
 static Sequence *sequence;

@@ -5,7 +5,7 @@
 #include "actionparser.h"
 #include "log.h"
 #include "imageanalysis.h"
-#include "qrcoder.h"
+
 
 static QDomDocument doc;
 static char currOrder = 0;
@@ -30,6 +30,8 @@ Sequence::Sequence(QObject *parent) : QObject(parent)
     connect(imageCapture,&ImageCapture::finishCapture,this,&Sequence::ActionFinish);
     connect(imageCapture,&ImageCapture::reView,this,&Sequence::CameraView);
 
+    qr = new QRcoder();
+    connect(qr,&QRcoder::finishQRcode,this,&Sequence::ActionFinish);
 
     currSequenceId = SequenceId::Sequence_Idle;    
     bCannelSequence = false;
@@ -111,6 +113,11 @@ bool Sequence::sequenceDo(SequenceId id)
     }
     else if(id == SequenceId::Sequence_CannelTest){
         sequenceAction = root.firstChildElement("StopTest");
+    }
+    else if(id == SequenceId::Sequence_QrDecode)
+    {
+        qrDect();
+        return true;
     }
 
     if (sequenceAction.isNull())
@@ -232,7 +239,12 @@ void Sequence::ActionFinish(QByteArray data)
             }
 
             currCameraCaptureType = 0;
-        }
+        }        
+    }
+    else if (data[1] == '\x04'){
+        data.remove(0,10);
+        emit qrDecode(data.data());
+        emit callQmlRefeshQrImg();
     }
 
     if (bCannelSequence)
@@ -246,6 +258,12 @@ void Sequence::ActionFinish(QByteArray data)
     {
         currSequenceId = SequenceId::Sequence_Idle;
         emit sequenceFinish(SequenceResult::Result_Simple_ok);
+    }
+    else if (currSequenceId == SequenceId::Sequence_QrDecode){
+        if (!listNextAction(false))
+        {
+            currSequenceId = SequenceId::Sequence_Idle;
+        }
     }
     else{
         bFinishAction = true;
@@ -665,14 +683,69 @@ bool Sequence::setGain(int value){
 }
 
 void Sequence::lxDebug(){
-    //qDebug()<<"Cycle00.tif";
+    qDebug()<<"lxDebug";
     //ImageAnalysis::QRDecode(QCoreApplication::applicationDirPath()+"/codebar/Cycle00.tif");
 
-    QRcoder::QRDecode();
+    //QRcoder::QRDecode();
     //emit callQmlRefeshData(data);
+    //qr->saveFrame();
 }
 
 void Sequence::showAnaImg(int type, int light){
     imageProvider->anaMainImg = imageAna->getMainImg(type,light);
     emit callQmlRefeshAnaMainImg();
+}
+
+bool Sequence::listNextAction(bool first){
+    qDebug()<<"listNextAction:count="<<actList.count();
+    if (!first && actList.count()>0)
+        actList.removeFirst();
+
+    if (actList.count()>0){
+        action act = actList.first();
+        if (act.device == "Qrcode"){
+            currOrder = '\xB0';
+            while (qr->isRunning());
+            qr->start();
+        }else {
+            QByteArray send = ActionParser::ParamToByte(act.device,act.value,act.param1,act.param2,act.param3);
+            currOrder = send[7];
+            serialMgr->serialWrite(send);
+        }
+        return true;
+    }
+
+    return false;
+}
+
+void Sequence::qrDect(){
+    actList.clear();
+    action act;
+
+    if (bQrOpenLight)
+    {
+        act.device = "Led";
+        act.value = 62;
+        actList.append(act);
+    }
+
+    act.device = "Qrcode";
+    actList.append(act);
+
+    if (bQrOpenLight)
+    {
+        act.device = "Led";
+        act.value = 63;
+        actList.append(act);
+    }
+
+    listNextAction(true);
+}
+
+void Sequence::qrSet(bool bopenlight, bool scale, bool handlimage, int bin, int pox){
+    bQrOpenLight = bopenlight;
+    qr->binValue = bin;
+    qr->poxValue = pox;
+    qr->handleimage = handlimage;
+    qr->scale = scale;
 }

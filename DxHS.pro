@@ -56,7 +56,8 @@ HEADERS += \
     module/v4l.h \
     module/entity/User.h \
     module/dao/usermgr.h \
-    module/qrcoder.h
+    module/qrcoder.h \
+    module/entity.h
 
 if(contains(DEFINES,PLUTFORM_ARM)){
 INCLUDEPATH += /opt/opencv-4.1.1/include \

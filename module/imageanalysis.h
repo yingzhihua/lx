@@ -25,7 +25,7 @@ public:
     QVector<int> getItem(){return posItem;}
     QVector<int> getValue(){return posValue;}
 private:
-    int subsize = 130;
+    int subsize = 160;
     size_t debugx = 9;
     size_t debugy = 8;
     int imageCount = 0;

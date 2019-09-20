@@ -17,7 +17,7 @@ static QString portCtrl = "ttyS4";
 static QByteArray byteReadData;
 static QByteArray byteCtrlReadData;
 static QTimer writeTimer;
-
+static int serialInitCount = 0;
 
 SerialMgr::SerialMgr(QObject *parent) : QObject(parent)
 {
@@ -28,6 +28,8 @@ SerialMgr::SerialMgr(QObject *parent) : QObject(parent)
     connect(&serialTemp,&QSerialPort::bytesWritten,this,&SerialMgr::handleBytesWritten);
     connect(&serialCtrl,&QSerialPort::bytesWritten,this,&SerialMgr::handleBytesWritten);
     connect(&writeTimer,&QTimer::timeout,this,&SerialMgr::handleWriteTimeout);    
+    serialInitCount++;
+    qDebug()<<"SerialMgr Init,count="<<serialInitCount;
 }
 
 int SerialMgr::SerialInit()

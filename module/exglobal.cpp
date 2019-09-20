@@ -85,7 +85,7 @@ QString ExGlobal::getIP(){
 void ExGlobal::exInit()
 {
     CaliParamInit();
-    SerialMgr::SerialInit();
+    SerialMgr::SerialInit();    
     //Sequence::sequenceInit();
 
     if(sqlitemgrinstance == nullptr)
