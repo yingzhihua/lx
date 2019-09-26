@@ -56,25 +56,29 @@ public:
     static int V1WorkX;
     static int V2WorkX;
     static int V3WorkX;
-    static int VPWorkX;
+    static int VPWorkX;    
     static int V1WorkOffset;
     static int V2WorkOffset;
     static int V3WorkOffset;
-    static int VPWorkOffset;
+    static int VPWorkOffset;    
     static int V1SoftHomeX;
     static int V2SoftHomeX;
     static int V3SoftHomeX;
     static int VPSoftHomeX;
+    static int PumpSoftHomeX;
     static int V1SoftHomeOffset;
     static int V2SoftHomeOffset;
     static int V3SoftHomeOffset;
     static int VPSoftHomeOffset;
+    static int PumpSoftHomeOffset;
     static int V1ToolHomeX;
     static int V2ToolHomeX;
     static int V3ToolHomeX;
     static int VPToolHomeX;
+    static int PumpToolHomeX;
     static int VDWorkX;
     static int VDSoftHomeX;
+
 
     static int CamAbs;
     static int CamGain;

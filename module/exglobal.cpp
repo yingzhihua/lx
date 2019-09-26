@@ -48,6 +48,10 @@ int ExGlobal::CamAbs = 500;
 int ExGlobal::CamGain = 0;
 int ExGlobal::CamFocus = 0;
 
+int ExGlobal::PumpSoftHomeX = 0;
+int ExGlobal::PumpToolHomeX = 0;
+int ExGlobal::PumpSoftHomeOffset = 0;
+
 ExGlobal::ExGlobal(QObject *parent) : QObject(parent)
 {
     //qDebug()<<"ExGlobal";
@@ -159,6 +163,12 @@ void ExGlobal::SetCaliParam(const QString &name, int caliValue)
         VDSoftHomeX = caliValue;
     else if (name == "V2WorkX")
         V2WorkX = caliValue;
+    else if (name == "PumpSoftHomeX")
+        PumpSoftHomeX = caliValue;
+    else if (name == "PumpToolHomeX")
+        PumpToolHomeX = caliValue;
+    else if (name == "PumpSoftHomeOffset")
+        PumpSoftHomeOffset = caliValue;
 
     if (name == "CamAbs")
         CamAbs = caliValue;
@@ -216,6 +226,12 @@ int ExGlobal::getCaliParam(const QString &caliName)
         result = VDWorkX;
     else if(caliName == "VDSoftHomeX")
         result = VDSoftHomeX;
+    else if(caliName == "PumpSoftHomeX")
+        result = PumpSoftHomeX;
+    else if(caliName == "PumpToolHomeX")
+        result = PumpToolHomeX;
+    else if(caliName == "PumpSoftHomeOffset")
+        result = PumpSoftHomeOffset;
 
     if (caliName == "CamAbs")
         result = CamAbs;

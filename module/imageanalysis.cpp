@@ -71,6 +71,8 @@ QImage ImageAnalysis::getMainImg(int type,int light){
         tempImg = tempImg*6;
     else if(light == 3)
         tempImg = tempImg*10;
+    else if(light == 4)
+        tempImg = tempImg*15;
 
     if (type == 0){
         for(size_t i = 0; i < x.size(); i++){
@@ -119,9 +121,9 @@ void ImageAnalysis::FirstImage(void *data, int imageType){
     QDateTime start_time = QDateTime::currentDateTime();
     imageCount = 1;
     posValue.clear();
-    posItem.clear();
+    posItem.clear();    
     if (imageType == 0)
-        firstImg = Mat(1944,2592,CV_8U,data);
+        Mat(1944,2592,CV_8U,data).copyTo(firstImg);
     FindGrid(firstImg,mpp,x,y);
     if (x.size()<gridCols || y.size()<gridRows)
         return;
@@ -156,10 +158,11 @@ void ImageAnalysis::AddImage(void *data, int imageType){
     QDateTime start_time = QDateTime::currentDateTime();
     if (imageCount < 1)
         return;
+    imageCount++;
     posValue.clear();
     posItem.clear();
     if (imageType == 0)
-        firstImg = Mat(1944,2592,CV_8U,data);
+        Mat(1944,2592,CV_8U,data).copyTo(firstImg);
     GaussianBlur(firstImg, firstImg, Size(25,25),0);
     for (int j = 0; j < gridRows; j++)
     {
@@ -178,7 +181,61 @@ void ImageAnalysis::AddImage(void *data, int imageType){
     qDebug()<<"AddImage endtime="<<QDateTime::currentDateTime().toString("hh:mm:ss.zzz");
 }
 
-void ImageAnalysis::SpotMask(Mat img, Mat &mask1, Mat &mask2, vector<int> &x, vector<int> &y, int subsize, int d1, int d2){
+bool ImageAnalysis::subImageHandle(bool debug, size_t posX, size_t posY, Mat &img, Mat &subimg){
+    int topsub = y[posY] - (subsize>>1);
+    int bottom = y[posY] + (subsize>>1);
+    int leftsub = x[posX] - (subsize>>1);
+    int rightsub = x[posX] + (subsize>>1);
+    if(topsub < 0 || bottom >=img.rows || leftsub < 0 || rightsub >= img.cols)
+        return false;
+
+    if (debug)
+    {
+        namedWindow("source Image",0);
+        resizeWindow("source Image",subsize<<1,subsize<<1);
+        imshow("source Image",img(Rect(leftsub,topsub,subsize+1,subsize+1))*3);
+    }
+
+    normalize(img(Rect(leftsub,topsub,subsize+1,subsize+1)),subimg,0,255,NORM_MINMAX);
+    if (debug)
+    {
+        namedWindow("sub Image",0);
+        resizeWindow("sub Image",subsize<<1,subsize<<1);
+        imshow("sub Image",subimg);
+    }
+    //medianBlur(subImage,subImage,5);
+
+    threshold(subimg,subimg,140,255,THRESH_BINARY);
+    if (debug)
+    {
+        namedWindow("threshold Image",0);
+        resizeWindow("threshold Image",subsize<<1,subsize<<1);
+        imshow("threshold Image",subimg);
+    }
+
+    //imclose
+    Mat element = getStructuringElement(MORPH_ELLIPSE,Size(9,9));
+    morphologyEx(subimg,subimg,MORPH_CLOSE,element);
+    //morphologyEx(subImage,subImage,MORPH_OPEN,element);
+    if (debug)
+    {
+        namedWindow("Close Image",0);
+        resizeWindow("Close Image",subsize<<1,subsize<<1);
+        imshow("Close Image",subimg);
+    }
+
+    //imfill
+#if 0
+    Mat mfloodFill = Mat::zeros(subsize,subsize,img.type());
+    bitwise_not(subImage,mfloodFill);
+    floodFill(mfloodFill,Point(0,0),Scalar(0));
+    subImage |= mfloodFill;
+    if (j == debugx && i == debugy)
+        imshow("fill Image",subImage);
+#endif
+    return true;
+}
+void ImageAnalysis::SpotMask(Mat &img, Mat &mask1, Mat &mask2, vector<int> &x, vector<int> &y, int subsize, int d1, int d2){
     int w = img.cols;
     int h = img.rows;
 
@@ -197,86 +254,15 @@ void ImageAnalysis::SpotMask(Mat img, Mat &mask1, Mat &mask2, vector<int> &x, ve
 
             if (leftsub < 0 || rightsub >= w)
                 continue;
-            if (cvDebug && j == debugx && i == debugy)
-            {
-                qDebug()<<"source image,x="<<leftsub<<",y="<<topsub;
-                imshow("source Image",img(Rect(leftsub,topsub,subsize+1,subsize+1))*3);
-            }
 
-            normalize(img(Rect(leftsub,topsub,subsize+1,subsize+1)),subImage,0,255,NORM_MINMAX);
-            if (cvDebug && j == debugx && i == debugy)
-                imshow("sub Image",subImage);
-            //medianBlur(subImage,subImage,5);
+            subImageHandle(false,j,i,img,subImage);
 
-            threshold(subImage,subImage,170,255,THRESH_BINARY);
-            if (cvDebug && j == debugx && i == debugy)
-                imshow("threshold Image",subImage);
 
-            //imclose
-            Mat element = getStructuringElement(MORPH_RECT,Size(15,15));
-            morphologyEx(subImage,subImage,MORPH_CLOSE,element);
-            if (cvDebug && j == debugx && i == debugy)
-                imshow("Close Image",subImage);
-
-            //imfill
-#if 0
-            Mat mfloodFill = Mat::zeros(subsize,subsize,img.type());
-            bitwise_not(subImage,mfloodFill);
-            floodFill(mfloodFill,Point(0,0),Scalar(0));
-            subImage |= mfloodFill;
-            if (j == debugx && i == debugy)
-                imshow("fill Image",subImage);
-#endif
             vector<vector<Point>> contours;
             vector<Vec4i> hi;
             findContours(subImage,contours,hi,RETR_EXTERNAL,CHAIN_APPROX_NONE);
             //qDebug()<<"findContours:("<<j<<","<<i<<"),Countours:"<<contours.size();
 
-#if 0
-            for (size_t z = 0; z < contours.size(); z++)
-            {
-                bool valid = true;
-                for (size_t t = 0; t < contours[z].size(); t++)
-                {
-                    if (contours[z][t].x == 0 || contours[z][t].x == subImage.cols - 1 || contours[z][t].y == 0 || contours[z][t].y == subImage.rows - 1)
-                    {
-                        valid = false;
-                        floodFill(subImage,Point(contours[z][t].x,contours[z][t].y),Scalar(0));
-                        break;
-                    }
-                }
-                if (valid)
-                {
-                    double s = contourArea(contours[z]);
-                    double l = arcLength(contours[z],true);
-                    qDebug()<<"\t"<<z<<","<<"area:"<<s<<",len:"<<l<<",s/l="<<(4*3.14*s/l/l);
-                    if (s>600 && s<6000 && (4*3.14*s/l/l)>0.7)
-                    {
-                        Mat subImage1 = Mat::zeros(subsize+1,subsize+1,img.type());
-                        Mat subImage2 = Mat::zeros(subsize+1,subsize+1,img.type());
-                        Mat subImage3 = Mat::zeros(subsize+1,subsize+1,img.type());
-                        Mat element2 = getStructuringElement(MORPH_ELLIPSE,Size(d1+1,d1+1));
-                        Mat element3 = getStructuringElement(MORPH_ELLIPSE,Size(d2+1,d2+1));
-
-                        drawContours(subImage1,contours,z,Scalar(i*x.size()+j),-1);
-                        qDebug()<<"\t\t"<<"fill color"<<(i*x.size()+j);
-
-                        dilate(subImage1,subImage1,element2);
-                        dilate(subImage1,subImage2,element3);
-                        dilate(subImage2,subImage3,element3);
-                        mask1(Rect(leftsub,topsub,subsize+1,subsize+1)) += subImage1;
-                        mask2(Rect(leftsub,topsub,subsize+1,subsize+1)) = subImage3 - subImage2;
-
-                        if (cvDebug && j == debugx && i == debugy)
-                        {
-                            imshow("dilate1",subImage1);
-                            imshow("dilate2",subImage2);
-                            imshow("dilate3",subImage3);
-                        }
-                    }
-                }
-            }
-#else
             int center = -1;
             Point centerPoint;
             for (size_t z = 0; z < contours.size(); z++)
@@ -294,7 +280,7 @@ void ImageAnalysis::SpotMask(Mat img, Mat &mask1, Mat &mask2, vector<int> &x, ve
                 if (valid){
                     double s = contourArea(contours[z]);
                     double l = arcLength(contours[z],true);
-                    if (s>600 && s<6000 && (4*3.14*s/l/l)>0.7)
+                    if (s>600 && s<6000 && (4*3.14*s/l/l)>0.5)
                     {
                         if (center == -1)
                         {
@@ -336,7 +322,6 @@ void ImageAnalysis::SpotMask(Mat img, Mat &mask1, Mat &mask2, vector<int> &x, ve
 
             }
         }
-#endif
     }
 
     topPointx = 0;
@@ -531,26 +516,14 @@ int ImageAnalysis::SpotCal(int PosX, int PosY){
     int bottom = y[PosY+topPointy] + (subsize>>1);
     int leftsub = x[PosX+topPointx] - (subsize>>1);
     int rightsub = x[PosX+topPointx] + (subsize>>1);
-    qDebug()<<"SpotCal,(x,y)="<<PosX<<","<<PosY<<" basePos:"<<basePos[PosY][PosX].x<<","<<basePos[PosY][PosX].y;
+    qDebug()<<"SpotCal,(x,y)="<<PosX<<","<<PosY<<" basePos:"<<basePos[PosY][PosX].x<<","<<basePos[PosY][PosX].y<<"\ttop:"<<topsub<<",left:"<<leftsub<<",bottom:"<<bottom<<",right:"<<rightsub;
     if (topsub < 0 || bottom >= firstImg.rows || leftsub < 0 || rightsub >= firstImg.cols)
     {
         qDebug()<<"topsub="<<topsub<<",bottom="<<bottom<<",leftsub="<<leftsub<<"rightsub="<<rightsub;
         return 0;
     }
     Mat subImage = Mat::zeros(subsize+1,subsize+1,firstImg.type());
-    normalize(firstImg(Rect(leftsub,topsub,subsize+1,subsize+1)),subImage,0,255,NORM_MINMAX);
-
-    if (cvDebug && PosX == static_cast<int>(debugx) && PosY == static_cast<int>(debugy))
-        imshow("sub Image",subImage);
-    threshold(subImage,subImage,170,255,THRESH_BINARY);
-    if (cvDebug && PosX == static_cast<int>(debugx) && PosY == static_cast<int>(debugy))
-        imshow("threshold Image",subImage);
-
-    //imclose
-    Mat element = getStructuringElement(MORPH_RECT,Size(15,15));
-    morphologyEx(subImage,subImage,MORPH_OPEN,element);
-    if (cvDebug && PosX == static_cast<int>(debugx) && PosY == static_cast<int>(debugy))
-        imshow("Close Image",subImage);
+    subImageHandle(false,PosX+topPointx,PosY+topPointy,firstImg,subImage);
 
     vector<vector<Point>> contours;
     vector<Vec4i> hi;
@@ -595,7 +568,10 @@ int ImageAnalysis::SpotCal(int PosX, int PosY){
     }
     qDebug()<<"center:"<<center<<",x="<<centerPoint.x<<",y="<<centerPoint.y;
     if (center == -1 || abs(centerPoint.x - basePos[PosY][PosX].x)>20 || abs(centerPoint.y - basePos[PosY][PosX].y)>20)
-        return 0;
+    {
+        centerPoint.x = basePos[PosY][PosX].x;
+        centerPoint.y = basePos[PosY][PosX].y;
+    }
 
     Mat subMask1 = mask1(Rect(leftsub,topsub,subsize+1,subsize+1));
     Mat subMask2 = mask2(Rect(leftsub,topsub,subsize+1,subsize+1));
@@ -612,4 +588,12 @@ int ImageAnalysis::SpotCal(int PosX, int PosY){
     Mat subSource = firstImg(Rect(leftsub,topsub,subsize+1,subsize+1));
 
     return getPosValue(subSource,subMask1,subMask2);
+}
+
+void ImageAnalysis::SetDebugPos(size_t x, size_t y)
+{
+    debugx = x;
+    debugy = y;
+    Mat subImage = Mat::zeros(subsize+1,subsize+1,firstImg.type());
+    subImageHandle(true,x,y,firstImg,subImage);
 }

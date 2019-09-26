@@ -175,6 +175,7 @@ int ImageCapture::init_device(){
     struct v4l2_cropcap cropcap;
     struct v4l2_crop crop;
     struct v4l2_format fmt;
+    struct v4l2_streamparm streamparam;
     unsigned int min;
 
     if (-1 == xioctl(fd,VIDIOC_QUERYCAP,&cap))
@@ -200,6 +201,46 @@ int ImageCapture::init_device(){
         Log::LogCam("open_device,dev does not support streaming io, return -1");
         return -1;
     }
+
+    CLEAR(streamparam);
+    streamparam.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    if (-1 == xioctl(fd,VIDIOC_G_PARM,&streamparam)){
+        qDebug()<<"VIDIOC_G_PARM error, return";
+        Log::LogCam("init_device,VIDIOC_G_PARM error, return -1");
+        return -1;
+    }
+    else {
+        Log::LogCam(QString("init_device,Get frame:%1/%2,capalibility=%3,capturemode=%4").arg(streamparam.parm.capture.timeperframe.numerator).arg(streamparam.parm.capture.timeperframe.denominator)
+                    .arg(streamparam.parm.capture.capability).arg(streamparam.parm.capture.capturemode));
+        qDebug()<<"Get frame "<<streamparam.parm.capture.timeperframe.numerator<<"/"<<streamparam.parm.capture.timeperframe.denominator;
+    }
+
+#if 1
+    CLEAR(streamparam);
+    streamparam.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    streamparam.parm.capture.capturemode = 1;
+    streamparam.parm.capture.timeperframe.numerator = 6;
+    streamparam.parm.capture.timeperframe.denominator = 3;
+    if (-1 == xioctl(fd,VIDIOC_S_PARM,&streamparam)){
+        qDebug()<<"VIDIOC_S_PARM error, return";
+        Log::LogCam("init_device,VIDIOC_S_PARM error, return -1");
+        return -1;
+    }
+#endif
+
+    CLEAR(streamparam);
+    streamparam.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    if (-1 == xioctl(fd,VIDIOC_G_PARM,&streamparam)){
+        qDebug()<<"VIDIOC_G_PARM error, return";
+        Log::LogCam("init_device,VIDIOC_G_PARM error, return -1");
+        return -1;
+    }
+    else {
+        Log::LogCam(QString("init_device,after Get frame:%1/%2,capalibility=%3,capturemode=%4").arg(streamparam.parm.capture.timeperframe.numerator).arg(streamparam.parm.capture.timeperframe.denominator)
+                    .arg(streamparam.parm.capture.capability).arg(streamparam.parm.capture.capturemode));
+        qDebug()<<"after set param,Get frame "<<streamparam.parm.capture.timeperframe.numerator<<"/"<<streamparam.parm.capture.timeperframe.denominator;
+    }
+
     CLEAR(cropcap);
     cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     if (0==xioctl(fd,VIDIOC_CROPCAP,&cropcap)){
@@ -229,7 +270,7 @@ int ImageCapture::init_device(){
     if (-1 == xioctl(fd,VIDIOC_S_FMT,&fmt))
     {
         qDebug()<<"VIDIOC_S_FMT error, return";
-        Log::LogCam("open_device,VIDIOC_S_FMT error, return -1");
+        Log::LogCam("init_device,VIDIOC_S_FMT error, return -1");
         return -1;
     }
     qDebug()<<"bytesperline:"<<fmt.fmt.pix.bytesperline<<"height:"<<fmt.fmt.pix.height<<"width:"<<fmt.fmt.pix.width;
@@ -304,7 +345,7 @@ int ImageCapture::init_device(){
         qDebug()<<"query ABSOLUTE:max="<<setting.maximum<<",min="<<setting.minimum<<",step="<<setting.step<<",default="<<setting.default_value;
         Log::LogCam(QString("init_device,query ABSOLUTE:max=%1,min=%2,step=%3,default=%4").arg(setting.maximum).arg(setting.minimum).arg(setting.step).arg(setting.default_value));
     }
-
+#if 1
     ctrl.id = V4L2_CID_EXPOSURE_ABSOLUTE;
     ctrl.value = ExGlobal::CamAbs;
 
@@ -324,6 +365,7 @@ int ImageCapture::init_device(){
         qDebug()<<"Get ABS Exposure:"<<ctrl.value;
         Log::LogCam(QString("init_device,Get ABS Exposure:%1").arg(ctrl.value));
     }
+#endif
 
     setting.id = V4L2_CID_GAIN;
     if (-1 == xioctl(fd,VIDIOC_QUERYCTRL,&setting))
@@ -640,6 +682,7 @@ int ImageCapture::process_image(int i, const void *p, int size){
             if(i == count){
                 for (int j = 0; j < 2592*1944; j++)
                     bufy[j] = sum[j<<1]/count;
+                    //bufy[j] = sum[j<<1];
 
                 for (int j = 0; j < 2592*1944*2; j++)
                     sum[j] = sum[j]/count;

@@ -469,11 +469,28 @@ QByteArray ActionParser::ParamToByte(const QString &action, int value, int param
     }
     else if(action == "Pump")
     {
-        if (value == 1)
+        if (value == 0)//hardware reset
         {
             data.resize(13);
             data[9] = 0x02;
             data[11] = 0x1B;
+        }
+        else if (value == 1 || value == 9)//software reset or
+        {
+            data.resize(15);
+            data[9] = 4;
+            if (value == 1)
+                param1 = ExGlobal::PumpSoftHomeX;
+            if (param1 >= 0)
+            {
+                data[11] = 26;
+            }
+            else {
+                data[11] = 25;
+                param1 = -param1;
+            }
+            data[12] = (param1>>8)&0xFF;
+            data[13] = param1&0xFF;
         }
         else if(value == 2 || value == 3)
         {
@@ -490,7 +507,7 @@ QByteArray ActionParser::ParamToByte(const QString &action, int value, int param
             data[13] = param1&0xFF;
             data[14] = (param2>>8)&0xFF;
             data[15] = param2&0xFF;
-        }
+        }        
 
         data[6] = 0x00;
         data[7] = 0x70;

@@ -25,6 +25,7 @@ Rectangle {
                     dev3Sp.stepSize=1
                     dev4Sp.stepSize=1
                     dev5Sp.stepSize=1
+                    dev6Sp.stepSize=1
                 }
             }
             RadioButton{
@@ -36,6 +37,7 @@ Rectangle {
                     dev3Sp.stepSize=10
                     dev4Sp.stepSize=10
                     dev5Sp.stepSize=10
+                    dev6Sp.stepSize=10
                 }
             }
             RadioButton{
@@ -48,6 +50,7 @@ Rectangle {
                     dev3Sp.stepSize=100
                     dev4Sp.stepSize=100
                     dev5Sp.stepSize=100
+                    dev6Sp.stepSize=100
                 }
             }
             RadioButton{
@@ -59,6 +62,7 @@ Rectangle {
                     dev3Sp.stepSize=500
                     dev4Sp.stepSize=500
                     dev5Sp.stepSize=500
+                    dev6Sp.stepSize=500
                 }
             }
             RadioButton{
@@ -70,6 +74,7 @@ Rectangle {
                     dev3Sp.stepSize=1000
                     dev4Sp.stepSize=1000
                     dev5Sp.stepSize=1000
+                    dev6Sp.stepSize=1000
                 }
             }
         }
@@ -445,6 +450,78 @@ Rectangle {
                 dev5Text.text = ExGlobal.getCaliParam("VDWorkX");
             }
         }
+
+        //pump
+        Text{
+            id:dev6
+            font.pixelSize: 40
+            text: qsTr("注射电机：")
+        }
+        Button{
+            id:dev6bt
+            font.pixelSize: 40
+            text:qsTr("硬件复位")
+            onClicked: {
+                dev6Sp.value = 0;
+                if (Sequence.actionDo("Pump",0,0,0,0))
+                    busyIndicator.running = true;
+            }
+        }
+        Button{
+            id:dev6btS
+            font.pixelSize: 40
+            text:qsTr("软件复位")
+            onClicked: {
+                dev6Sp.value = ExGlobal.getCaliParam("PumpSoftHomeX");
+                if (Sequence.actionDo("Pump",9,dev6Sp.value,0,0))
+                    busyIndicator.running = true;
+            }
+        }
+        Button{
+            id:dev6btT
+            font.pixelSize: 40
+            text:qsTr("工装位")
+            onClicked: {
+                dev6Sp.value = ExGlobal.getCaliParam("PumpToolHomeX");
+                if (Sequence.actionDo("Pump",9,dev6Sp.value,0,0))
+                //if (Sequence.actionDo("VP",3,0,0,0))
+                    busyIndicator.running = true;
+            }
+        }
+        Text{
+            id:dev6Text
+            font.pixelSize: 40
+            text:ExGlobal.getCaliParam("PumpToolHomeX")
+        }
+        SpinBox{
+            id:dev6Sp
+            from:-10000
+            value: 0
+            to:10000
+            stepSize: 100
+            font.pixelSize: 40
+            width: 220
+        }
+        Button{
+            id:dev6Set
+            font.pixelSize: 40
+            text:qsTr("设置")
+            onClicked: {
+                if (Sequence.actionDo("Pump",9,dev6Sp.value,0,0))
+                    busyIndicator.running = true;
+            }
+        }
+        Button{
+            id:dev6Save
+            font.pixelSize: 40
+            text:qsTr("保存")
+            onClicked: {
+                ExGlobal.updateCaliParam("PumpToolHomeX",dev6Sp.value);
+                ExGlobal.updateCaliParam("PumpSoftHomeX",dev6Sp.value-ExGlobal.getCaliParam("PumpSoftHomeOffset"));
+                dev6Text.text = ExGlobal.getCaliParam("PumpToolHomeX");
+            }
+        }
+
     }
 
     Button {

@@ -97,29 +97,21 @@ Page {
         legend.alignment: Qt.AlignTop
         animationOptions: ChartView.SeriesAnimations
         antialiasing: true
-/*
+
         ValueAxis{
             id: axisX
             min: 0
             max: 50
-            tickCount: 5
+            tickCount: 6
+            minorTickCount: 9
+            labelFormat: "%d"
         }
+
         ValueAxis{
             id:axisY
-            min:-0.5
-            max:1.5
+            min:0
+            max:50
         }
-
-        LineSeries{
-            id:serial0
-            name:"FLUA"
-
-        }
-        LineSeries{
-            id:serial1
-            name:"FLUB"
-        }
-        */
     }
 
     Button {
@@ -145,8 +137,8 @@ Page {
     Component.onCompleted: {
         Sequence.sequenceDo(Sequence.Sequence_Test);
         var newline = chartView.createSeries(ChartView.SeriesTypeLine,"lx");
-        newline.axisX.max = 40;
-        newline.axisY.max = 400;
+        newline.axisX = axisX;
+        newline.axisY = axisY;
         newline.append(2,30);
         newline.append(12,60);
     }
@@ -196,16 +188,18 @@ Page {
                 for (var i = 0; i < item.length; i++)
                 {
                     chartView.createSeries(ChartView.SeriesTypeLine,ExGlobal.getPosName(item[i]));
-                    chartView.series(i).axisX.max = 42;
-                    chartView.series(i).axisY.max = 400;
-                    chartView.series(i).append(1,value[i]);
+                    newline.axisX = axisX;
+                    newline.axisY = axisY;
                 }
             }
-            else
+
+            for (i = 0; i < item.length; i++)
             {
-                for (var i = 0; i < item.length; i++)
-                    chartView.series(i).append(index,value[i]);
+                if (value[i] > axisY.max - 10)
+                    axisY.max = value[i] + 10;
+                chartView.series(i).append(index,value[i]);
             }
+
 
             console.log(index,item,value);
         }
