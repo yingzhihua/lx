@@ -130,7 +130,8 @@ QByteArray ActionParser::ParamToByte(const QString &action, int value, int param
         }
         else if(value == 2)
         {
-            data.resize(15);
+            int pumpSoftHomeX = ExGlobal::PumpSoftHomeX;
+            data.resize(17);
             data[6] = 0x00;
             data[7] = 0x70;
             data[8] = 0x00;
@@ -139,6 +140,10 @@ QByteArray ActionParser::ParamToByte(const QString &action, int value, int param
             data[11] = 0x03;
             data[12] = (ExGlobal::VDWorkX>>8)&0xFF;    //时序参数
             data[13] = ExGlobal::VDWorkX&0xFF;
+            if (pumpSoftHomeX < 0)
+                pumpSoftHomeX = -pumpSoftHomeX;
+            data[14] = (pumpSoftHomeX>>8)&0xFF;
+            data[15] = pumpSoftHomeX&0xFF;
         }
         else if(value == 3){
             data.resize(17);
@@ -469,18 +474,21 @@ QByteArray ActionParser::ParamToByte(const QString &action, int value, int param
     }
     else if(action == "Pump")
     {
-        if (value == 0)//hardware reset
+        if (value == 1)//hardware reset
         {
             data.resize(13);
             data[9] = 0x02;
             data[11] = 0x1B;
         }
-        else if (value == 1 || value == 9)//software reset or
+        else if (value == 2 || value == 3 ||value == 9)//software reset or
         {
             data.resize(15);
             data[9] = 4;
-            if (value == 1)
+            if (value == 2)
                 param1 = ExGlobal::PumpSoftHomeX;
+            else if(value == 3)
+                param1 = ExGlobal::PumpToolHomeX;
+
             if (param1 >= 0)
             {
                 data[11] = 26;
@@ -492,16 +500,16 @@ QByteArray ActionParser::ParamToByte(const QString &action, int value, int param
             data[12] = (param1>>8)&0xFF;
             data[13] = param1&0xFF;
         }
-        else if(value == 2 || value == 3)
+        else if(value == 4 || value == 5)
         {
             double step = (double)param2;
             step = step/0.010797;
             //param2 = (int)step;
             data.resize(17);
             data[9] = 0x06;
-            if (value == 2)
+            if (value == 4)
                 data[11] = 0x1C;
-            else if(value == 3)
+            else if(value == 5)
                 data[11] = 0x1D;
             data[12] = (param1>>8)&0xFF;
             data[13] = param1&0xFF;

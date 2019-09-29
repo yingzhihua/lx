@@ -90,7 +90,7 @@ static int convert_yuv_to_rgb_buffer(unsigned char *yuv, unsigned char *rgb, uns
     return 0;
 }
 
-static int convert_yuv_to_rgb(unsigned short *yuv, unsigned char *rgb, unsigned int width, unsigned int height)
+static int convert_yuv_to_rgb(unsigned int *yuv, unsigned char *rgb, unsigned int width, unsigned int height)
 {
     unsigned int in, out = 0;
     unsigned int pixel_16;
@@ -128,6 +128,15 @@ static int convert_yuv_to_y_buffer(unsigned char *yuv, unsigned char *rgb, unsig
     unsigned int in, out = 0;
     for(in = 0; in < width * height; in++) {
         rgb[out++] = yuv[(in<<1)];
+    }
+    return 0;
+}
+
+static int convert_yuv_to_2y_buffer(unsigned char *yuv, unsigned short *rgb, unsigned int width, unsigned int height)
+{
+    unsigned int in, out = 0;
+    for(in = 0; in < width * height; in++) {
+        rgb[out++] = yuv[(in<<1)]*256;
     }
     return 0;
 }
@@ -201,7 +210,7 @@ int ImageCapture::init_device(){
         Log::LogCam("open_device,dev does not support streaming io, return -1");
         return -1;
     }
-
+#if 0
     CLEAR(streamparam);
     streamparam.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     if (-1 == xioctl(fd,VIDIOC_G_PARM,&streamparam)){
@@ -215,7 +224,6 @@ int ImageCapture::init_device(){
         qDebug()<<"Get frame "<<streamparam.parm.capture.timeperframe.numerator<<"/"<<streamparam.parm.capture.timeperframe.denominator;
     }
 
-#if 1
     CLEAR(streamparam);
     streamparam.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     streamparam.parm.capture.capturemode = 1;
@@ -226,7 +234,6 @@ int ImageCapture::init_device(){
         Log::LogCam("init_device,VIDIOC_S_PARM error, return -1");
         return -1;
     }
-#endif
 
     CLEAR(streamparam);
     streamparam.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -240,6 +247,7 @@ int ImageCapture::init_device(){
                     .arg(streamparam.parm.capture.capability).arg(streamparam.parm.capture.capturemode));
         qDebug()<<"after set param,Get frame "<<streamparam.parm.capture.timeperframe.numerator<<"/"<<streamparam.parm.capture.timeperframe.denominator;
     }
+#endif
 
     CLEAR(cropcap);
     cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -402,7 +410,8 @@ int ImageCapture::init_device(){
 
     bufrgb = (unsigned char *)malloc(fmt.fmt.pix.height * fmt.fmt.pix.width * 3);
     bufy = (unsigned char *)malloc(fmt.fmt.pix.height * fmt.fmt.pix.width);
-    sum = (unsigned short *)malloc(fmt.fmt.pix.height * fmt.fmt.pix.width * 4);
+    buf2y = (unsigned short *)malloc(fmt.fmt.pix.height * fmt.fmt.pix.width * 2);
+    sum = (unsigned int *)malloc(fmt.fmt.pix.height * fmt.fmt.pix.width * 8);
     if (io == IO_METHOD_READ)
         return init_read(fmt.fmt.pix.sizeimage);
     else
@@ -658,7 +667,7 @@ int ImageCapture::process_image(int i, const void *p, int size){
         QImage image(bufrgb,2592,1944,QImage::Format_RGB888);
         image.save(filenames);
 #endif
-#if 0
+#if 1
         sprintf(filenames,"%s/%s_%02d.y",Log::getDir().toLatin1().data(),filename.toLatin1().data(),i);
         convert_yuv_to_y_buffer((unsigned char *)p,bufy,2592,1944);
         FILE *file_f = fopen(filenames,"w");
@@ -669,26 +678,34 @@ int ImageCapture::process_image(int i, const void *p, int size){
         if (count == 1)
         {
             convert_yuv_to_y_buffer((unsigned char *)p,bufy,2592,1944);
+            convert_yuv_to_2y_buffer((unsigned char *)p,buf2y,2592,1944);
             convert_yuv_to_rgb_buffer((unsigned char *)p,bufrgb,2592,1944);
         }
         else
         {
             if (i == 1)
-                memset((void *)sum,0,2592*1944*4);
+                memset((void *)sum,0,2592*1944*8);
 
             for (int j = 0; j < 2592*1944*2; j++)
                 sum[j] += data[j];
 
             if(i == count){
+                unsigned short temp;
                 for (int j = 0; j < 2592*1944; j++)
+                {
                     bufy[j] = sum[j<<1]/count;
-                    //bufy[j] = sum[j<<1];
+                    buf2y[j] = sum[j<<1]*256/count;
+                    temp = buf2y[j]>>8;
+                    buf2y[j] = temp+(buf2y[j]<<8);
+                }
+                qDebug()<<"buf2y="<<buf2y[2592*500+1000]<<",bufy="<<bufy[2592*500+1000]<<",sum="<<sum[(2592*500+1000)<<1];
 
                 for (int j = 0; j < 2592*1944*2; j++)
                     sum[j] = sum[j]/count;
                 convert_yuv_to_rgb(sum,bufrgb,2592,1944);
             }
         }
+
 
         if (i == count)
         {
@@ -698,7 +715,12 @@ int ImageCapture::process_image(int i, const void *p, int size){
             fclose(file_s);
             Log::LogCam("Image Capture "+QString::fromUtf8(filenames));
             //imageAna.FirstImage(bufrgb,0);
-
+#if 1
+            sprintf(filenames,"%s/%s.2y",Log::getDir().toLatin1().data(),filename.toLatin1().data());
+            FILE *file_2s = fopen(filenames,"w");
+            fwrite(buf2y,size,1,file_2s);
+            fclose(file_2s);
+#endif
 #if 1
             sprintf(filenames,"%s/%s.bmp",Log::getDir().toLatin1().data(),filename.toLatin1().data());            
             QImage image(bufrgb,2592,1944,QImage::Format_RGB888);

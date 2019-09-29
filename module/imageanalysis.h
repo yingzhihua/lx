@@ -25,6 +25,8 @@ public:
     QVector<int> getItem(){return posItem;}
     QVector<int> getValue(){return posValue;}
     int getImageCount(){return imageCount;}
+
+    int thrsh = 170;
 private:
     int subsize = 160;
     size_t debugx = 9;
@@ -45,7 +47,9 @@ private:
     void FindPeaks(int *number, int numberLen, int mpp, std::vector<int>& pos);
     void FindGrid(Mat img, int mpp, std::vector<int>& x, std::vector<int>& y);
     int SpotCal(int x, int y);
-    bool subImageHandle(bool debug, size_t x, size_t y, Mat &img, Mat &subimg);
+    int subImageHandle(bool debug, size_t x, size_t y, Mat &img, Mat &subimg, int thrsh,vector<vector<Point>> &contours,Point &centerPoint);
+    void UpdateMask(int top, int left, vector<vector<Point>> &contours, int center);
+    void EllipseMask(int top, int left, vector<Point> &contour);
 signals:
 
 public slots:

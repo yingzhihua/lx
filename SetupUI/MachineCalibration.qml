@@ -463,7 +463,7 @@ Rectangle {
             text:qsTr("硬件复位")
             onClicked: {
                 dev6Sp.value = 0;
-                if (Sequence.actionDo("Pump",0,0,0,0))
+                if (Sequence.actionDo("Pump",1,0,0,0))
                     busyIndicator.running = true;
             }
         }

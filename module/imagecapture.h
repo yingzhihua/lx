@@ -57,7 +57,8 @@ private:
     unsigned int n_buffers;
     unsigned char *bufrgb;
     unsigned char *bufy;
-    unsigned short *sum;
+    unsigned short *buf2y;
+    unsigned int *sum;
     QString filename;
     CaptureMode captureMode;    
 };

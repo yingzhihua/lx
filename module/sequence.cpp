@@ -212,14 +212,15 @@ void Sequence::ActionFinish(QByteArray data)
                 if (currCameraCycle < 2)                
                     imageAna->FirstImage(imageCapture->getyData(),0);                
                 else                
-                    imageAna->FirstImage(imageCapture->getyData(),0);
+                    imageAna->AddImage(imageCapture->getyData(),0);
 
                 imageProvider->anaMainImg = imageAna->getMainImg(0,1);
                 emit callQmlRefeshAnaMainImg();
                 QVector<int> item = imageAna->getItem();
                 QVector<int> value = imageAna->getValue();
                 emit callQmlRefeshData(currCameraCycle,item,value);
-//*
+
+                //*
                 QString saveStr;
                 if (currCameraCycle == 1){
                     saveStr = "cycle";
@@ -246,6 +247,7 @@ void Sequence::ActionFinish(QByteArray data)
         emit qrDecode(data.data());
         emit callQmlRefeshQrImg();
     }
+
 
     if (bCannelSequence)
     {

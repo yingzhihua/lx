@@ -4,6 +4,7 @@
 #include <QDateTime>
 
 #include "imageanalysis.h"
+static const int shd = 170;
 static void GetCenter(vector<Point> &c, Point &center)
 {
     int pointCount = c.size();
@@ -120,10 +121,13 @@ QImage ImageAnalysis::getMainImg(int type,int light){
 void ImageAnalysis::FirstImage(void *data, int imageType){
     QDateTime start_time = QDateTime::currentDateTime();
     imageCount = 1;
+    x.clear();
+    y.clear();
     posValue.clear();
     posItem.clear();    
     if (imageType == 0)
-        Mat(1944,2592,CV_8U,data).copyTo(firstImg);
+        flip(Mat(1944,2592,CV_8U,data),firstImg,0);
+        //Mat(1944,2592,CV_8U,data).copyTo(firstImg);
     FindGrid(firstImg,mpp,x,y);
     if (x.size()<gridCols || y.size()<gridRows)
         return;
@@ -133,36 +137,20 @@ void ImageAnalysis::FirstImage(void *data, int imageType){
     SpotMask(firstImg,mask1,mask2, x,y,subsize,md1,md2);
     qDebug()<<"FirstImage starttime="<<start_time.toString("hh:mm:ss.zzz");
     qDebug()<<"FirstImage endtime="<<QDateTime::currentDateTime().toString("hh:mm:ss.zzz");
-#if 0
-    if (cvDebug){
-        line(firstImg,Point(x[debugx] - (subsize>>1),y[debugy] - (subsize>>1)),Point(x[debugx] + (subsize>>1),y[debugy] - (subsize>>1)),Scalar(255));
-        line(firstImg,Point(x[debugx] - (subsize>>1),y[debugy] - (subsize>>1)),Point(x[debugx] - (subsize>>1),y[debugy] + (subsize>>1)),Scalar(255));
-        line(firstImg,Point(x[debugx] + (subsize>>1),y[debugy] - (subsize>>1)),Point(x[debugx] + (subsize>>1),y[debugy] + (subsize>>1)),Scalar(255));
-        line(firstImg,Point(x[debugx] - (subsize>>1),y[debugy] + (subsize>>1)),Point(x[debugx] + (subsize>>1),y[debugy] + (subsize>>1)),Scalar(255));
-
-        namedWindow("Input Image",0);
-        cv::resizeWindow("Input Image",1000,800);
-        imshow("Input Image",firstImg*3);
-        namedWindow("mask Image",0);
-        cv::resizeWindow("mask Image",1000,800);
-        imshow("mask Image",mask1*2);
-        namedWindow("mask2 Image",0);
-        cv::resizeWindow("mask2 Image",1000,800);
-        imshow("mask2 Image",(mask1+mask2)*2);
-    }
-#endif
 }
 
 void ImageAnalysis::AddImage(void *data, int imageType){
     qDebug()<<"AddImage:";
     QDateTime start_time = QDateTime::currentDateTime();
-    if (imageCount < 1)
+    if (imageCount < 1 || x.size()<gridCols || y.size()<gridRows)
         return;
     imageCount++;
     posValue.clear();
-    posItem.clear();
+    posItem.clear();    
     if (imageType == 0)
-        Mat(1944,2592,CV_8U,data).copyTo(firstImg);
+        flip(Mat(1944,2592,CV_8U,data),firstImg,0);
+        //Mat(1944,2592,CV_8U,data).copyTo(firstImg);
+
     GaussianBlur(firstImg, firstImg, Size(25,25),0);
     for (int j = 0; j < gridRows; j++)
     {
@@ -171,8 +159,7 @@ void ImageAnalysis::AddImage(void *data, int imageType){
             if (maskPos.at<uchar>(j,i) != 0 && maskPos.at<uchar>(j,i) != 14){
                 int value = SpotCal(i,j);
                 posItem.push_back(maskPos.at<uchar>(j,i));
-                posValue.push_back(value);
-                //posValue.push_back(Vec2i(maskPos.at<uchar>(j,i),value));
+                posValue.push_back(value);                
                 qDebug()<<"AddImage,maskPos="<<maskPos.at<uchar>(j,i)<<",value="<<value;
             }
         }
@@ -181,13 +168,15 @@ void ImageAnalysis::AddImage(void *data, int imageType){
     qDebug()<<"AddImage endtime="<<QDateTime::currentDateTime().toString("hh:mm:ss.zzz");
 }
 
-bool ImageAnalysis::subImageHandle(bool debug, size_t posX, size_t posY, Mat &img, Mat &subimg){
+int ImageAnalysis::subImageHandle(bool debug, size_t posX, size_t posY, Mat &img, Mat &subimg, int thrsh,vector<vector<Point>> &contours,Point &centerPoint){
+    vector<Vec4i> hi;
+    int center = -1;
     int topsub = y[posY] - (subsize>>1);
     int bottom = y[posY] + (subsize>>1);
     int leftsub = x[posX] - (subsize>>1);
     int rightsub = x[posX] + (subsize>>1);
     if(topsub < 0 || bottom >=img.rows || leftsub < 0 || rightsub >= img.cols)
-        return false;
+        return -2;
 
     if (debug)
     {
@@ -202,10 +191,9 @@ bool ImageAnalysis::subImageHandle(bool debug, size_t posX, size_t posY, Mat &im
         namedWindow("sub Image",0);
         resizeWindow("sub Image",subsize<<1,subsize<<1);
         imshow("sub Image",subimg);
-    }
-    //medianBlur(subImage,subImage,5);
+    }    
 
-    threshold(subimg,subimg,140,255,THRESH_BINARY);
+    threshold(subimg,subimg,thrsh,255,THRESH_BINARY);
     if (debug)
     {
         namedWindow("threshold Image",0);
@@ -233,8 +221,97 @@ bool ImageAnalysis::subImageHandle(bool debug, size_t posX, size_t posY, Mat &im
     if (j == debugx && i == debugy)
         imshow("fill Image",subImage);
 #endif
-    return true;
+
+    findContours(subimg,contours,hi,RETR_EXTERNAL,CHAIN_APPROX_NONE);
+    for (size_t z = 0; z < contours.size(); z++)
+    {
+        bool valid = true;
+        for (size_t t = 0; t < contours[z].size(); t++)
+        {
+            if (contours[z][t].x == 0 || contours[z][t].x == subimg.cols - 1 || contours[z][t].y == 0 || contours[z][t].y == subimg.rows - 1)
+            {
+                valid = false;
+                //floodFill(subimg,Point(contours[z][t].x,contours[z][t].y),Scalar(0));
+                break;
+            }
+        }
+        if (valid){
+            double s = contourArea(contours[z]);
+            double l = arcLength(contours[z],true);
+            if (s>600 && s<6000 && (4*3.14*s/l/l)>0.5)
+            {
+                if (center == -1)
+                {
+                    GetCenter(contours[z],centerPoint);
+                    center = static_cast<int>(z);
+                }
+                else {
+                    Point point;
+                    GetCenter(contours[z],point);
+                    if (abs(point.x - (subsize>>1))+abs(point.y - (subsize>>1)) < abs(centerPoint.x - (subsize>>1))+abs(centerPoint.y - (subsize>>1)))
+                    {
+                        center = static_cast<int>(z);
+                        centerPoint.x = point.x;
+                        centerPoint.y = point.y;
+                    }
+                }
+            }
+        }
+    }
+
+    if (debug){
+        vector<vector<Point>> contours;
+        vector<Vec4i> hi;
+        findContours(subimg,contours,hi,RETR_EXTERNAL,CHAIN_APPROX_NONE);
+
+        for (size_t z = 0; z < contours.size(); z++)
+        {
+            RotatedRect box = fitEllipse(contours[z]);
+            qDebug()<<"box:width="<<box.size.width<<",height="<<box.size.height;
+            ellipse(subimg,box,Scalar(120),-1);
+        }
+
+        namedWindow("fitEllipse Image",0);
+        resizeWindow("fitEllipse Image",subsize<<1,subsize<<1);
+        imshow("fitEllipse Image",subimg);
+    }
+
+    return center;
 }
+
+void ImageAnalysis::UpdateMask(int top, int left, vector<vector<Point>> &contours, int center){
+    Mat subImage1 = Mat::zeros(subsize+1,subsize+1,mask1.type());
+    Mat subImage2 = Mat::zeros(subsize+1,subsize+1,mask1.type());
+    Mat subImage3 = Mat::zeros(subsize+1,subsize+1,mask1.type());
+    Mat element2 = getStructuringElement(MORPH_ELLIPSE,Size(md1+1,md1+1));
+    Mat element3 = getStructuringElement(MORPH_ELLIPSE,Size(md2+1,md2+1));
+
+    drawContours(subImage1,contours,center,Scalar(1),-1);
+
+    dilate(subImage1,subImage1,element2);
+    dilate(subImage1,subImage2,element3);
+    dilate(subImage2,subImage3,element3);
+    mask1(Rect(left,top,subsize+1,subsize+1)) += subImage1;
+    mask2(Rect(left,top,subsize+1,subsize+1)) = subImage3 - subImage2;
+}
+
+void ImageAnalysis::EllipseMask(int top, int left, vector<Point> &contour){
+    Mat subImage1 = Mat::zeros(subsize+1,subsize+1,mask1.type());
+    Mat subImage2 = Mat::zeros(subsize+1,subsize+1,mask1.type());
+    Mat subImage3 = Mat::zeros(subsize+1,subsize+1,mask1.type());
+    Mat element2 = getStructuringElement(MORPH_ELLIPSE,Size(md1+11,md1+11));
+    Mat element3 = getStructuringElement(MORPH_ELLIPSE,Size(md2+1,md2+1));
+
+    RotatedRect box = fitEllipse(contour);
+    ellipse(subImage1,box,Scalar(1),-1);
+
+    dilate(subImage1,subImage1,element2);
+    dilate(subImage1,subImage2,element3);
+    dilate(subImage2,subImage3,element3);
+    mask1(Rect(left,top,subsize+1,subsize+1)) += subImage1;
+    mask2(Rect(left,top,subsize+1,subsize+1)) = subImage3 - subImage2;
+}
+
 void ImageAnalysis::SpotMask(Mat &img, Mat &mask1, Mat &mask2, vector<int> &x, vector<int> &y, int subsize, int d1, int d2){
     int w = img.cols;
     int h = img.rows;
@@ -255,72 +332,11 @@ void ImageAnalysis::SpotMask(Mat &img, Mat &mask1, Mat &mask2, vector<int> &x, v
             if (leftsub < 0 || rightsub >= w)
                 continue;
 
-            subImageHandle(false,j,i,img,subImage);
-
-
             vector<vector<Point>> contours;
-            vector<Vec4i> hi;
-            findContours(subImage,contours,hi,RETR_EXTERNAL,CHAIN_APPROX_NONE);
-            //qDebug()<<"findContours:("<<j<<","<<i<<"),Countours:"<<contours.size();
+            int center = subImageHandle(false,j,i,img,subImage,shd,contours,matPoint[i][j]);
 
-            int center = -1;
-            Point centerPoint;
-            for (size_t z = 0; z < contours.size(); z++)
-            {
-                bool valid = true;
-                for (size_t t = 0; t < contours[z].size(); t++)
-                {
-                    if (contours[z][t].x == 0 || contours[z][t].x == subImage.cols - 1 || contours[z][t].y == 0 || contours[z][t].y == subImage.rows - 1)
-                    {
-                        valid = false;
-                        floodFill(subImage,Point(contours[z][t].x,contours[z][t].y),Scalar(0));
-                        break;
-                    }
-                }
-                if (valid){
-                    double s = contourArea(contours[z]);
-                    double l = arcLength(contours[z],true);
-                    if (s>600 && s<6000 && (4*3.14*s/l/l)>0.5)
-                    {
-                        if (center == -1)
-                        {
-                            GetCenter(contours[z],centerPoint);
-                            center = static_cast<int>(z);
-                        }
-                        else {
-                            Point point;
-                            GetCenter(contours[z],point);
-                            if (abs(point.x - (subsize>>1))+abs(point.y - (subsize>>1)) < abs(centerPoint.x - (subsize>>1))+abs(centerPoint.y - (subsize>>1)))
-                            {
-                                center = static_cast<int>(z);
-                                centerPoint.x = point.x;
-                                centerPoint.y = point.y;
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (center != -1)
-            {
-                matPoint[i][j].x = centerPoint.x;
-                matPoint[i][j].y = centerPoint.y;
-                Mat subImage1 = Mat::zeros(subsize+1,subsize+1,img.type());
-                Mat subImage2 = Mat::zeros(subsize+1,subsize+1,img.type());
-                Mat subImage3 = Mat::zeros(subsize+1,subsize+1,img.type());
-                Mat element2 = getStructuringElement(MORPH_ELLIPSE,Size(d1+1,d1+1));
-                Mat element3 = getStructuringElement(MORPH_ELLIPSE,Size(d2+1,d2+1));
-
-                drawContours(subImage1,contours,center,Scalar(i*x.size()+j),-1);
-                //qDebug()<<"\t\t"<<"fill color"<<(i*x.size()+j);
-
-                dilate(subImage1,subImage1,element2);
-                dilate(subImage1,subImage2,element3);
-                dilate(subImage2,subImage3,element3);
-                mask1(Rect(leftsub,topsub,subsize+1,subsize+1)) += subImage1;
-                mask2(Rect(leftsub,topsub,subsize+1,subsize+1)) = subImage3 - subImage2;
-
-            }
+            if (center >= 0)
+                UpdateMask(topsub, leftsub,contours,center);
         }
     }
 
@@ -330,12 +346,12 @@ void ImageAnalysis::SpotMask(Mat &img, Mat &mask1, Mat &mask2, vector<int> &x, v
     for (size_t z = 0; z < x.size()-gridCols; z++)
     {
         int tempPointCount = 0;
-        for(int i = z; i < z+gridCols; i++)
+        for(size_t i = z; i < z+gridCols; i++)
         {
             for (size_t j = 0; j < y.size(); j++)
             {
-            if (matPoint[j][i].x != 0 || matPoint[j][i].y != 0)
-                tempPointCount++;
+                if (matPoint[j][i].x != 0 || matPoint[j][i].y != 0)
+                    tempPointCount++;
             }
         }
         if (tempPointCount > pointCount)
@@ -344,15 +360,15 @@ void ImageAnalysis::SpotMask(Mat &img, Mat &mask1, Mat &mask2, vector<int> &x, v
             topPointx = static_cast<int>(z);
         }
     }
-
+    
     pointCount = 0;
     for (size_t z = 0; z < y.size()-gridRows; z++){
         int tempPointCount = 0;
-        for (int j = z; j < z + gridRows; j++){
+        for (size_t j = z; j < z + gridRows; j++){
             for (size_t i = 0; i < x.size(); i++)
             {
-            if (matPoint[j][i].x != 0 || matPoint[j][i].y != 0)
-                tempPointCount++;
+                if (matPoint[j][i].x != 0 || matPoint[j][i].y != 0)
+                    tempPointCount++;
             }
         }
         if (tempPointCount > pointCount)
@@ -383,21 +399,73 @@ void ImageAnalysis::SpotMask(Mat &img, Mat &mask1, Mat &mask2, vector<int> &x, v
     {
         for (size_t j = topPointx; j < topPointx+gridCols; j++)
         {
-            //basePos[i-topPointy][j-topPointx].x = matPoint[i][j].x + x[j] - (subsize>>1);
-            //basePos[i-topPointy][j-topPointx].y = matPoint[i][j].y + y[i] - (subsize>>1);
             basePos[i-topPointy][j-topPointx].x = matPoint[i][j].x;
             basePos[i-topPointy][j-topPointx].y = matPoint[i][j].y;
             qDebug()<<"basePos["<<i-topPointy<<"]["<<j-topPointx<<"] = "<<"("<<basePos[i-topPointy][j-topPointx].x<<","<<basePos[i-topPointy][j-topPointx].y<<")";
-            if (maskPos.at<uchar>(i-topPointy,j-topPointx) != 0 && maskPos.at<uchar>(i-topPointy,j-topPointx) != 14){
+            if (maskPos.at<uchar>(i-topPointy,j-topPointx) != 0/* && maskPos.at<uchar>(i-topPointy,j-topPointx) != 14*/){
                 int topsub = y[i] - (subsize>>1);
-                int leftsub = x[j] - (subsize>>1);
-                Mat submask1 = mask1(Rect(leftsub,topsub,subsize+1,subsize+1));
-                Mat submask2 = mask2(Rect(leftsub,topsub,subsize+1,subsize+1));
-                int value = getPosValue(img(Rect(leftsub,topsub,subsize+1,subsize+1)),submask1,submask2);
-                posItem.push_back(maskPos.at<uchar>(i-topPointy,j-topPointx));
-                posValue.push_back(value);
-                //posValue.push_back(Vec2i(maskPos.at<uchar>(i-topPointy,j-topPointx),value));
-                qDebug()<<"maskPos="<<maskPos.at<uchar>(i-topPointy,j-topPointx)<<",value="<<value;
+                int leftsub = x[j] - (subsize>>1);                
+                if (basePos[i-topPointy][j-topPointx].x == 0){
+                    vector<vector<Point>> contours;
+                    int center = -1;
+                    for (int z = 1; z < 8 && center == -1; z++)
+                    {
+                        center = subImageHandle(false,j,i,img,subImage,shd-20*z,contours,basePos[i-topPointy][j-topPointx]);
+                        qDebug()<<"reset Image,shd="<<(shd-20*z)<<",center="<<center;
+                        if (center >= 0)
+                            UpdateMask(topsub, leftsub,contours,center);
+                    }
+
+                    if (center == -1){
+                        subImageHandle(false,j,i,img,subImage,shd,contours,basePos[i-topPointy][j-topPointx]);
+                        for (size_t z = 0; z < contours.size(); z++){
+                            bool valid = true;
+                            for (size_t t = 0; t < contours[z].size(); t++)
+                            {
+                                if (contours[z][t].x == 0 || contours[z][t].x == subImage.cols - 1 || contours[z][t].y == 0 || contours[z][t].y == subImage.rows - 1)
+                                {
+                                    valid = false;
+                                    break;
+                                }
+                            }
+
+                            if (valid){
+                                double s = contourArea(contours[z]);                                
+                                if (s>600 && s<6000)
+                                {
+                                    if (center == -1)
+                                    {
+                                        GetCenter(contours[z],basePos[i-topPointy][j-topPointx]);
+                                        center = static_cast<int>(z);
+                                    }
+                                    else {
+                                        Point point;
+                                        GetCenter(contours[z],point);
+                                        if (abs(point.x - (subsize>>1))+abs(point.y - (subsize>>1)) < abs(basePos[i-topPointy][j-topPointx].x - (subsize>>1))+abs(basePos[i-topPointy][j-topPointx].y - (subsize>>1)))
+                                        {
+                                            center = static_cast<int>(z);
+                                            basePos[i-topPointy][j-topPointx].x = point.x;
+                                            basePos[i-topPointy][j-topPointx].y = point.y;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (center >=0){
+                            RotatedRect box = fitEllipse(contours[center]);
+                            EllipseMask(topsub,leftsub,contours[center]);
+                        }
+                    }
+                }
+                if (maskPos.at<uchar>(i-topPointy,j-topPointx) != 14){
+                    Mat submask1 = mask1(Rect(leftsub,topsub,subsize+1,subsize+1));
+                    Mat submask2 = mask2(Rect(leftsub,topsub,subsize+1,subsize+1));
+                    int value = getPosValue(img(Rect(leftsub,topsub,subsize+1,subsize+1)),submask1,submask2);
+                    posItem.push_back(maskPos.at<uchar>(i-topPointy,j-topPointx));
+                    posValue.push_back(value);
+                    //posValue.push_back(Vec2i(maskPos.at<uchar>(i-topPointy,j-topPointx),value));
+                    qDebug()<<"maskPos="<<maskPos.at<uchar>(i-topPointy,j-topPointx)<<",value="<<value;
+                }
             }
         }
     }
@@ -474,8 +542,7 @@ void ImageAnalysis::FindGrid(Mat img, int mpp, vector<int> &x, vector<int> &y){
         xnumber[i] = 0;
         for(int j = 0; j < h; j++)
             xnumber[i] += *(it + j*w + i);
-    }
-
+    }    
     FindPeaks(xnumber,w,mpp,x);
     FindPeaks(ynumber,h,mpp,y);
     qDebug()<<"xnumber:";
@@ -493,8 +560,7 @@ void ImageAnalysis::FindGrid(Mat img, int mpp, vector<int> &x, vector<int> &y){
             qDebug()<<i<<"- "<<y[i]<<","<<ynumber[y[i]]<<",Dy="<<(y[i]-y[i-1]);
         else
             qDebug()<<i<<"- "<<y[i]<<","<<ynumber[y[i]]<<",Dy="<<y[i];
-    }
-    qDebug()<<"findgrid:"<<*(it+w*y[8]+x[8]);
+    }    
 }
 
 void ImageAnalysis::SetMask(void *data, int maskType){    
@@ -510,8 +576,7 @@ void ImageAnalysis::SetMask(void *data, int maskType){
     }
 }
 
-int ImageAnalysis::SpotCal(int PosX, int PosY){
-    int value = 1;
+int ImageAnalysis::SpotCal(int PosX, int PosY){    
     int topsub = y[PosY+topPointy] - (subsize>>1);
     int bottom = y[PosY+topPointy] + (subsize>>1);
     int leftsub = x[PosX+topPointx] - (subsize>>1);
@@ -522,50 +587,11 @@ int ImageAnalysis::SpotCal(int PosX, int PosY){
         qDebug()<<"topsub="<<topsub<<",bottom="<<bottom<<",leftsub="<<leftsub<<"rightsub="<<rightsub;
         return 0;
     }
-    Mat subImage = Mat::zeros(subsize+1,subsize+1,firstImg.type());
-    subImageHandle(false,PosX+topPointx,PosY+topPointy,firstImg,subImage);
-
+    Mat subImage = Mat::zeros(subsize+1,subsize+1,firstImg.type());    
     vector<vector<Point>> contours;
-    vector<Vec4i> hi;
-    findContours(subImage,contours,hi,RETR_EXTERNAL,CHAIN_APPROX_NONE);
-
-    int center = -1;
     Point centerPoint;
-    for (size_t z = 0; z < contours.size(); z++)
-    {
-        bool valid = true;
-        for (size_t t = 0; t < contours[z].size(); t++)
-        {
-            if (contours[z][t].x == 0 || contours[z][t].x == subImage.cols - 1 || contours[z][t].y == 0 || contours[z][t].y == subImage.rows - 1)
-            {
-                valid = false;
-                floodFill(subImage,Point(contours[z][t].x,contours[z][t].y),Scalar(0));
-                break;
-            }
-        }
-        if (valid){
-            double s = contourArea(contours[z]);
-            double l = arcLength(contours[z],true);
-            if (s>600 && s<6000 && (4*3.14*s/l/l)>0.7)
-            {
-                if (center == -1)
-                {
-                    GetCenter(contours[z],centerPoint);
-                    center = static_cast<int>(z);
-                }
-                else {
-                    Point point;
-                    GetCenter(contours[z],point);
-                    if (abs(point.x - (subsize>>1))+abs(point.y - (subsize>>1)) < abs(centerPoint.x - (subsize>>1))+abs(centerPoint.y - (subsize>>1)))
-                    {
-                        center = static_cast<int>(z);
-                        centerPoint.x = point.x;
-                        centerPoint.y = point.y;
-                    }
-                }
-            }
-        }
-    }
+    int center = subImageHandle(false,PosX+topPointx,PosY+topPointy,firstImg,subImage,shd,contours,centerPoint);
+
     qDebug()<<"center:"<<center<<",x="<<centerPoint.x<<",y="<<centerPoint.y;
     if (center == -1 || abs(centerPoint.x - basePos[PosY][PosX].x)>20 || abs(centerPoint.y - basePos[PosY][PosX].y)>20)
     {
@@ -595,5 +621,7 @@ void ImageAnalysis::SetDebugPos(size_t x, size_t y)
     debugx = x;
     debugy = y;
     Mat subImage = Mat::zeros(subsize+1,subsize+1,firstImg.type());
-    subImageHandle(true,x,y,firstImg,subImage);
+    vector<vector<Point>> contours;
+    Point centerPoint;
+    subImageHandle(true,x,y,firstImg,subImage,thrsh,contours,centerPoint);
 }

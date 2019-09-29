@@ -136,11 +136,11 @@ Page {
 
     Component.onCompleted: {
         Sequence.sequenceDo(Sequence.Sequence_Test);
-        var newline = chartView.createSeries(ChartView.SeriesTypeLine,"lx");
-        newline.axisX = axisX;
-        newline.axisY = axisY;
-        newline.append(2,30);
-        newline.append(12,60);
+        //var newline = chartView.createSeries(ChartView.SeriesTypeLine,"lx");
+        //newline.axisX = axisX;
+        //newline.axisY = axisY;
+        //newline.append(2,30);
+        //newline.append(12,60);
     }
 
     Connections{
@@ -172,7 +172,6 @@ Page {
                 stackView.pop();
                 stackView.push("qrc:/HomeUI/Idle.qml");
             }
-
             console.log("TestProcessT.qml,result:"+result);
         }
 
@@ -187,7 +186,7 @@ Page {
                 chartView.removeAllSeries();
                 for (var i = 0; i < item.length; i++)
                 {
-                    chartView.createSeries(ChartView.SeriesTypeLine,ExGlobal.getPosName(item[i]));
+                    var newline =chartView.createSeries(ChartView.SeriesTypeLine,ExGlobal.getPosName(item[i]));
                     newline.axisX = axisX;
                     newline.axisY = axisY;
                 }
@@ -199,7 +198,6 @@ Page {
                     axisY.max = value[i] + 10;
                 chartView.series(i).append(index,value[i]);
             }
-
 
             console.log(index,item,value);
         }
