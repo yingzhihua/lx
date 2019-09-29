@@ -141,7 +141,10 @@ QByteArray ActionParser::ParamToByte(const QString &action, int value, int param
             data[12] = (ExGlobal::VDWorkX>>8)&0xFF;    //时序参数
             data[13] = ExGlobal::VDWorkX&0xFF;
             if (pumpSoftHomeX < 0)
+            {
                 pumpSoftHomeX = -pumpSoftHomeX;
+                data[11] = 0x06;
+            }
             data[14] = (pumpSoftHomeX>>8)&0xFF;
             data[15] = pumpSoftHomeX&0xFF;
         }
