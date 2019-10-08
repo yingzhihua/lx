@@ -85,16 +85,45 @@ Page {
         wrapMode: Text.Wrap
     }
 
+    Grid{
+        id: gridSerialSelect
+        anchors.horizontalCenter: chartView.horizontalCenter
+        anchors.top: parent.top
+        anchors.topMargin: 10
+        //anchors.left: mainAnaImage.right
+        //anchors.leftMargin: 1
+        columns:7
+        rowSpacing: 20
+        columnSpacing: 4
+
+        Repeater{
+            model: ["IC","IFA","IFB","RSV-A","RSV-B","ADV-1","ADV-2","PIV-1","PIV-2","PIV-3","PIV-4","MP","BP"]
+            CheckBox{
+                checked: true
+                text:modelData
+                objectName: "cb"
+                onCheckedChanged: {
+                    //console.log(this.text,this.checked,chartView.count);
+                    for (var i = 0; i < chartView.count; i++){
+                        if (this.text === chartView.series(i).name)
+                        chartView.series(i).visible = this.checked;
+                    }
+                }
+            }
+        }
+    }
+
     ChartView {
         id: chartView
         title: "实时测试曲线"
-        anchors.top: parent.top
+        anchors.top: gridSerialSelect.bottom
         anchors.topMargin: 10
         anchors.left: mainAnaImage.right
-        anchors.leftMargin: 1
+        anchors.leftMargin: 10
         height: 700
-        width: 900
-        legend.alignment: Qt.AlignTop
+        width: 860
+        legend.visible: false
+        //legend.alignment: Qt.AlignTop
         animationOptions: ChartView.SeriesAnimations
         antialiasing: true
 
@@ -111,6 +140,7 @@ Page {
             id:axisY
             min:0
             max:50
+            labelFormat: "%d"
         }
     }
 
@@ -189,6 +219,11 @@ Page {
                     var newline =chartView.createSeries(ChartView.SeriesTypeLine,ExGlobal.getPosName(item[i]));
                     newline.axisX = axisX;
                     newline.axisY = axisY;
+
+                    var list = gridSerialSelect.children;
+                    for (var ch in list)
+                        if (list[ch].objectName === "cb" && list[ch].text === newline.name)
+                            newline.visible = list[ch].checked;
                 }
             }
 
@@ -196,7 +231,7 @@ Page {
             {
                 if (value[i] > axisY.max - 10)
                     axisY.max = value[i] + 10;
-                chartView.series(i).append(index,value[i]);
+                chartView.series(i).append(index,value[i]);                
             }
 
             console.log(index,item,value);
