@@ -238,7 +238,7 @@ int ImageAnalysis::subImageHandle(bool debug, size_t posX, size_t posY, Mat &img
         if (valid){
             double s = contourArea(contours[z]);
             double l = arcLength(contours[z],true);
-            if (s>600 && s<6000 && (4*3.14*s/l/l)>0.5)
+            if (s>600 && s<6000 && (4*3.14*s/l/l)>0.7)
             {
                 if (center == -1)
                 {
@@ -408,10 +408,18 @@ void ImageAnalysis::SpotMask(Mat &img, Mat &mask1, Mat &mask2, vector<int> &x, v
                 if (basePos[i-topPointy][j-topPointx].x == 0){
                     vector<vector<Point>> contours;
                     int center = -1;
-                    for (int z = 1; z < 8 && center == -1; z++)
+                    for (int z = 1; z < 7 && center == -1; z++)
                     {
                         center = subImageHandle(false,j,i,img,subImage,shd-20*z,contours,basePos[i-topPointy][j-topPointx]);
                         qDebug()<<"reset Image,shd="<<(shd-20*z)<<",center="<<center;
+                        if (center >= 0)
+                            UpdateMask(topsub, leftsub,contours,center);
+                    }
+
+                    for (int z = 1; z < 3 && center == -1; z++)
+                    {
+                        center = subImageHandle(false,j,i,img,subImage,shd+20*z,contours,basePos[i-topPointy][j-topPointx]);
+                        qDebug()<<"reset Image,shd="<<(shd+20*z)<<",center="<<center;
                         if (center >= 0)
                             UpdateMask(topsub, leftsub,contours,center);
                     }

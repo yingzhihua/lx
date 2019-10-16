@@ -26,7 +26,8 @@ SOURCES += \
     module/v4l.cpp \
     main.cpp \   
     module/dao/usermgr.cpp \
-    module/qrcoder.cpp
+    module/qrcoder.cpp \
+    module/dao/testmgr.cpp
 
 RESOURCES += qml.qrc
 
@@ -57,7 +58,8 @@ HEADERS += \
     module/entity/User.h \
     module/dao/usermgr.h \
     module/qrcoder.h \
-    module/entity.h
+    module/entity.h \
+    module/dao/testmgr.h
 
 if(contains(DEFINES,PLUTFORM_ARM)){
 INCLUDEPATH += /opt/opencv-4.1.1/include \

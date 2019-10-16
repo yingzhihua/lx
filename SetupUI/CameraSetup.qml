@@ -77,6 +77,16 @@ Page {
         font.pixelSize: 30
         onClicked: Sequence.actionDo("Light",1,0,0,0)
     }
+
+    Button{
+        id:capture
+        anchors.left: closeLight.right
+        anchors.leftMargin: 50
+        anchors.verticalCenter: startView.verticalCenter
+        text: qsTr("拍照")
+        font.pixelSize: 30
+        onClicked: Sequence.saveView()
+    }
     Text {
         id: lbabs
         text: qsTr("曝光时间:")

@@ -288,9 +288,15 @@ void Sequence::FinishSequence()
         emit sequenceFinish(SequenceResult::Result_SelfCheck_ok);
     }
     else if(currSequenceId == SequenceId::Sequence_CloseBox)
+    {
+        bDoorState = false;
         emit sequenceFinish(SequenceResult::Result_CloseBox_ok);
+    }
     else if(currSequenceId == SequenceId::Sequence_OpenBox)
+    {
+        bDoorState = true;
         emit sequenceFinish(SequenceResult::Result_OpenBox_ok);
+    }
     else if(currSequenceId == SequenceId::Sequence_CannelTest)
         emit sequenceFinish(SequenceResult::Result_CannelTest_ok);
     else if(currSequenceId == SequenceId::Sequence_Test)
@@ -648,6 +654,18 @@ bool Sequence::startView(int id){
 
 bool Sequence::stopView(){
     imageCapture->stop_capturing();
+    return true;
+}
+
+bool Sequence::saveView(){
+    QDir dir(QCoreApplication::applicationDirPath());
+    QStringList filter;
+    filter<<QString("tmp*.bmp");
+    dir.setNameFilters(filter);
+    QFileInfoList fileList = dir.entryInfoList();
+    char filenames[100] = {0};
+    sprintf(filenames,"%s/tmp%d.bmp",QCoreApplication::applicationDirPath().toLatin1().data(),fileList.count()+1);
+    imageProvider->img.save(filenames);
     return true;
 }
 

@@ -150,6 +150,7 @@ ImageCapture::ImageCapture(QObject *parent) : QThread(parent),io(IO_METHOD_MMAP)
 
     if (init_device() != 0)
         return;
+
     camerainited = true;
     captureMode = CaptureMode::Idle;
 }

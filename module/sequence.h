@@ -78,6 +78,7 @@ public:
 
     Q_INVOKABLE bool startView(int id);
     Q_INVOKABLE bool stopView();
+    Q_INVOKABLE bool saveView();
     Q_INVOKABLE void lxDebug();
     Q_INVOKABLE void showAnaImg(int type,int light);
     Q_INVOKABLE void qrSet(bool bopenlight, bool scale, bool handlimage, int bin,int pox);

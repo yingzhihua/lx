@@ -18,7 +18,8 @@ Page {
             anchors.fill: parent
             onClicked: {
                 console.log("openDoor,status:"+bDoorIsOpen);
-                if (bDoorIsOpen == false)
+                //if (bDoorIsOpen == false)
+                if (Sequence.door == false)
                 {
                     if (Sequence.sequenceDo(Sequence.Sequence_OpenBox))
                     {
@@ -132,7 +133,7 @@ Page {
         Sequence.actionDo("Query",3,0,0,0);
         bDoorIsOpen = Sequence.door;
         //*
-        if (bDoorIsOpen)
+        if (Sequence.door)
             updateState.start();
         else
             updateState.stop();
@@ -178,7 +179,7 @@ Page {
         }
         onDoorStateChanged:{
             bDoorIsOpen = Sequence.door;
-            if (bDoorIsOpen)
+            if (Sequence.door)
                 updateState.start();
             else
                 updateState.stop();
