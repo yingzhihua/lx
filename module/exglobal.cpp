@@ -16,7 +16,7 @@ bool ExGlobal::test = false;
 QString ExGlobal::t_sysName = "样机02";
 int ExGlobal::t_sysLanguageCode = 1;
 
-QString ExGlobal::t_version = "V1.13";
+QString ExGlobal::t_version = "V2.01";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
@@ -51,6 +51,8 @@ int ExGlobal::CamFocus = 0;
 int ExGlobal::PumpSoftHomeX = 0;
 int ExGlobal::PumpToolHomeX = 0;
 int ExGlobal::PumpSoftHomeOffset = 0;
+
+static QMap<int, QString> AssayItem;
 
 ExGlobal::ExGlobal(QObject *parent) : QObject(parent)
 {
@@ -111,6 +113,16 @@ void ExGlobal::CaliParamInit()
     {
         SetCaliParam(query.value(0).toString(),query.value(1).toInt());
     }
+
+    sql = "select * from AssayItem order by Itemid";
+    query = sqlitemgrinstance->select(sql);
+    while(query.next()){
+        qDebug()<<"Itemid:"<<query.value(0).toInt()<<"ItemName:"<<query.value(1).toString();
+        AssayItem[query.value(0).toInt()] = query.value(1).toString();
+    }
+
+    if (AssayItem.count() > 0)
+        qDebug()<<"Itemid = 0"<<",ItemName:"<<AssayItem[0];
 }
 
 void ExGlobal::SetCaliParam(const QString &name, int caliValue)
