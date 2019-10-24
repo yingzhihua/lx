@@ -5,7 +5,7 @@
 #include "actionparser.h"
 #include "log.h"
 #include "imageanalysis.h"
-
+#include "sqlitemgr.h"
 
 static QDomDocument doc;
 static char currOrder = 0;
@@ -30,6 +30,8 @@ Sequence::Sequence(QObject *parent) : QObject(parent)
     connect(imageCapture,&ImageCapture::finishCapture,this,&Sequence::ActionFinish);
     connect(imageCapture,&ImageCapture::reView,this,&Sequence::CameraView);
 
+    testMgr = new TestMgr();
+
     qr = new QRcoder();
     connect(qr,&QRcoder::finishQRcode,this,&Sequence::ActionFinish);
 
@@ -38,12 +40,21 @@ Sequence::Sequence(QObject *parent) : QObject(parent)
 
     //actionDo("Sensor",0,0,0);
     serialMgr->serialWrite(ActionParser::ParamToByte("AutoData",1,0,0,0));
-    ReadMask(QCoreApplication::applicationDirPath()+"/pos");
+    //ReadMask(QCoreApplication::applicationDirPath()+"/pos");
+    //imageAna->SetMask(ExGlobal::getReagentBox("201"),0);
+
+#if 0
+    qDebug()<<"startTrans:"<<sqlitemgrinstance->StartTransations();
+    testMgr->TestCreate("123456","201");
+    for (int i = 0; i < 121; i++)
+        testMgr->InsertData(i,5,1,120+i);
+    qDebug()<<"endTrans:"<<sqlitemgrinstance->EndTransations();
+#endif
 }
 
-bool Sequence::sequenceInit(){
+bool Sequence::sequenceInit(){    
     if (!ReadTestProcess(QCoreApplication::applicationDirPath()+"/FLASHDXcn"))    
-        return false;    
+        return false;
     return true;
 }
 
@@ -97,6 +108,10 @@ bool Sequence::sequenceDo(SequenceId id)
                 Log::setDir(QCoreApplication::applicationDirPath()+"/"+current_time_str);
                 imageCapture->start_capturing(ImageCapture::CaptureMode::Capture);                
                 ExGlobal::setPanelName(sequenceAction.attribute("PanelName"));
+
+                ExGlobal::setReagentBox("201");
+                imageAna->SetMask(ExGlobal::getReagentBox(),0);
+                testMgr->TestCreate("12345",ExGlobal::reagentBox());
                 break;
             }
         }
@@ -218,7 +233,14 @@ void Sequence::ActionFinish(QByteArray data)
                 emit callQmlRefeshAnaMainImg();
                 QVector<int> item = imageAna->getItem();
                 QVector<int> value = imageAna->getValue();
+                QVector<int> posIndex = imageAna->getIndex();
                 emit callQmlRefeshData(currCameraCycle,item,value);
+
+                sqlitemgrinstance->StartTransations();
+                for(int i = 0; i < item.size(); i++){
+                    testMgr->InsertData(posIndex[i],item[i],currCameraCycle,value[i]);
+                }
+                sqlitemgrinstance->EndTransations();
 
                 //*
                 QString saveStr;
@@ -709,6 +731,7 @@ void Sequence::lxDebug(){
     //QRcoder::QRDecode();
     //emit callQmlRefeshData(data);
     //qr->saveFrame();
+    //ExGlobal::addTest();
 }
 
 void Sequence::showAnaImg(int type, int light){

@@ -11,6 +11,7 @@
 #include "imageanalysis.h"
 #include "entity.h"
 #include "qrcoder.h"
+#include "dao/testmgr.h"
 
 class Sequence : public QObject
 {
@@ -126,6 +127,7 @@ private:
     QString message;
     SerialMgr *serialMgr;
     ImageCapture *imageCapture;
+    TestMgr *testMgr;
     bool bFinishAction;
     TimeState durationState;
     int nDuration;

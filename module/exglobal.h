@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QQmlEngine>
+#include "dao/testmodel.h"
 
 class ExGlobal : public QObject
 {
@@ -35,6 +36,8 @@ public:
     static void setSampleCode(const QString &sampleCode){t_sampleCode = sampleCode;}
     static QString sampleInfo(){return t_sampleInfo;}
     static void setSampleInfo(const QString &sampleInfo){t_sampleInfo = sampleInfo;}
+    static QString reagentBox(){return t_ReagentBox;}
+    static void setReagentBox(const QString &reagentBoxType){t_ReagentBox = reagentBoxType;}
     static QStringList serialPort();
     static bool isDebug(){return test;}
     static void setDebug(bool debug){test = debug;}
@@ -47,6 +50,8 @@ public:
     static void settempversion(const QString &version){temp_version = version;}
     static void setctrlversion(const QString &version){ctrl_version = version;}
 
+    static uchar* getReagentBox();
+    static void addTest();
     Q_INVOKABLE static void updateCaliParam(const QString &caliName, int caliValue);
     Q_INVOKABLE static int getCaliParam(const QString &caliName);
     Q_INVOKABLE static QString getIP();
@@ -83,7 +88,7 @@ public:
     static int CamAbs;
     static int CamGain;
     static int CamFocus;
-
+    static TestModel *pTestModel;
 signals:
     void userChanged();
     void panelNameChanged();
@@ -105,6 +110,7 @@ private:
     static QString t_sampleCode;
     static QString t_sampleInfo;
     static QString t_user;
+    static QString t_ReagentBox;
     static bool test;
 
     static QString t_sysName;

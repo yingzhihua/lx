@@ -144,7 +144,7 @@ static int convert_yuv_to_2y_buffer(unsigned char *yuv, unsigned short *rgb, uns
 ImageCapture::ImageCapture(QObject *parent) : QThread(parent),io(IO_METHOD_MMAP),count(1)
 {    
     filename = "undefine";
-
+//return;
     if (open_device() != 0)
         return;
 
@@ -211,6 +211,7 @@ int ImageCapture::init_device(){
         Log::LogCam("open_device,dev does not support streaming io, return -1");
         return -1;
     }
+    //set frame rat
 #if 0
     CLEAR(streamparam);
     streamparam.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -354,6 +355,8 @@ int ImageCapture::init_device(){
         qDebug()<<"query ABSOLUTE:max="<<setting.maximum<<",min="<<setting.minimum<<",step="<<setting.step<<",default="<<setting.default_value;
         Log::LogCam(QString("init_device,query ABSOLUTE:max=%1,min=%2,step=%3,default=%4").arg(setting.maximum).arg(setting.minimum).arg(setting.step).arg(setting.default_value));
     }
+
+    //set ABSOLUTE
 #if 1
     ctrl.id = V4L2_CID_EXPOSURE_ABSOLUTE;
     ctrl.value = ExGlobal::CamAbs;
@@ -376,6 +379,8 @@ int ImageCapture::init_device(){
     }
 #endif
 
+    //set GAIN
+#if 1
     setting.id = V4L2_CID_GAIN;
     if (-1 == xioctl(fd,VIDIOC_QUERYCTRL,&setting))
     {
@@ -406,6 +411,7 @@ int ImageCapture::init_device(){
         qDebug()<<"Get GAIN:"<<ctrl.value;
         Log::LogCam(QString("init_device,Get GAIN:%1").arg(ctrl.value));
     }
+#endif
 
 #endif
 
@@ -517,7 +523,7 @@ int ImageCapture::start_capturing(CaptureMode mode)
             buf.index = i;
             if (-1 == xioctl(fd, VIDIOC_QBUF,&buf))
             {
-                qDebug()<<"VIDIOC_QBUF error,return";
+                qDebug()<<"start_capturing,VIDIOC_QBUF error,return -1";
                 Log::LogCam("start_capturing,VIDIOC_QBUF error,return -1");
                 return -1;
             }
@@ -525,7 +531,7 @@ int ImageCapture::start_capturing(CaptureMode mode)
 
         if (-1 == xioctl(fd, VIDIOC_STREAMON, &type))
         {
-            qDebug()<<"VIDIOC_STREAMON error,return";
+            qDebug()<<"start_capturing,VIDIOC_STREAMON error,return -1";
             Log::LogCam("start_capturing,VIDIOC_STREAMON error,return -1");
             return -1;
         }
@@ -738,7 +744,8 @@ void ImageCapture::run()
     if (camerainited == false)
         return;
 
-    clear_frame();
+    //if (captureMode == CaptureMode::Capture)
+        clear_frame();
 
     for (int i = 1; i <= count; i++)
     {
@@ -750,7 +757,7 @@ void ImageCapture::run()
         mutex.lock();
         FD_ZERO(&fds);
         FD_SET(fd,&fds);
-        tv.tv_sec = 20;
+        tv.tv_sec = 40;
         tv.tv_usec = 0;
         r = select(fd+1,&fds,NULL,NULL,&tv);
         if (-1 == r){

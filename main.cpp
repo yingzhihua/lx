@@ -1,6 +1,7 @@
 //#include <QGuiApplication>
 #include <QApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
 #include <QFont>
 
 #include "module/sqlitemgr.h"
@@ -8,6 +9,8 @@
 #include "module/sequence.h"
 #include "module/log.h"
 #include "module/dao/usermgr.h"
+
+#include "module/dao/testmodel.h"
 
 int main(int argc, char *argv[])
 {
@@ -22,6 +25,7 @@ int main(int argc, char *argv[])
     app.setFont(font);
 
     sqlitemgrinstance = new SqliteMgr();
+    ExGlobal::pTestModel = new TestModel();
     sqlitemgrinstance->conn(Log::getDir()+"/data.db","sa","123456");
     //init dao manager
     //sqlitemgrinstance->init();
@@ -37,8 +41,12 @@ int main(int argc, char *argv[])
     qmlRegisterSingletonType<UserMgr>("Dx.UserMgr",1,0,"UserMgr",usermgr_provider);
 
     QQmlApplicationEngine engine;
+
+    engine.rootContext()->setContextProperty("testModel",ExGlobal::pTestModel);
+
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     engine.addImageProvider("CodeImg",sequence->imageProvider);
+
     if (engine.rootObjects().isEmpty())
         return -1;
 

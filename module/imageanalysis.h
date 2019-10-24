@@ -24,6 +24,7 @@ public:
     void SetDebugPos(size_t x, size_t y);
     QVector<int> getItem(){return posItem;}
     QVector<int> getValue(){return posValue;}
+    QVector<int> getIndex(){return posIndex;}
     int getImageCount(){return imageCount;}
 
     int thrsh = 170;
@@ -40,9 +41,11 @@ private:
     int topPointx = 0;
     int topPointy = 0;
     Mat firstImg,mask1,mask2,maskPos;
-    Point **basePos;
+    //Point **basePos;
+    Point basePos[11][11];
     vector<int> x,y;
-    QVector<int> posItem,posValue;
+    QVector<int> posItem,posValue,posIndex;
+
     void SpotMask(Mat &img, Mat &mask1, Mat &mask2,std::vector<int>& x,std::vector<int>& y,int subsize,int d1, int d2);
     void FindPeaks(int *number, int numberLen, int mpp, std::vector<int>& pos);
     void FindGrid(Mat img, int mpp, std::vector<int>& x, std::vector<int>& y);

@@ -199,6 +199,7 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
+        //console.log("lx-model:"+testModel.rowCount());
     }
 
     onWaitMsgChanged: {

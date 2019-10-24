@@ -29,6 +29,8 @@ void QRcoder::run(){
     }
     cap.set(CAP_PROP_FRAME_WIDTH,1920);
     cap.set(CAP_PROP_FRAME_HEIGHT,1080);
+    //cap.set(CAP_PROP_FRAME_WIDTH,2592);
+    //cap.set(CAP_PROP_FRAME_HEIGHT,1944);
     cap.set(CAP_PROP_AUTO_EXPOSURE,1);
     cap.set(CAP_PROP_EXPOSURE,poxValue);
     qDebug()<<"width:"<<cap.get(CAP_PROP_FRAME_WIDTH)<<" height:"<<cap.get(CAP_PROP_FRAME_HEIGHT)<<" Frame:"<<cap.get(CAP_PROP_FPS)<<" auto_expoure:"<<cap.get(CAP_PROP_AUTO_EXPOSURE)<<" exp:"<<cap.get(CAP_PROP_EXPOSURE);

@@ -10,7 +10,8 @@ QString ExGlobal::t_panelCode = "012315";
 QString ExGlobal::t_panelName = "上呼吸道测试";
 QString ExGlobal::t_sampleCode = "SLX 01079";
 QString ExGlobal::t_sampleInfo = "华山11";
-QString ExGlobal::t_user = "";
+QString ExGlobal::t_user = "user";
+QString ExGlobal::t_ReagentBox = "201";
 bool ExGlobal::test = false;
 
 QString ExGlobal::t_sysName = "样机02";
@@ -53,10 +54,12 @@ int ExGlobal::PumpToolHomeX = 0;
 int ExGlobal::PumpSoftHomeOffset = 0;
 
 static QMap<int, QString> AssayItem;
-
+static uchar ReagentBox[121];
+static int ReagentBoxCode = 201;
+TestModel * ExGlobal::pTestModel = nullptr;
 ExGlobal::ExGlobal(QObject *parent) : QObject(parent)
 {
-    //qDebug()<<"ExGlobal";
+    //qDebug()<<"ExGlobal";    
 }
 
 static QString getWMIC(const QString &cmd){
@@ -121,10 +124,32 @@ void ExGlobal::CaliParamInit()
         AssayItem[query.value(0).toInt()] = query.value(1).toString();
     }
 
-    if (AssayItem.count() > 0)
-        qDebug()<<"Itemid = 0"<<",ItemName:"<<AssayItem[0];
+    sql = "select * from PanelTest";
+    query = sqlitemgrinstance->select(sql);
+    while(query.next()){
+        Test test;
+        test.Testid = query.value(0).toInt();
+        test.PanelCode = query.value(1).toString();
+        test.SerialNo = query.value(2).toString();
+        test.TestTime = query.value(4).toString();
+        test.SampleInfo = query.value(5).toString();
+        test.User = query.value(6).toString();
+        test.ResultType = query.value(7).toInt();
+        pTestModel->AddTest(test);
+    }
 }
 
+uchar* ExGlobal::getReagentBox(){
+    QString sql = "SELECT * FROM ReagentPos where BoxCode='"+t_ReagentBox+"'";
+    QSqlQuery query = sqlitemgrinstance->select(sql);
+    memset(ReagentBox,0,sizeof(ReagentBox));
+    while(query.next()){
+        if (query.value(1).toInt() < 121)
+            ReagentBox[query.value(1).toInt()] = static_cast<uchar>(query.value(2).toInt());
+
+    }
+    return ReagentBox;
+}
 void ExGlobal::SetCaliParam(const QString &name, int caliValue)
 {
     if (name == "V1WorkX")
@@ -283,33 +308,21 @@ QStringList ExGlobal::serialPort(){
 
 
 QString ExGlobal::getPosName(int pos){
-    QString name = "Ortho";
-    if (pos == 1)
-        name = "IC";
-    else if(pos == 2)
-        name = "IFA";
-    else if(pos == 3)
-        name = "IFB";
-    else if(pos == 4)
-        name = "RSV-A";
-    else if(pos == 5)
-        name = "RSV-B";
-    else if(pos == 6)
-        name = "ADV-1";
-    else if(pos == 7)
-        name = "ADV-2";
-    else if(pos == 8)
-        name = "PIV-1";
-    else if(pos == 9)
-        name = "PIV-2";
-    else if(pos == 10)
-        name = "PIV-3";
-    else if(pos == 11)
-        name = "PIV-4";
-    else if(pos == 12)
-        name = "MP";
-    else if(pos == 13)
-        name = "BP";
-    return name;
+    return AssayItem[pos];
 }
 
+void ExGlobal::addTest(){
+    QString sql = "select * from PanelTest";
+    QSqlQuery query = sqlitemgrinstance->select(sql);
+    while(query.next()){
+        Test test;
+        test.Testid = query.value(0).toInt();
+        test.PanelCode = query.value(1).toString();
+        test.SerialNo = query.value(2).toString();
+        test.TestTime = query.value(4).toString();
+        test.SampleInfo = query.value(5).toString();
+        test.User = query.value(6).toString();
+        test.ResultType = query.value(7).toInt();
+        pTestModel->AddTest(test);
+    }
+}

@@ -28,7 +28,8 @@ public:
 
     Q_INVOKABLE bool clear(QString tableName);
 
-
+    bool StartTransations();
+    bool EndTransations();
 
 public slots:
 

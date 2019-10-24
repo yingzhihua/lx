@@ -5,19 +5,34 @@ Page {
     property string titlemsg: qsTr("历史数据")
     id: data_page
 
-    ListModel{
-        id:dataModel
-        ListElement{dataTime:"12:01:01";dataDate:"2019/04/17";dataCode:"SLX 01079";dataInfo:"小明"}
-        ListElement{dataTime:"13:05:01";dataDate:"2019/04/17";dataCode:"SLX 01079";dataInfo:"小红"}
-        ListElement{dataTime:"14:06:01";dataDate:"2019/04/17";dataCode:"SLX 01079";dataInfo:"校长"}
-        ListElement{dataTime:"12:01:01";dataDate:"2019/04/17";dataCode:"SLX 01079";dataInfo:"张小明"}
-        ListElement{dataTime:"14:06:01";dataDate:"2019/04/17";dataCode:"SLX 01079";dataInfo:"林校长"}
-        ListElement{dataTime:"12:01:01";dataDate:"2019/04/17";dataCode:"SLX 01079";dataInfo:"小明"}
-        ListElement{dataTime:"13:05:01";dataDate:"2019/04/17";dataCode:"SLX 01079";dataInfo:"小红"}
-        ListElement{dataTime:"14:06:01";dataDate:"2019/04/17";dataCode:"SLX 01079";dataInfo:"校长"}
-        ListElement{dataTime:"12:01:01";dataDate:"2019/04/17";dataCode:"SLX 01079";dataInfo:"张小明"}
+    ListView{
+        id:listView
+        anchors.fill: parent
+        spacing: 0
+        model:testModel
+        delegate: Rectangle{
+            width:listView.width
+            height:60
+            color: (model.index%2 == 1)?"darkgrey":"#ffffff"
+            Row{
+                anchors.fill: parent
+                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:200;text:Testid}
+                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:300;text:PanelCode}
+                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:300;text:SerialNo}
+                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:300;text:SampleInfo}
+                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:400;text:TestTime}
+                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:300;text:User}
+            }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    console.log("click:"+index);
+                }
+            }
+        }
     }
 
+/*
     Column{
         Repeater{
             model: dataModel
@@ -48,6 +63,10 @@ Page {
             }
         }
     }
-
+    */
+    Component.onCompleted: {
+        //console.log("data-model:"+testModel.rowCount());
+        //console.log("data-dt:"+testModel[0].dt);
+    }
     onTitlemsgChanged: headerMsg.text = titlemsg;
 }

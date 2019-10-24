@@ -122,6 +122,20 @@ bool SqliteMgr::close()
     }
 }
 
+bool SqliteMgr::StartTransations(){
+    if (QSqlDatabase::database().transaction())
+        return true;
+    return false;
+}
+
+bool SqliteMgr::EndTransations(){
+    if (!QSqlDatabase::database().commit()){
+        QSqlDatabase::database().rollback();
+        return false;
+    }
+    return true;
+}
+
 bool SqliteMgr::init()
 {
     qDebug()<<"sqlite init: " + path+ " "+ userName +" "+password;

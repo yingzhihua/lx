@@ -146,7 +146,8 @@ void ImageAnalysis::AddImage(void *data, int imageType){
         return;
     imageCount++;
     posValue.clear();
-    posItem.clear();    
+    posItem.clear();
+    posIndex.clear();
     if (imageType == 0)
         flip(Mat(1944,2592,CV_8U,data),firstImg,0);
         //Mat(1944,2592,CV_8U,data).copyTo(firstImg);
@@ -156,10 +157,11 @@ void ImageAnalysis::AddImage(void *data, int imageType){
     {
         for (int i = 0; i < gridCols; i++)
         {
-            if (maskPos.at<uchar>(j,i) != 0 && maskPos.at<uchar>(j,i) != 14){
+            if (maskPos.at<uchar>(j,i) != 0 && maskPos.at<uchar>(j,i) != 1){
                 int value = SpotCal(i,j);
                 posItem.push_back(maskPos.at<uchar>(j,i));
-                posValue.push_back(value);                
+                posValue.push_back(value);
+                posIndex.push_back(j*gridCols+i);
                 qDebug()<<"AddImage,maskPos="<<maskPos.at<uchar>(j,i)<<",value="<<value;
             }
         }
@@ -576,9 +578,9 @@ void ImageAnalysis::SetMask(void *data, int maskType){
         gridRows = 11;
         gridCols = 11;
         maskPos = Mat::zeros(11,11,CV_8UC1);
-        basePos = new Point*[11];
-        for (int i = 0; i < 11; i++)
-            basePos[i] = new Point[11];
+        //basePos = new Point*[11];
+        //for (int i = 0; i < 11; i++)
+        //    basePos[i] = new Point[11];
         memcpy(maskPos.data,data,121);
         cout<<maskPos<<endl;        
     }
