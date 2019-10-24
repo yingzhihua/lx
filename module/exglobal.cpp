@@ -53,27 +53,15 @@ int ExGlobal::PumpSoftHomeX = 0;
 int ExGlobal::PumpToolHomeX = 0;
 int ExGlobal::PumpSoftHomeOffset = 0;
 
-static QMap<int, QString> AssayItem;
 static uchar ReagentBox[121];
-static int ReagentBoxCode = 201;
 TestModel * ExGlobal::pTestModel = nullptr;
+TestResultModel * ExGlobal::pTestResultModel = nullptr;
+
+QHash<int, QByteArray> ExGlobal::AssayItem;
+
 ExGlobal::ExGlobal(QObject *parent) : QObject(parent)
 {
     //qDebug()<<"ExGlobal";    
-}
-
-static QString getWMIC(const QString &cmd){
-    //cpu name: wmic cpu get Name
-    QProcess p;
-    p.start(cmd);
-    p.waitForFinished();
-    QString result = QString::fromLocal8Bit(p.readAllStandardOutput());
-    QStringList list = cmd.split(" ");
-    result = result.remove(list.last(),Qt::CaseInsensitive);
-    result = result.replace("\r","");
-    result = result.replace("\n","");
-    result = result.simplified();
-    return result;
 }
 
 void ExGlobal::exClose(){
@@ -121,7 +109,7 @@ void ExGlobal::CaliParamInit()
     query = sqlitemgrinstance->select(sql);
     while(query.next()){
         qDebug()<<"Itemid:"<<query.value(0).toInt()<<"ItemName:"<<query.value(1).toString();
-        AssayItem[query.value(0).toInt()] = query.value(1).toString();
+        AssayItem[query.value(0).toInt()] = query.value(1).toString().toLatin1();
     }
 
     sql = "select * from PanelTest";

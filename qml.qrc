@@ -30,5 +30,13 @@
         <file>image/openDoor.png</file>
         <file>image/quit.png</file>
         <file>image/start.png</file>
+        <file>DataUI/DataMenu.qml</file>
+        <file>DataUI/DataView.qml</file>
+        <file>DataUI/DataLine.qml</file>
+        <file>image/Negative.png</file>
+        <file>image/Positive.png</file>
+        <file>image/Print.png</file>
+        <file>image/Undefined.png</file>
+        <file>image/Valid.png</file>
     </qresource>
 </RCC>

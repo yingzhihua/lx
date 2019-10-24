@@ -42,12 +42,15 @@ public:
     int rowCount(const QModelIndex & parent = QModelIndex()) const;
     QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
     void AddTest(const Test &test);
+    Q_INVOKABLE void setCurrItem(int ItemIndex);
+
 protected:
     QHash<int, QByteArray> roleNames() const;
 
 private:
     QList<Test> m_display_list;
     QHash<int, QByteArray> roles;
+    int currTestid;
 };
 
 #endif // TESTMODEL_H

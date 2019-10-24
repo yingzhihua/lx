@@ -32,7 +32,6 @@ Page {
             testCompleted.width = testprocess*headerRec.width/1000;
             testunCompleted.x = testCompleted.width;
             testunCompleted.width = (1000-testprocess)*headerRec.width/1000;
-
         }
     }
 }

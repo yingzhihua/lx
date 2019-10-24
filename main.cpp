@@ -11,6 +11,7 @@
 #include "module/dao/usermgr.h"
 
 #include "module/dao/testmodel.h"
+#include "module/dao/testresultmodel.h"
 
 int main(int argc, char *argv[])
 {
@@ -26,6 +27,8 @@ int main(int argc, char *argv[])
 
     sqlitemgrinstance = new SqliteMgr();
     ExGlobal::pTestModel = new TestModel();
+    ExGlobal::pTestResultModel = new TestResultModel();
+
     sqlitemgrinstance->conn(Log::getDir()+"/data.db","sa","123456");
     //init dao manager
     //sqlitemgrinstance->init();

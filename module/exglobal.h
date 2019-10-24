@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QQmlEngine>
 #include "dao/testmodel.h"
+#include "dao/testresultmodel.h"
 
 class ExGlobal : public QObject
 {
@@ -89,6 +90,8 @@ public:
     static int CamGain;
     static int CamFocus;
     static TestModel *pTestModel;
+    static TestResultModel *pTestResultModel;
+    static QHash<int, QByteArray> AssayItem;
 signals:
     void userChanged();
     void panelNameChanged();
