@@ -46,6 +46,7 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
 
     engine.rootContext()->setContextProperty("testModel",ExGlobal::pTestModel);
+    engine.rootContext()->setContextProperty("testResultModel",ExGlobal::pTestResultModel);
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     engine.addImageProvider("CodeImg",sequence->imageProvider);

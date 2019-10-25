@@ -27,7 +27,7 @@ Rectangle {
                 anchors.fill: parent
                 onClicked: {
                     console.log("click:"+index);
-                    testModel.setCurrItem(index);
+                    testModel.setCurrTest(index);
                     dataView.push("qrc:/DataUI/DataView.qml");
                 }
             }

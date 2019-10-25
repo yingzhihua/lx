@@ -268,9 +268,11 @@ int ImageAnalysis::subImageHandle(bool debug, size_t posX, size_t posY, Mat &img
 
         for (size_t z = 0; z < contours.size(); z++)
         {
-            RotatedRect box = fitEllipse(contours[z]);
-            qDebug()<<"box:width="<<box.size.width<<",height="<<box.size.height;
-            ellipse(subimg,box,Scalar(120),-1);
+            if (contours[z].size()>10){
+                RotatedRect box = fitEllipse(contours[z]);
+                qDebug()<<"box:width="<<box.size.width<<",height="<<box.size.height;
+                ellipse(subimg,box,Scalar(120),-1);
+            }
         }
 
         namedWindow("fitEllipse Image",0);
@@ -440,8 +442,9 @@ void ImageAnalysis::SpotMask(Mat &img, Mat &mask1, Mat &mask2, vector<int> &x, v
                             }
 
                             if (valid){
-                                double s = contourArea(contours[z]);                                
-                                if (s>600 && s<6000)
+                                double s = contourArea(contours[z]);
+                                qDebug()<<"\tellipse mask,s="<<s<<",z="<<z<<",contours[z].size="<<contours[z].size();
+                                if (s>600 && s<6000 && contours[z].size()>10)
                                 {
                                     if (center == -1)
                                     {
@@ -591,7 +594,9 @@ int ImageAnalysis::SpotCal(int PosX, int PosY){
     int bottom = y[PosY+topPointy] + (subsize>>1);
     int leftsub = x[PosX+topPointx] - (subsize>>1);
     int rightsub = x[PosX+topPointx] + (subsize>>1);
-    qDebug()<<"SpotCal,(x,y)="<<PosX<<","<<PosY<<" basePos:"<<basePos[PosY][PosX].x<<","<<basePos[PosY][PosX].y<<"\ttop:"<<topsub<<",left:"<<leftsub<<",bottom:"<<bottom<<",right:"<<rightsub;
+
+    if (PosY+topPointy == debugy && PosX+topPointx == debugx)
+        qDebug()<<"SpotCal,(x,y)="<<PosX<<","<<PosY<<" basePos:"<<basePos[PosY][PosX].x<<","<<basePos[PosY][PosX].y<<"\ttop:"<<topsub<<",left:"<<leftsub<<",bottom:"<<bottom<<",right:"<<rightsub;
     if (topsub < 0 || bottom >= firstImg.rows || leftsub < 0 || rightsub >= firstImg.cols)
     {
         qDebug()<<"topsub="<<topsub<<",bottom="<<bottom<<",leftsub="<<leftsub<<"rightsub="<<rightsub;
@@ -602,7 +607,8 @@ int ImageAnalysis::SpotCal(int PosX, int PosY){
     Point centerPoint;
     int center = subImageHandle(false,PosX+topPointx,PosY+topPointy,firstImg,subImage,shd,contours,centerPoint);
 
-    qDebug()<<"center:"<<center<<",x="<<centerPoint.x<<",y="<<centerPoint.y;
+    if (PosY+topPointy == debugy && PosX+topPointx == debugx)
+        qDebug()<<"center:"<<center<<",x="<<centerPoint.x<<",y="<<centerPoint.y;
     if (center == -1 || abs(centerPoint.x - basePos[PosY][PosX].x)>20 || abs(centerPoint.y - basePos[PosY][PosX].y)>20)
     {
         centerPoint.x = basePos[PosY][PosX].x;

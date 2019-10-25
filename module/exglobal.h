@@ -51,13 +51,14 @@ public:
     static void settempversion(const QString &version){temp_version = version;}
     static void setctrlversion(const QString &version){ctrl_version = version;}
 
-    static uchar* getReagentBox();
+    static uchar* getReagentBox(QString BoxCode);
     static void addTest();
     Q_INVOKABLE static void updateCaliParam(const QString &caliName, int caliValue);
     Q_INVOKABLE static int getCaliParam(const QString &caliName);
     Q_INVOKABLE static QString getIP();
     Q_INVOKABLE static void exClose();
     Q_INVOKABLE static QString getPosName(int pos);
+    Q_INVOKABLE static QList<int> getBoxItemList(QString BoxCode);
 
     static int V1WorkX;
     static int V2WorkX;

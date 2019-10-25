@@ -1,4 +1,5 @@
 #include "testmodel.h"
+#include "../exglobal.h"
 
 TestModel::TestModel(QObject *parent):QAbstractListModel (parent)
 {
@@ -54,6 +55,7 @@ void TestModel::AddTest(const Test &test){
     //emit dataChanged(createIndex(index,0),createIndex(index,0));
 }
 
-void TestModel::setCurrItem(int ItemIndex){
-    currTestid = m_display_list[ItemIndex].Testid;
+void TestModel::setCurrTest(int TestIndex){
+    currTestid = m_display_list[TestIndex].Testid;
+    ExGlobal::pTestResultModel->setTestid(currTestid);
 }

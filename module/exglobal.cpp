@@ -39,7 +39,7 @@ int ExGlobal::VPWorkOffset = 3654;
 int ExGlobal::V1SoftHomeOffset = 2520;
 int ExGlobal::V2SoftHomeOffset = 2520;
 int ExGlobal::V3SoftHomeOffset = 2520;
-int ExGlobal::VPSoftHomeOffset = 2520;
+int ExGlobal::VPSoftHomeOffset = 3520;
 int ExGlobal::V1ToolHomeX = 9166;
 int ExGlobal::V2ToolHomeX = 8178;
 int ExGlobal::V3ToolHomeX = 5686;
@@ -127,8 +127,8 @@ void ExGlobal::CaliParamInit()
     }
 }
 
-uchar* ExGlobal::getReagentBox(){
-    QString sql = "SELECT * FROM ReagentPos where BoxCode='"+t_ReagentBox+"'";
+uchar* ExGlobal::getReagentBox(QString BoxCode){
+    QString sql = "SELECT * FROM ReagentPos where BoxCode='"+BoxCode+"'";
     QSqlQuery query = sqlitemgrinstance->select(sql);
     memset(ReagentBox,0,sizeof(ReagentBox));
     while(query.next()){
@@ -297,6 +297,27 @@ QStringList ExGlobal::serialPort(){
 
 QString ExGlobal::getPosName(int pos){
     return AssayItem[pos];
+}
+
+QList<int> ExGlobal::getBoxItemList(QString BoxCode){
+    QList<int> result;
+    getReagentBox(BoxCode);
+    for (int i = 0; i < 121; i++)
+        if (ReagentBox[i] > 2){
+            bool find = false;
+            for(int j = 0; j < result.size(); j++)
+            {
+                if (result[j] == ReagentBox[i])
+                {
+                    find = true;
+                    break;
+                }
+            }
+            if (find == false)
+                result<<ReagentBox[i];
+        }
+    sort(result.begin(),result.end());
+    return result;
 }
 
 void ExGlobal::addTest(){
