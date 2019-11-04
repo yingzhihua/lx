@@ -27,7 +27,7 @@
 
 static bool camerainited = false;
 static QByteArray resultData;
-static QMutex mutex;
+static QMutex qmutex;
 static int xioctl(int fd, unsigned long request, void * arg){
     int r;
     do{
@@ -674,7 +674,7 @@ int ImageCapture::process_image(int i, const void *p, int size){
         QImage image(bufrgb,2592,1944,QImage::Format_RGB888);
         image.save(filenames);
 #endif
-#if 1
+#if 0
         sprintf(filenames,"%s/%s_%02d.y",Log::getDir().toLatin1().data(),filename.toLatin1().data(),i);
         convert_yuv_to_y_buffer((unsigned char *)p,bufy,2592,1944);
         FILE *file_f = fopen(filenames,"w");
@@ -705,7 +705,7 @@ int ImageCapture::process_image(int i, const void *p, int size){
                     temp = buf2y[j]>>8;
                     buf2y[j] = temp+(buf2y[j]<<8);
                 }
-                qDebug()<<"buf2y="<<buf2y[2592*500+1000]<<",bufy="<<bufy[2592*500+1000]<<",sum="<<sum[(2592*500+1000)<<1];
+                //qDebug()<<"buf2y="<<buf2y[2592*500+1000]<<",bufy="<<bufy[2592*500+1000]<<",sum="<<sum[(2592*500+1000)<<1];
 
                 for (int j = 0; j < 2592*1944*2; j++)
                     sum[j] = sum[j]/count;
@@ -722,7 +722,7 @@ int ImageCapture::process_image(int i, const void *p, int size){
             fclose(file_s);
             Log::LogCam("Image Capture "+QString::fromUtf8(filenames));
             //imageAna.FirstImage(bufrgb,0);
-#if 1
+#if 0
             sprintf(filenames,"%s/%s.2y",Log::getDir().toLatin1().data(),filename.toLatin1().data());
             FILE *file_2s = fopen(filenames,"w");
             fwrite(buf2y,size,1,file_2s);
@@ -754,7 +754,7 @@ void ImageCapture::run()
         fd_set fds;
         struct timeval tv;
         int r;
-        mutex.lock();
+        qmutex.lock();
         FD_ZERO(&fds);
         FD_SET(fd,&fds);
         tv.tv_sec = 40;
@@ -766,7 +766,7 @@ void ImageCapture::run()
             qDebug()<<"select err";
             Log::LogCam("run,select err");
             resultData[10] = 1;
-            mutex.unlock();
+            qmutex.unlock();
             emit finishCapture(resultData);
             return;
         }
@@ -774,7 +774,7 @@ void ImageCapture::run()
         if (0 == r) //select timeout
         {
             resultData[10] = 2;
-            mutex.unlock();
+            qmutex.unlock();
             emit finishCapture(resultData);
             qDebug()<<"selet timeout";
             Log::LogCam("run,selet timeout");
@@ -784,7 +784,7 @@ void ImageCapture::run()
         if (read_frame(i))
         {
             resultData[10] = 3;
-            mutex.unlock();
+            qmutex.unlock();
             Log::LogCam("run,read frame err");
             emit finishCapture(resultData);
             return;
@@ -794,11 +794,11 @@ void ImageCapture::run()
             i = 1;
         else if (captureMode == CaptureMode::Idle)
         {
-            mutex.unlock();
+            qmutex.unlock();
             stop_capturing();
             return;
         }
-        mutex.unlock();
+        qmutex.unlock();
     }
     resultData[10] = 0;
     emit finishCapture(resultData);
@@ -811,7 +811,7 @@ int ImageCapture::getabsExpose(){
     if (camerainited == false)
         return -1;
 
-    mutex.lock();
+    qmutex.lock();
     ctrl.id = V4L2_CID_EXPOSURE_ABSOLUTE;
     if (-1 == xioctl(fd,VIDIOC_G_CTRL,&ctrl))
     {
@@ -819,7 +819,7 @@ int ImageCapture::getabsExpose(){
         ctrl.value = -1;
     }
     qDebug()<<"getabsExpose:"<<ctrl.value;
-    mutex.unlock();
+    qmutex.unlock();
     return ctrl.value;
 }
 
@@ -829,7 +829,7 @@ bool ImageCapture::setabsExpose(int value){
     qDebug()<<"setabsExpose camerainited:"<<camerainited;
     if (camerainited == false)
         return false;
-    mutex.lock();
+    qmutex.lock();
     ctrl.id = V4L2_CID_EXPOSURE_ABSOLUTE;
     ctrl.value = value;
 
@@ -838,7 +838,7 @@ bool ImageCapture::setabsExpose(int value){
         qDebug()<<"setabsExpose VIDIOC_S_CTRL V4L2_CID_EXPOSURE_ABSOLUTE error";
         Log::LogCam("setabsExpose,VIDIOC_S_CTRL V4L2_CID_EXPOSURE_ABSOLUTE error");
     }
-    mutex.unlock();
+    qmutex.unlock();
     qDebug()<<"setabsExpose value:"<<value;
     ExGlobal::updateCaliParam("CamAbs",value);
     return true;
@@ -849,14 +849,14 @@ int ImageCapture::getGain(){
 
     if (camerainited == false)
         return -1;
-    mutex.lock();
+    qmutex.lock();
     ctrl.id = V4L2_CID_GAIN;
     if (-1 == xioctl(fd,VIDIOC_G_CTRL,&ctrl))
     {
         Log::LogCam("getGain,V4L2_CID_GAIN error");
         ctrl.value = -1;
     }
-    mutex.unlock();
+    qmutex.unlock();
     qDebug()<<"getGain:"<<ctrl.value;
     return ctrl.value;
 }
@@ -868,7 +868,7 @@ bool ImageCapture::setGain(int value){
     if (camerainited == false)
         return false;
 
-    mutex.lock();
+    qmutex.lock();
     ctrl.id = V4L2_CID_GAIN;
     ctrl.value = value;
 
@@ -877,7 +877,7 @@ bool ImageCapture::setGain(int value){
         qDebug()<<"setGain VIDIOC_S_CTRL V4L2_CID_GAIN error";
         Log::LogCam("setGain,VIDIOC_S_CTRL V4L2_CID_GAIN error");
     }
-    mutex.unlock();
+    qmutex.unlock();
     qDebug()<<"setGain value:"<<value;
     ExGlobal::updateCaliParam("CamGain",value);
     return true;

@@ -42,6 +42,7 @@ public:
     int rowCount(const QModelIndex & parent = QModelIndex()) const;
     QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
     void AddTest(const Test &test);
+    bool ExistTest(int Testid);
     Q_INVOKABLE void setCurrTest(int TestIndex);
 
 protected:

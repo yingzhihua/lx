@@ -36,9 +36,9 @@ void TestMgr::InsertData(int posIndex,int Itemid,int cycle,int value){
     }
 }
 
-void TestMgr::TestClose(){
+void TestMgr::TestClose(int type){
     if (Testid != -1){
-        QString sql = QString("update PanelTest set ResultType=1 where Testid=%1").arg(Testid);
+        QString sql = QString("update PanelTest set ResultType=%1 where Testid=%2").arg(type).arg(Testid);
         sqlitemgrinstance->execute(sql);
         Testid = -1;
     }

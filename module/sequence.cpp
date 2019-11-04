@@ -40,7 +40,7 @@ Sequence::Sequence(QObject *parent) : QObject(parent)
 
     //actionDo("Sensor",0,0,0);
     serialMgr->serialWrite(ActionParser::ParamToByte("AutoData",1,0,0,0));
-    ReadMask(QCoreApplication::applicationDirPath()+"/pos");
+    //ReadMask(QCoreApplication::applicationDirPath()+"/pos");
     //imageAna->SetMask(ExGlobal::getReagentBox("201"),0);
 
 #if 0
@@ -110,7 +110,7 @@ bool Sequence::sequenceDo(SequenceId id)
                 ExGlobal::setPanelName(sequenceAction.attribute("PanelName"));
 
                 ExGlobal::setReagentBox("201");
-                //imageAna->SetMask(ExGlobal::getReagentBox(),0);
+                imageAna->SetMask(ExGlobal::getReagentBox("201"),0);
                 testMgr->TestCreate("12345",ExGlobal::reagentBox());
                 break;
             }
@@ -248,7 +248,8 @@ void Sequence::ActionFinish(QByteArray data)
                     saveStr = "cycle";
                     for (int i = 0; i < item.size(); i++){
                         saveStr += ",";
-                        saveStr += Log::getPosName(item[i]);
+                        //saveStr += Log::getPosName(item[i]);
+                        saveStr += ExGlobal::getPosName(item[i]);
                     }
                     Log::LogPos(saveStr);
                 }
@@ -324,6 +325,11 @@ void Sequence::FinishSequence()
     else if(currSequenceId == SequenceId::Sequence_Test)
     {
         imageCapture->stop_capturing();
+        if (imageAna->getItem().size() > 45)
+            testMgr->TestClose(2);
+        else
+            testMgr->TestClose(1);
+        ExGlobal::addTest();
         Log::setDir(QCoreApplication::applicationDirPath());
     }
     currSequenceId = SequenceId::Sequence_Idle;

@@ -13,7 +13,7 @@ Page {
         font.pixelSize: 40
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.horizontalCenterOffset: -100
-        y:20
+        y:100
     }
     Image {
         id: printIco
@@ -34,18 +34,20 @@ Page {
         height:100
         anchors.verticalCenter: divider.verticalCenter
         anchors.right: divider.left
-        anchors.rightMargin: 20
+        anchors.rightMargin: 50
+
         Text{
             id:reference
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
             anchors.topMargin: 10
+            font.pixelSize: 40
             text:qsTr("测试有效")
         }
         Image {
             id: validico
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.horizontalCenterOffset: -50
+            anchors.horizontalCenterOffset: -60
             anchors.top: reference.bottom
             anchors.topMargin: 10
             source: "qrc:/image/Valid.png"
@@ -54,11 +56,13 @@ Page {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.horizontalCenterOffset: +20
             anchors.verticalCenter: validico.verticalCenter
+            font.pixelSize: 40
             text:qsTr("参照物")
         }
         MouseArea{
             anchors.fill: parent
             onClicked: {
+                testResultModel.setCurrItem(2);
                 dataView.push("qrc:/DataUI/DataLine.qml");
             }
         }
@@ -66,10 +70,11 @@ Page {
 
     Grid{
         id: gridPos
-        anchors.top: parent.top
-        anchors.topMargin: 200
+        //anchors.top: parent.top
+        //anchors.topMargin: 200
+        anchors.verticalCenter: divider.verticalCenter
         anchors.left: divider.right
-        anchors.leftMargin: 50
+        anchors.leftMargin: 100
         columns:3
         rowSpacing: 20
         columnSpacing: 30
@@ -83,13 +88,13 @@ Page {
                 Image {
                     anchors.verticalCenter: parent.verticalCenter
                     x:10
-                    source: "qrc:/image/Positive.png"
+                    source: ExGlobal.getItemResult(testResultModel.getTestid(),itemList[modelData])>0?"qrc:/image/Positive.png":"qrc:/image/Negative.png"
                 }
                 Text{
                     anchors.verticalCenter: parent.verticalCenter
-                    x:50
+                    x:60
                     text: ExGlobal.getPosName(itemList[modelData])
-                    font.pixelSize: 30
+                    font.pixelSize: 40
                 }
                 MouseArea{
                     anchors.fill: parent

@@ -9,7 +9,7 @@ class TestMgr : public QObject
 public:
     explicit TestMgr(QObject *parent = nullptr);
     int TestCreate(QString nSerial,QString BoxCode);
-    void TestClose();
+    void TestClose(int type);
     void InsertData(int posIndex,int Itemid,int cycle,int value);
 signals:
 

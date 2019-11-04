@@ -1,6 +1,6 @@
 #include "testmodel.h"
 #include "../exglobal.h"
-
+#include<QDebug>
 TestModel::TestModel(QObject *parent):QAbstractListModel (parent)
 {
     roles[RolesTestid] = "Testid";
@@ -55,7 +55,16 @@ void TestModel::AddTest(const Test &test){
     //emit dataChanged(createIndex(index,0),createIndex(index,0));
 }
 
+bool TestModel::ExistTest(int Testid){
+    foreach(Test test, m_display_list){
+        if (test.Testid == Testid)
+            return true;
+    }
+    return false;
+}
+
 void TestModel::setCurrTest(int TestIndex){
     currTestid = m_display_list[TestIndex].Testid;
     ExGlobal::pTestResultModel->setTestid(currTestid);
+    qDebug()<<"setCurrTest:"<<currTestid;
 }

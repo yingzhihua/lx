@@ -58,7 +58,10 @@ public:
     Q_INVOKABLE static QString getIP();
     Q_INVOKABLE static void exClose();
     Q_INVOKABLE static QString getPosName(int pos);
+    Q_INVOKABLE static int getItemCT(int Itemid);
+    Q_INVOKABLE static int getItemResult(int Testid, int Itemid);
     Q_INVOKABLE static QList<int> getBoxItemList(QString BoxCode);
+    Q_INVOKABLE static QList<int> getCurrItemResult();
 
     static int V1WorkX;
     static int V2WorkX;
@@ -93,6 +96,7 @@ public:
     static TestModel *pTestModel;
     static TestResultModel *pTestResultModel;
     static QHash<int, QByteArray> AssayItem;
+    static QHash<int, int> ItemCT;
 signals:
     void userChanged();
     void panelNameChanged();

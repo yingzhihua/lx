@@ -17,7 +17,7 @@ bool ExGlobal::test = false;
 QString ExGlobal::t_sysName = "样机02";
 int ExGlobal::t_sysLanguageCode = 1;
 
-QString ExGlobal::t_version = "V2.01";
+QString ExGlobal::t_version = "V2.02";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
@@ -58,7 +58,7 @@ TestModel * ExGlobal::pTestModel = nullptr;
 TestResultModel * ExGlobal::pTestResultModel = nullptr;
 
 QHash<int, QByteArray> ExGlobal::AssayItem;
-
+QHash<int, int> ExGlobal::ItemCT;
 ExGlobal::ExGlobal(QObject *parent) : QObject(parent)
 {
     //qDebug()<<"ExGlobal";    
@@ -108,23 +108,12 @@ void ExGlobal::CaliParamInit()
     sql = "select * from AssayItem order by Itemid";
     query = sqlitemgrinstance->select(sql);
     while(query.next()){
-        qDebug()<<"Itemid:"<<query.value(0).toInt()<<"ItemName:"<<query.value(1).toString();
+        qDebug()<<"Itemid:"<<query.value(0).toInt()<<"ItemName:"<<query.value(1).toString()<<"ItemCT:"<<query.value(2).toInt();
         AssayItem[query.value(0).toInt()] = query.value(1).toString().toLatin1();
+        ItemCT[query.value(0).toInt()] = query.value(2).toInt();
     }
 
-    sql = "select * from PanelTest";
-    query = sqlitemgrinstance->select(sql);
-    while(query.next()){
-        Test test;
-        test.Testid = query.value(0).toInt();
-        test.PanelCode = query.value(1).toString();
-        test.SerialNo = query.value(2).toString();
-        test.TestTime = query.value(4).toString();
-        test.SampleInfo = query.value(5).toString();
-        test.User = query.value(6).toString();
-        test.ResultType = query.value(7).toInt();
-        pTestModel->AddTest(test);
-    }
+    addTest();
 }
 
 uchar* ExGlobal::getReagentBox(QString BoxCode){
@@ -299,6 +288,93 @@ QString ExGlobal::getPosName(int pos){
     return AssayItem[pos];
 }
 
+int ExGlobal::getItemCT(int Itemid){
+    return ItemCT[Itemid];
+}
+
+int ExGlobal::getItemResult(int Testid, int Itemid){
+    int result = 0;
+    int resultLength = 0;
+    QString sql = "select cycle from AnalysisResult where Testid="+QString::number(Testid)+" and Itemid="+QString::number(Itemid);
+    QSqlQuery query = sqlitemgrinstance->select(sql);
+    while(query.next()){
+        resultLength++;
+        if (query.value(0).toInt() > result)
+            result = query.value(0).toInt();
+    }
+
+    if(resultLength == 0) {
+        sql = "select * from TestResult where Testid="+QString::number(Testid)+" and Itemid="+QString::number(Itemid);
+        query = sqlitemgrinstance->select(sql);        
+        QHash<int, vector<Point>> dataPos;
+        while(query.next()){
+            dataPos[query.value(2).toInt()].push_back(Point(query.value(4).toInt(),query.value(5).toInt()));
+        }
+
+        foreach(int dataKey, dataPos.keys()){
+            qDebug()<<"key="<<dataKey<<",length="<<dataPos[dataKey].size();
+            if (dataPos[dataKey].size()>30){
+                vector<Point> points = dataPos[dataKey];
+                vector<Point> tempPoint;
+                int linebaseStart = 3;
+                int linebaseEnd = points.size()-1;
+                Vec4f line_para;
+                while (linebaseEnd > 20) {
+                    tempPoint.assign(points.begin()+linebaseStart,points.begin()+linebaseEnd+1);
+                    fitLine(tempPoint,line_para,cv::DIST_L2,0,1e-2,1e-2);
+                    double dv = line_para[1]/line_para[0]*(points[linebaseEnd].x-line_para[2])+line_para[3];
+                    if (fabs(points[linebaseEnd].y-dv)>1)
+                        linebaseEnd--;
+                    else
+                        break;
+                }
+                while(linebaseStart<10){
+                    tempPoint.assign(points.begin()+linebaseStart,points.begin()+linebaseEnd+1);
+                    fitLine(tempPoint,line_para,cv::DIST_L2,0,1e-2,1e-2);
+                    double dv = line_para[1]/line_para[0]*(points[linebaseStart].x-line_para[2])+line_para[3];
+                    if (fabs(points[linebaseStart].y-dv)>1)
+                        linebaseStart++;
+                    else
+                        break;
+                }
+                double k = line_para[1]/line_para[0];
+                double intercept = k*(0-line_para[2]) + line_para[3];
+                int t_result = 0;
+                for (int i = 10; i < dataPos[dataKey].size(); i++){
+                    dataPos[dataKey][i].y = dataPos[dataKey][i].y - (dataPos[dataKey][i].x*k + intercept);
+                    if (dataPos[dataKey][i].y >= ItemCT[ReagentBox[dataKey]]){
+                        if(i == 10)
+                            t_result = 100;
+                        else if (dataPos[dataKey][i].y==dataPos[dataKey][i-1].y)
+                            t_result= (i+1)*10;
+                        else
+                            t_result = (i+1)*10+((dataPos[dataKey][i].y-ItemCT[ReagentBox[dataKey]])*10/(dataPos[dataKey][i].y-dataPos[dataKey][i-1].y));
+                        break;
+                    }
+                }
+                sql = QString("insert into AnalysisResult(Testid,PosIndex,cycle,Itemid) values(%1,%2,%3,%4)").arg(Testid).arg(dataKey).arg(t_result).arg(Itemid);
+                sqlitemgrinstance->execute(sql);
+                if (t_result > result)
+                    result = t_result;
+            }
+        }
+    }
+    return result;
+}
+
+QList<int> ExGlobal::getCurrItemResult(){
+    QList<int> result;
+    int Testid = pTestResultModel->getTestid();
+    int Itemid = pTestResultModel->getCurrItemId();
+    QString sql = "select cycle,PosIndex from AnalysisResult where Testid="+QString::number(Testid)+" and Itemid="+QString::number(Itemid);
+    QSqlQuery query = sqlitemgrinstance->select(sql);
+    while(query.next()){
+        result<<(query.value(1).toInt()*1000+query.value(0).toInt());
+    }
+    sort(result.begin(),result.end());
+    return result;
+}
+
 QList<int> ExGlobal::getBoxItemList(QString BoxCode){
     QList<int> result;
     getReagentBox(BoxCode);
@@ -321,7 +397,8 @@ QList<int> ExGlobal::getBoxItemList(QString BoxCode){
 }
 
 void ExGlobal::addTest(){
-    QString sql = "select * from PanelTest";
+    //QString sql = "select * from PanelTest";
+    QString sql = "select * from PanelTest where ResultType = 2";
     QSqlQuery query = sqlitemgrinstance->select(sql);
     while(query.next()){
         Test test;
@@ -332,6 +409,7 @@ void ExGlobal::addTest(){
         test.SampleInfo = query.value(5).toString();
         test.User = query.value(6).toString();
         test.ResultType = query.value(7).toInt();
-        pTestModel->AddTest(test);
+        if (!pTestModel->ExistTest(test.Testid))
+            pTestModel->AddTest(test);
     }
 }

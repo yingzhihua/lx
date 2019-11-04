@@ -124,7 +124,8 @@ void ImageAnalysis::FirstImage(void *data, int imageType){
     x.clear();
     y.clear();
     posValue.clear();
-    posItem.clear();    
+    posItem.clear();
+    posIndex.clear();
     if (imageType == 0)
         flip(Mat(1944,2592,CV_8U,data),firstImg,0);
         //Mat(1944,2592,CV_8U,data).copyTo(firstImg);
@@ -157,7 +158,7 @@ void ImageAnalysis::AddImage(void *data, int imageType){
     {
         for (int i = 0; i < gridCols; i++)
         {
-            if (maskPos.at<uchar>(j,i) != 0 && maskPos.at<uchar>(j,i) != 1){
+            if (basePos[j][i].x != 0 && maskPos.at<uchar>(j,i) != 0 && maskPos.at<uchar>(j,i) != 1){
                 int value = SpotCal(i,j);
                 posItem.push_back(maskPos.at<uchar>(j,i));
                 posValue.push_back(value);
@@ -470,13 +471,13 @@ void ImageAnalysis::SpotMask(Mat &img, Mat &mask1, Mat &mask2, vector<int> &x, v
                         }
                     }
                 }
-                if (maskPos.at<uchar>(i-topPointy,j-topPointx) != 14){
+                if (basePos[i-topPointy][j-topPointx].x != 0 && maskPos.at<uchar>(i-topPointy,j-topPointx) != 1){
                     Mat submask1 = mask1(Rect(leftsub,topsub,subsize+1,subsize+1));
                     Mat submask2 = mask2(Rect(leftsub,topsub,subsize+1,subsize+1));
                     int value = getPosValue(img(Rect(leftsub,topsub,subsize+1,subsize+1)),submask1,submask2);
                     posItem.push_back(maskPos.at<uchar>(i-topPointy,j-topPointx));
                     posValue.push_back(value);
-                    //posValue.push_back(Vec2i(maskPos.at<uchar>(i-topPointy,j-topPointx),value));
+                    posIndex.push_back((i-topPointy)*gridCols+j-topPointx);
                     qDebug()<<"maskPos="<<maskPos.at<uchar>(i-topPointy,j-topPointx)<<",value="<<value;
                 }
             }
