@@ -109,8 +109,8 @@ bool Sequence::sequenceDo(SequenceId id)
                 imageCapture->start_capturing(ImageCapture::CaptureMode::Capture);                
                 ExGlobal::setPanelName(sequenceAction.attribute("PanelName"));
 
-                ExGlobal::setReagentBox("201");
-                imageAna->SetMask(ExGlobal::getReagentBox("201"),0);
+                ExGlobal::setReagentBox("202");
+                imageAna->SetMask(ExGlobal::getReagentBox("202"),0);
                 testMgr->TestCreate("12345",ExGlobal::reagentBox());
                 break;
             }
@@ -163,11 +163,13 @@ bool Sequence::actionDo(QString device, int value, int param1, int param2, int p
 
 void Sequence::sequenceCancel()
 {
+    qDebug()<<"sequenceCancel:"<<",currSequenceId:"<<currSequenceId<<",durationState:"<<durationState<<",bFinishAction:"<<bFinishAction;
     if (currSequenceId != SequenceId::Sequence_Test)
         return;
 
     if(durationState == TimeState::running)
         timer->stop();
+
     if (bFinishAction) {
         currSequenceId = SequenceId::Sequence_Idle;
         sequenceDo(SequenceId::Sequence_CannelTest);
@@ -242,7 +244,7 @@ void Sequence::ActionFinish(QByteArray data)
                 }
                 sqlitemgrinstance->EndTransations();
 
-                //*
+                /*
                 QString saveStr;
                 if (currCameraCycle == 1){
                     saveStr = "cycle";
@@ -452,8 +454,8 @@ bool Sequence::DoAction(QDomElement action,bool isChild)
 
         currOrder = '\xA0';
         imageCapture->setImageCount(action.attribute("ActionParam1").toInt());
-        while (imageCapture->isRunning());
-        imageCapture->start();
+        if (!imageCapture->Running())
+            imageCapture->start();
     }
     else if(action.attribute("Device")=="Door" || action.attribute("Device")=="Light" || action.attribute("Device")=="Temperature"
             ||action.attribute("Device")=="V1" || action.attribute("Device")=="V2" || action.attribute("Device")=="V3"
@@ -671,11 +673,13 @@ void Sequence::CameraView(QImage img)
 }
 
 bool Sequence::startView(int id){
-    if (id == 0){
-        imageCapture->start_capturing(ImageCapture::CaptureMode::View);
-        imageCapture->setImageCount(10);
-        while (imageCapture->isRunning());
-        imageCapture->start();
+    if (id == 0){        
+        if (!imageCapture->Running())
+        {
+            imageCapture->start_capturing(ImageCapture::CaptureMode::View);
+            imageCapture->setImageCount(10);
+            imageCapture->start();
+        }
     }
     return true;
 }

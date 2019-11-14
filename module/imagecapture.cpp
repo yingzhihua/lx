@@ -840,7 +840,7 @@ bool ImageCapture::setabsExpose(int value){
     }
     qmutex.unlock();
     qDebug()<<"setabsExpose value:"<<value;
-    ExGlobal::updateCaliParam("CamAbs",value);
+    ExGlobal::updateCaliParam("CamAbs",value);   
     return true;
 }
 
@@ -880,5 +880,17 @@ bool ImageCapture::setGain(int value){
     qmutex.unlock();
     qDebug()<<"setGain value:"<<value;
     ExGlobal::updateCaliParam("CamGain",value);
+    return true;
+}
+
+bool ImageCapture::Running(){
+    int count = 0;
+    while(this->isRunning() && count<30){
+        qDebug()<<"Running:"<<count;
+        count++;
+        QThread::msleep(100);
+    }
+    if (count<100)
+        return false;
     return true;
 }

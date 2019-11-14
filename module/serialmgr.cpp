@@ -72,9 +72,10 @@ int SerialMgr::SerialInit()
 
 void SerialMgr::handleReadTemp()
 {
-    byteReadData.append(serialTemp.readAll());    
+    byteReadData.append(serialTemp.readAll());
     if (byteReadData.length() == 0)
         return;
+    //qDebug()<<"Temp Read length:"<<byteReadData.length()<<","<<byteReadData.toHex(' ');
     if ((byteReadData[0]!='\xaa'&&byteReadData[0]!='\x99')||byteReadData.length()>1000)
     {
         byteReadData.clear();
@@ -198,7 +199,20 @@ void SerialMgr::ackReceive(QByteArray wData)
         {
             sendList.removeFirst();
             writeTimer.stop();
-            sending = false;            
+            sending = false;
+
+            if (data[7] == '\x24'){
+                QByteArray send;
+                send.resize(11);
+                send[0] = 0xAA;
+                send[1] = 0x02;
+                send[2] = 0x0B;
+                send[7] = 0x76;
+                send[8] = 0;
+                send[9] = 0;
+                send[10] = 0x55;
+                serialTemp.write(send);
+            }
         }
     }
     mutex.unlock();

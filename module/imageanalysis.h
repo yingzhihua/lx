@@ -33,7 +33,7 @@ private:
     size_t debugx = 9;
     size_t debugy = 8;
     int imageCount = 0;
-    int mpp = 120;
+    int mpp = 100;
     int md1 = 10;
     int md2 = 20;
     int gridRows = 11;

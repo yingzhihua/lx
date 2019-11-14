@@ -17,7 +17,7 @@ bool ExGlobal::test = false;
 QString ExGlobal::t_sysName = "样机02";
 int ExGlobal::t_sysLanguageCode = 1;
 
-QString ExGlobal::t_version = "V2.02";
+QString ExGlobal::t_version = "V2.04";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
@@ -33,13 +33,13 @@ int ExGlobal::VDWorkX = 2000;
 int ExGlobal::VDSoftHomeX = 1000;
 
 int ExGlobal::V1WorkOffset = 3276;
-int ExGlobal::V2WorkOffset = 3654;
+int ExGlobal::V2WorkOffset = 3276;
 int ExGlobal::V3WorkOffset = 3276;
 int ExGlobal::VPWorkOffset = 3654;
 int ExGlobal::V1SoftHomeOffset = 2520;
 int ExGlobal::V2SoftHomeOffset = 2520;
 int ExGlobal::V3SoftHomeOffset = 2520;
-int ExGlobal::VPSoftHomeOffset = 3520;
+int ExGlobal::VPSoftHomeOffset = 2520;
 int ExGlobal::V1ToolHomeX = 9166;
 int ExGlobal::V2ToolHomeX = 8178;
 int ExGlobal::V3ToolHomeX = 5686;
@@ -62,6 +62,11 @@ QHash<int, int> ExGlobal::ItemCT;
 ExGlobal::ExGlobal(QObject *parent) : QObject(parent)
 {
     //qDebug()<<"ExGlobal";    
+}
+
+void ExGlobal::GlobalMessage(int code){
+    qDebug()<<"GlobalMessage:"<<code;
+    exglobalMessage(code);
 }
 
 void ExGlobal::exClose(){
@@ -308,7 +313,7 @@ int ExGlobal::getItemResult(int Testid, int Itemid){
         query = sqlitemgrinstance->select(sql);        
         QHash<int, vector<Point>> dataPos;
         while(query.next()){
-            dataPos[query.value(2).toInt()].push_back(Point(query.value(4).toInt(),query.value(5).toInt()));
+            dataPos[query.value(2).toInt()].push_back(Point(query.value(4).toInt()*10,query.value(5).toInt()));
         }
 
         foreach(int dataKey, dataPos.keys()){
@@ -319,26 +324,32 @@ int ExGlobal::getItemResult(int Testid, int Itemid){
                 int linebaseStart = 3;
                 int linebaseEnd = points.size()-1;
                 Vec4f line_para;
-                while (linebaseEnd > 20) {
+                bool doLine = true;
+                while(doLine){
+                    doLine = false;
                     tempPoint.assign(points.begin()+linebaseStart,points.begin()+linebaseEnd+1);
                     fitLine(tempPoint,line_para,cv::DIST_L2,0,1e-2,1e-2);
-                    double dv = line_para[1]/line_para[0]*(points[linebaseEnd].x-line_para[2])+line_para[3];
-                    if (fabs(points[linebaseEnd].y-dv)>1)
-                        linebaseEnd--;
-                    else
-                        break;
+                    if (linebaseEnd > 20) {
+                        double dv = line_para[1]/line_para[0]*(points[linebaseEnd].x-line_para[2])+line_para[3];
+                        if (fabs(points[linebaseEnd].y-dv)>1)
+                        {
+                            linebaseEnd--;
+                            doLine = true;
+                        }
+                    }
+                    if (doLine == false && linebaseStart<10){
+                        double dv = line_para[1]/line_para[0]*(points[linebaseStart].x-line_para[2])+line_para[3];
+                        if (fabs(points[linebaseStart].y-dv)>1)
+                        {
+                            linebaseStart++;
+                            doLine = true;
+                        }
+                    }
                 }
-                while(linebaseStart<10){
-                    tempPoint.assign(points.begin()+linebaseStart,points.begin()+linebaseEnd+1);
-                    fitLine(tempPoint,line_para,cv::DIST_L2,0,1e-2,1e-2);
-                    double dv = line_para[1]/line_para[0]*(points[linebaseStart].x-line_para[2])+line_para[3];
-                    if (fabs(points[linebaseStart].y-dv)>1)
-                        linebaseStart++;
-                    else
-                        break;
-                }
+
                 double k = line_para[1]/line_para[0];
                 double intercept = k*(0-line_para[2]) + line_para[3];
+                //qDebug()<<"para[0]="<<line_para[0]<<",para[1]="<<line_para[1]<<",para[2]="<<line_para[2]<<",para[3]="<<line_para[3]<<",k="<<k<<",intercept="<<intercept<<",lineStart="<<linebaseStart<<",lineEnd="<<linebaseEnd;
                 int t_result = 0;
                 for (int i = 10; i < dataPos[dataKey].size(); i++){
                     dataPos[dataKey][i].y = dataPos[dataKey][i].y - (dataPos[dataKey][i].x*k + intercept);
@@ -398,7 +409,7 @@ QList<int> ExGlobal::getBoxItemList(QString BoxCode){
 
 void ExGlobal::addTest(){
     //QString sql = "select * from PanelTest";
-    QString sql = "select * from PanelTest where ResultType = 2";
+    QString sql = "select * from PanelTest where ResultType = 2 order by Testid DESC";
     QSqlQuery query = sqlitemgrinstance->select(sql);
     while(query.next()){
         Test test;

@@ -109,8 +109,7 @@ signals:
     void sysLanguageNameChanged();
     void sysLanguageCodeChanged();
     void versionChanged();
-
-public slots:
+    void exglobalMessage(int code);
 
 private:
     static QString t_panelCode;
@@ -129,13 +128,16 @@ private:
 
     static void CaliParamInit();
     static void SetCaliParam(const QString &caliName, int caliValue);
+public:
+    void GlobalMessage(int code);
 };
 
+static ExGlobal *exGlobal;
 static QObject *exglobal_provider(QQmlEngine *engine, QJSEngine *scriptEngine)
 {
     Q_UNUSED(engine);
     Q_UNUSED(scriptEngine);
-    ExGlobal *exGlobal = new ExGlobal();
+    //ExGlobal *exGlobal = new ExGlobal();
     return exGlobal;
 }
 #endif // EXGLOBAL_H

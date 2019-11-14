@@ -65,7 +65,7 @@ void TestResultModel::setCurrItem(int id){
         result.TestValue = query.value(5).toInt();
         m_display_list<<result;        
         //qDebug()<<"setTestid,resultid="<<result.Resultid<<",PosIndex="<<result.PosIndex<<",Itemid="<<result.Itemid<<",cycle="<<result.cycle<<",TestValue="<<result.TestValue;
-        dataPos[result.PosIndex].push_back(Point(result.cycle,result.TestValue));
+        dataPos[result.PosIndex].push_back(Point(result.cycle*10,result.TestValue));
     }
 
     foreach(int dataKey, dataPos.keys()){
@@ -76,26 +76,31 @@ void TestResultModel::setCurrItem(int id){
             int linebaseStart = 3;
             int linebaseEnd = points.size()-1;
             Vec4f line_para;
-            while (linebaseEnd > 20) {
+            bool doLine = true;
+            while(doLine){
+                doLine = false;
                 tempPoint.assign(points.begin()+linebaseStart,points.begin()+linebaseEnd+1);
                 fitLine(tempPoint,line_para,cv::DIST_L2,0,1e-2,1e-2);
-                double dv = line_para[1]/line_para[0]*(points[linebaseEnd].x-line_para[2])+line_para[3];
-                if (fabs(points[linebaseEnd].y-dv)>1)
-                    linebaseEnd--;
-                else
-                    break;
-            }
-            while(linebaseStart<10){
-                tempPoint.assign(points.begin()+linebaseStart,points.begin()+linebaseEnd+1);
-                fitLine(tempPoint,line_para,cv::DIST_L2,0,1e-2,1e-2);
-                double dv = line_para[1]/line_para[0]*(points[linebaseStart].x-line_para[2])+line_para[3];
-                if (fabs(points[linebaseStart].y-dv)>1)
-                    linebaseStart++;
-                else
-                    break;
+                if (linebaseEnd > 20) {
+                    double dv = line_para[1]/line_para[0]*(points[linebaseEnd].x-line_para[2])+line_para[3];
+                    if (fabs(points[linebaseEnd].y-dv)>1)
+                    {
+                        linebaseEnd--;
+                        doLine = true;
+                    }
+                }
+                if (doLine == false && linebaseStart<10){
+                    double dv = line_para[1]/line_para[0]*(points[linebaseStart].x-line_para[2])+line_para[3];
+                    if (fabs(points[linebaseStart].y-dv)>1)
+                    {
+                        linebaseStart++;
+                        doLine = true;
+                    }
+                }
             }
             double k = line_para[1]/line_para[0];
             double intercept = k*(0-line_para[2]) + line_para[3];
+            qDebug()<<"para[0]="<<line_para[0]<<",para[1]="<<line_para[1]<<",para[2]="<<line_para[2]<<",para[3]="<<line_para[3]<<",k="<<k<<",intercept="<<intercept<<",lineStart="<<linebaseStart<<",lineEnd="<<linebaseEnd;
             for (int i = 0; i < dataPos[dataKey].size(); i++){
                 //qDebug()<<"\tvalue="<<a.y<<","<<(a.y - (a.x*k + intercept));
                 dataPos[dataKey][i].y = dataPos[dataKey][i].y - (dataPos[dataKey][i].x*k + intercept);

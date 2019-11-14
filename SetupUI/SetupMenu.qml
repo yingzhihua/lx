@@ -7,7 +7,7 @@ Rectangle {
     color: "darkgrey"
     ListModel{
         id:setModel
-        ListElement{name:qsTr("系统名称");info:"";qrc_res:"qrc:/SetupUI/Incomplete.qml"}
+        ListElement{name:qsTr("系统参数");info:"";qrc_res:"qrc:/SetupUI/SystemParam.qml"}
         ListElement{name:qsTr("语言");info:"";qrc_res:"qrc:/SetupUI/Incomplete.qml"}
         ListElement{name:qsTr("管理员密码");info:"";qrc_res:"qrc:/SetupUI/Incomplete.qml"}
         ListElement{name:qsTr("网络");info:"";qrc_res:"qrc:/SetupUI/Incomplete.qml"}
@@ -84,5 +84,6 @@ Rectangle {
     Component.onCompleted: {
         setModel.get(0).info = ExGlobal.sysName;
         setModel.get(1).info = ExGlobal.sysLanguageName;
+        setModel.get(9).info = ExGlobal.version;
     }
 }

@@ -348,7 +348,7 @@ void ImageAnalysis::SpotMask(Mat &img, Mat &mask1, Mat &mask2, vector<int> &x, v
     topPointx = 0;
     topPointy = 0;
     int pointCount = 0;
-    for (size_t z = 0; z < x.size()-gridCols; z++)
+    for (size_t z = 0; z < x.size()-gridCols + 1; z++)
     {
         int tempPointCount = 0;
         for(size_t i = z; i < z+gridCols; i++)
@@ -367,7 +367,7 @@ void ImageAnalysis::SpotMask(Mat &img, Mat &mask1, Mat &mask2, vector<int> &x, v
     }
     
     pointCount = 0;
-    for (size_t z = 0; z < y.size()-gridRows; z++){
+    for (size_t z = 0; z < y.size()-gridRows + 1; z++){
         int tempPointCount = 0;
         for (size_t j = z; j < z + gridRows; j++){
             for (size_t i = 0; i < x.size(); i++)

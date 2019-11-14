@@ -15,13 +15,13 @@ Rectangle {
             color: (model.index%2 == 1)?"darkgrey":"#ffffff"
             Row{
                 anchors.fill: parent
-                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:200;text:Testid}
-                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:300;text:PanelCode}
-                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:300;text:SerialNo}
-                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:300;text:SampleInfo}
-                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:400;text:TestTime}
-                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:300;text:User}
-                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:300;text:ResultType}
+                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:100;text:Testid}
+                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:200;text:PanelCode}
+                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:200;text:SerialNo}
+                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:1000;text:SampleInfo}
+                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:300;text:TestTime}
+                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:200;text:User}
+                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:100;text:ResultType}
             }
             MouseArea{
                 anchors.fill: parent

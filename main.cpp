@@ -3,6 +3,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QFont>
+#include "globalapplication.h"
 
 #include "module/sqlitemgr.h"
 #include "module/exglobal.h"
@@ -17,13 +18,17 @@ int main(int argc, char *argv[])
 {
     qputenv("QT_IM_MODULE", QByteArray("qtvirtualkeyboard"));
 
+    qputenv("LC_ALL","zh_CN.GB2312");
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
-    QApplication app(argc, argv);
+    GlobalApplication app(argc, argv);
 
     QFont font;
     font.setPixelSize(30);
     app.setFont(font);
+
+    exGlobal = new ExGlobal();
+    app.global = exGlobal;
 
     sqlitemgrinstance = new SqliteMgr();
     ExGlobal::pTestModel = new TestModel();

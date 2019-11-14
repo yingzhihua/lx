@@ -38,5 +38,9 @@
         <file>image/Print.png</file>
         <file>image/Undefined.png</file>
         <file>image/Valid.png</file>
+        <file>SetupUI/SystemName.qml</file>
+        <file>components/LanguageDialog.qml</file>
+        <file>components/LockDialog.qml</file>
+        <file>SetupUI/SystemParam.qml</file>
     </qresource>
 </RCC>

@@ -34,6 +34,7 @@ public:
     int getGain();
     bool setGain(int value);
     void *getyData(){return bufy;}
+    bool Running();
 
 protected:
     void run();

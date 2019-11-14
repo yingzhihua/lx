@@ -8,6 +8,7 @@ CONFIG += c++11
 # deprecated API to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
 
+CONFIG += "lang-zh_CN"
 # You can also make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
@@ -29,7 +30,8 @@ SOURCES += \
     module/qrcoder.cpp \
     module/dao/testmgr.cpp \
     module/dao/testmodel.cpp \
-    module/dao/testresultmodel.cpp
+    module/dao/testresultmodel.cpp \
+    globalapplication.cpp
 
 RESOURCES += qml.qrc
 
@@ -65,7 +67,8 @@ HEADERS += \
     module/dao/testmodel.h \
     module/entity/assayitem.h \
     module/entity/testresult.h \
-    module/dao/testresultmodel.h
+    module/dao/testresultmodel.h \
+    globalapplication.h
 
 if(contains(DEFINES,PLUTFORM_ARM)){
 INCLUDEPATH += /opt/opencv-4.1.1/include \

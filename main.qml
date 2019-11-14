@@ -2,31 +2,41 @@ import QtQuick 2.12
 import QtQuick.Controls 2.2
 import QtQuick.Window 2.12
 import QtQuick.VirtualKeyboard 2.4
-
+import QtQuick.VirtualKeyboard.Settings 2.2
 import Dx.Global 1.0
 import Dx.Sequence 1.0
 
+import "./components"
+
 ApplicationWindow {
     property string waitMsg: ""
+    property int languageIndex: 0
     id: window
     visible: true
     width: screen.width
     height: screen.height
     title: qsTr("闪量-华山")
 
+    LanguageDialog{
+        id: languageDialog        
+        x:600
+        y:600
+    }
+
     InputPanel {
         id: inputPanel
+        externalLanguageSwitchEnabled: true
         z: 99
-        x: 0
+        x: window.width/3
         y: window.height
-        width: window.width
+        width: window.width*2/3
 
         states: State {
             name: "visible"
             when: inputPanel.active
             PropertyChanges {
                 target: inputPanel
-                y: window.height - inputPanel.height
+                y: window.height - inputPanel.height -100
             }
         }
         transitions: Transition {
@@ -41,6 +51,7 @@ ApplicationWindow {
                 }
             }
         }
+        onExternalLanguageSwitch: languageDialog.show(["en_US","zh_CN"])
     }
 
     menuBar: Rectangle{
@@ -176,6 +187,11 @@ ApplicationWindow {
         visible: false
     }
 
+    LockDialog{
+        id:lockDialog
+        anchors.fill: parent
+    }
+
     Timer{
         repeat: true
         interval: 1000
@@ -198,8 +214,26 @@ ApplicationWindow {
         }
     }
 
+    Connections{
+        target: ExGlobal
+        onExglobalMessage:{
+            if (code == 1){
+                console.log("main.qml",code)
+                lockDialog.show()
+                tabBar.enabled = false
+            }
+            else if(code == 2)
+            {
+                console.log("main.qml exit",code)
+                //lockDialog.exit()
+            }
+        }
+    }
+
     Component.onCompleted: {
         //console.log("lx-model:"+testModel.rowCount());
+        //console.log("lengxing",Qt.locale("en_US").nativeLanguageName)
+        //VirtualKeyboardSettings.styleName = "retro"
     }
 
     onWaitMsgChanged: {
