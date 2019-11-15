@@ -89,6 +89,8 @@ public:
     static int VDWorkX;
     static int VDSoftHomeX;
 
+    static int LockScreenTime;
+
 
     static int CamAbs;
     static int CamGain;

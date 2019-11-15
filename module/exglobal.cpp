@@ -53,6 +53,8 @@ int ExGlobal::PumpSoftHomeX = 0;
 int ExGlobal::PumpToolHomeX = 0;
 int ExGlobal::PumpSoftHomeOffset = 0;
 
+int ExGlobal::LockScreenTime = 0;
+
 static uchar ReagentBox[121];
 TestModel * ExGlobal::pTestModel = nullptr;
 TestResultModel * ExGlobal::pTestResultModel = nullptr;
@@ -194,7 +196,9 @@ void ExGlobal::SetCaliParam(const QString &name, int caliValue)
     else if (name == "CamGain")
         CamGain = caliValue;
     else if (name == "CamFocus")
-        CamFocus = caliValue;
+        CamFocus = caliValue;    
+    else if (name == "LockScreenTime")
+        LockScreenTime = caliValue;
 
 }
 
@@ -258,6 +262,9 @@ int ExGlobal::getCaliParam(const QString &caliName)
         result = CamGain;
     else if(caliName == "CamFocus")
         result = CamFocus;
+    else if(caliName == "LockScreenTime")
+        result = LockScreenTime;
+
     qDebug()<<"getCaliParam,"<<caliName<<",result="<<result;
     return result;
 }
