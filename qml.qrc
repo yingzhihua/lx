@@ -42,5 +42,7 @@
         <file>components/LanguageDialog.qml</file>
         <file>components/LockDialog.qml</file>
         <file>SetupUI/SystemParam.qml</file>
+        <file>SetupUI/LockScreenSet.qml</file>
+        <file>image/unlock.png</file>
     </qresource>
 </RCC>

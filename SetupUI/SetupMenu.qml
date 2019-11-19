@@ -3,11 +3,13 @@ import QtQuick.Controls 2.5
 import Dx.Global 1.0
 Rectangle {
     property string titlemsg: qsTr("设置")
-    id: setup_page
+    property int lockScreenTime: 0
+    id: setup_menu
     color: "darkgrey"
     ListModel{
         id:setModel
-        ListElement{name:qsTr("系统参数");info:"";qrc_res:"qrc:/SetupUI/SystemParam.qml"}
+        ListElement{name:qsTr("系统名称");info:"";qrc_res:"qrc:/SetupUI/SystemName.qml"}
+        ListElement{name:qsTr("锁屏时间");info:"";qrc_res:"qrc:/SetupUI/LockScreenSet.qml"}
         ListElement{name:qsTr("语言");info:"";qrc_res:"qrc:/SetupUI/Incomplete.qml"}
         ListElement{name:qsTr("管理员密码");info:"";qrc_res:"qrc:/SetupUI/Incomplete.qml"}
         ListElement{name:qsTr("网络");info:"";qrc_res:"qrc:/SetupUI/Incomplete.qml"}
@@ -82,8 +84,19 @@ Rectangle {
     onTitlemsgChanged: headerMsg.text = titlemsg;
 
     Component.onCompleted: {
+        setSetupMenuParam()
+    }
+
+    onLockScreenTimeChanged: {
+        console.log(onLockScreenTimeChanged,lockScreenTime);
+        setModel.get(1).info = lockScreenTime+qsTr(" 秒");
+    }
+
+    function setSetupMenuParam(){
         setModel.get(0).info = ExGlobal.sysName;
-        setModel.get(1).info = ExGlobal.sysLanguageName;
-        setModel.get(9).info = ExGlobal.version;
+        //setModel.get(1).info = ExGlobal.getCaliParam("LockScreenTime")+qsTr(" 秒");
+        lockScreenTime = ExGlobal.getCaliParam("LockScreenTime");
+        setModel.get(2).info = ExGlobal.sysLanguageName;
+        setModel.get(10).info = ExGlobal.version;
     }
 }

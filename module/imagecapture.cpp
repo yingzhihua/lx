@@ -144,6 +144,15 @@ static int convert_yuv_to_2y_buffer(unsigned char *yuv, unsigned short *rgb, uns
 ImageCapture::ImageCapture(QObject *parent) : QThread(parent),io(IO_METHOD_MMAP),count(1)
 {    
     filename = "undefine";
+
+    resultData.resize(12);
+    resultData[0] = '\xaa';
+    resultData[1] = '\x03';
+    resultData[6] = '\x00';
+    resultData[7] = '\xA0';
+    resultData[8] = '\x00';
+    resultData[9] = '\x02';
+    resultData[11] = '\x55';
 //return;
     if (open_device() != 0)
         return;
@@ -464,15 +473,7 @@ int ImageCapture::init_mmap(){
         qDebug()<<"Insufficient buffer memory, return";
         Log::LogCam("init_mmap,Insufficient buffer memory, return -1");
         return -1;
-    }
-    resultData.resize(12);
-    resultData[0] = '\xaa';
-    resultData[1] = '\x03';
-    resultData[6] = '\x00';
-    resultData[7] = '\xA0';
-    resultData[8] = '\x00';
-    resultData[9] = '\x02';
-    resultData[11] = '\x55';
+    }    
 
     buffers = (buffer *)calloc(req.count,sizeof(*buffers));
     if (!buffers){
@@ -742,7 +743,11 @@ int ImageCapture::process_image(int i, const void *p, int size){
 void ImageCapture::run()
 {
     if (camerainited == false)
+    {
+        resultData[10] = 0x10;
+        emit finishCapture(resultData);
         return;
+    }
 
     //if (captureMode == CaptureMode::Capture)
         clear_frame();

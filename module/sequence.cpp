@@ -263,6 +263,10 @@ void Sequence::ActionFinish(QByteArray data)
                 Log::LogPos(saveStr);
                 //*/
             }
+            else if(data[7] == '\xa0' && data[10] != '\x00'){
+                errReceive(0x300 + data[10]);
+                return;
+            }
 
             currCameraCaptureType = 0;
         }        
@@ -707,7 +711,7 @@ void Sequence::errReceive(int code){
         errStr = "温控板通讯出错！";
     else if(code == 0x201)
         errStr = "驱动板通讯出错！";
-    else if(code == 0x301)
+    else if(code >= 0x301 && code <= 0x3FF)
         errStr = "摄像头通讯出错！";
     else if(code == 0x401)
         errStr = "配置文件读取出错！";
@@ -715,7 +719,7 @@ void Sequence::errReceive(int code){
         errStr = "配置文件格式出错！";
     else if(code == 0x403)
         errStr = "模板文件读取出错！";
-    emit errOccur(errStr);
+    emit errOccur(errStr+" 错误代码："+QString::number(code,16));
 }
 
 int Sequence::getAbs(){

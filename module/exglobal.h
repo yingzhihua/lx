@@ -62,6 +62,8 @@ public:
     Q_INVOKABLE static int getItemResult(int Testid, int Itemid);
     Q_INVOKABLE static QList<int> getBoxItemList(QString BoxCode);
     Q_INVOKABLE static QList<int> getCurrItemResult();
+    Q_INVOKABLE void setLockTime(int time);
+    Q_INVOKABLE void qmlGlobalMessage(int code){GlobalMessage(code);}
 
     static int V1WorkX;
     static int V2WorkX;

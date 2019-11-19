@@ -16,12 +16,15 @@ bool GlobalApplication::notify(QObject *obj, QEvent *e){
     const QMetaObject* objMeta = obj->metaObject();
     QString clName = objMeta->className();
 
+    if (clName == "QQuickApplicationWindow_QML_30" && ExGlobal::user() == "NotLoggedIn")
     if(e->type() == QEvent::MouseButtonPress){
         QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(e);
         qDebug()<<"clName:"<<clName<<"mouse:"<<mouseEvent->x();
         if (timerid != -1)
             this->killTimer(timerid);
-        timerid = this->startTimer(10000);
+        int timerout = ExGlobal::getCaliParam("LockScreenTime");
+        if (timerout != 0)
+            timerid = this->startTimer(timerout*1000);
     }
 
     return QApplication::notify(obj,e);

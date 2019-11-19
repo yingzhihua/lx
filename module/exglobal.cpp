@@ -10,14 +10,14 @@ QString ExGlobal::t_panelCode = "012315";
 QString ExGlobal::t_panelName = "上呼吸道测试";
 QString ExGlobal::t_sampleCode = "SLX 01079";
 QString ExGlobal::t_sampleInfo = "华山11";
-QString ExGlobal::t_user = "user";
+QString ExGlobal::t_user = "NotLoggedIn";
 QString ExGlobal::t_ReagentBox = "201";
 bool ExGlobal::test = false;
 
 QString ExGlobal::t_sysName = "样机02";
 int ExGlobal::t_sysLanguageCode = 1;
 
-QString ExGlobal::t_version = "V2.04";
+QString ExGlobal::t_version = "V2.05";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
@@ -53,7 +53,7 @@ int ExGlobal::PumpSoftHomeX = 0;
 int ExGlobal::PumpToolHomeX = 0;
 int ExGlobal::PumpSoftHomeOffset = 0;
 
-int ExGlobal::LockScreenTime = 0;
+int ExGlobal::LockScreenTime = 30;
 
 static uchar ReagentBox[121];
 TestModel * ExGlobal::pTestModel = nullptr;
@@ -430,4 +430,8 @@ void ExGlobal::addTest(){
         if (!pTestModel->ExistTest(test.Testid))
             pTestModel->AddTest(test);
     }
+}
+
+void ExGlobal::setLockTime(int time){
+    qDebug()<<"setLockTime:"<<time;
 }

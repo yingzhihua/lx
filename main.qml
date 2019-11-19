@@ -51,7 +51,16 @@ ApplicationWindow {
                 }
             }
         }
-        onExternalLanguageSwitch: languageDialog.show(["en_US","zh_CN"])
+        onExternalLanguageSwitch: {
+            console.log("main.qml,result:",VirtualKeyboardSettings.locale);
+            //languageDialog.show(["en_US","zh_CN"])
+            if (VirtualKeyboardSettings.locale == "en_US")
+                VirtualKeyboardSettings.locale = "zh_CN";
+            else if(VirtualKeyboardSettings.locale == "zh_CN")
+                VirtualKeyboardSettings.locale = "en_US";
+            else
+                VirtualKeyboardSettings.locale = "en_US";
+        }
     }
 
     menuBar: Rectangle{
@@ -218,14 +227,15 @@ ApplicationWindow {
         target: ExGlobal
         onExglobalMessage:{
             if (code == 1){
-                console.log("main.qml",code)
+                console.log("onExglobalMessage",code)
                 lockDialog.show()
                 tabBar.enabled = false
             }
             else if(code == 2)
             {
                 console.log("main.qml exit",code)
-                //lockDialog.exit()
+                lockDialog.exit()
+                tabBar.enabled = true
             }
         }
     }
