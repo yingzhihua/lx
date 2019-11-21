@@ -226,7 +226,7 @@ ApplicationWindow {
     Connections{
         target: ExGlobal
         onExglobalMessage:{
-            if (code == 1){
+            if (code == 1 && ExGlobal.user != "NotLoggedIn"){
                 console.log("onExglobalMessage",code)
                 lockDialog.show()
                 tabBar.enabled = false

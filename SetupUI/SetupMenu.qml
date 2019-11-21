@@ -2,8 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.5
 import Dx.Global 1.0
 Rectangle {
-    property string titlemsg: qsTr("设置")
-    property int lockScreenTime: 0
+    property string titlemsg: qsTr("设置")    
     id: setup_menu
     color: "darkgrey"
     ListModel{
@@ -84,19 +83,19 @@ Rectangle {
     onTitlemsgChanged: headerMsg.text = titlemsg;
 
     Component.onCompleted: {
-        setSetupMenuParam()
-    }
-
-    onLockScreenTimeChanged: {
-        console.log(onLockScreenTimeChanged,lockScreenTime);
-        setModel.get(1).info = lockScreenTime+qsTr(" 秒");
-    }
-
-    function setSetupMenuParam(){
         setModel.get(0).info = ExGlobal.sysName;
-        //setModel.get(1).info = ExGlobal.getCaliParam("LockScreenTime")+qsTr(" 秒");
-        lockScreenTime = ExGlobal.getCaliParam("LockScreenTime");
+        setModel.get(1).info = ExGlobal.getCaliParam("LockScreenTime")+qsTr(" 秒");
         setModel.get(2).info = ExGlobal.sysLanguageName;
         setModel.get(10).info = ExGlobal.version;
+    }
+
+    Connections{
+        target: ExGlobal
+        onLockTimeChanged:{
+            setModel.get(1).info = ExGlobal.getCaliParam("LockScreenTime")+qsTr(" 秒");
+        }
+        onSysNameChanged:{
+            setModel.get(0).info = ExGlobal.sysName;
+        }
     }
 }

@@ -16,12 +16,13 @@ class ExGlobal : public QObject
     Q_PROPERTY(QString sampleInfo READ sampleInfo NOTIFY sampleInfoChanged)
     Q_PROPERTY(QStringList serialPort READ serialPort NOTIFY serialPortChanged)
     Q_PROPERTY(bool debug READ isDebug WRITE setDebug NOTIFY debugChanged)
-    Q_PROPERTY(QString sysName READ sysName NOTIFY sysNameChanged)
+    Q_PROPERTY(QString sysName READ sysName WRITE setSysName NOTIFY sysNameChanged)
     Q_PROPERTY(QString sysLanguageName READ sysLanguageName NOTIFY sysLanguageNameChanged)
     Q_PROPERTY(int sysLanguageCode READ sysLanguageCode NOTIFY sysLanguageCodeChanged)
     Q_PROPERTY(QString version READ version NOTIFY versionChanged)
     Q_PROPERTY(QString tempversion READ tempversion NOTIFY versionChanged)
     Q_PROPERTY(QString ctrlversion READ ctrlversion NOTIFY versionChanged)    
+    Q_PROPERTY(int lockTime READ lockTime WRITE setLockTime NOTIFY lockTimeChanged)
 public:
     explicit ExGlobal(QObject *parent = nullptr);
     static void exInit();
@@ -42,7 +43,8 @@ public:
     static QStringList serialPort();
     static bool isDebug(){return test;}
     static void setDebug(bool debug){test = debug;}
-    static QString sysName(){return t_sysName;}
+    QString sysName(){return SysName;}
+    void setSysName(const QString &name){updateTextParam("SysName",name);emit sysNameChanged();}
     static QString sysLanguageName();
     static int sysLanguageCode(){return t_sysLanguageCode;}
     static QString version(){return t_version;}
@@ -50,11 +52,15 @@ public:
     static QString ctrlversion(){return ctrl_version;}
     static void settempversion(const QString &version){temp_version = version;}
     static void setctrlversion(const QString &version){ctrl_version = version;}
+    int lockTime(){return getCaliParam("LockScreenTime");}
+    void setLockTime(int time){updateCaliParam("LockScreenTime",time);emit lockTimeChanged();}
 
     static uchar* getReagentBox(QString BoxCode);
     static void addTest();
     Q_INVOKABLE static void updateCaliParam(const QString &caliName, int caliValue);
     Q_INVOKABLE static int getCaliParam(const QString &caliName);
+    Q_INVOKABLE static void updateTextParam(const QString &caliName, QString caliValue);
+    Q_INVOKABLE static QString getTextParam(const QString &caliName);
     Q_INVOKABLE static QString getIP();
     Q_INVOKABLE static void exClose();
     Q_INVOKABLE static QString getPosName(int pos);
@@ -62,7 +68,7 @@ public:
     Q_INVOKABLE static int getItemResult(int Testid, int Itemid);
     Q_INVOKABLE static QList<int> getBoxItemList(QString BoxCode);
     Q_INVOKABLE static QList<int> getCurrItemResult();
-    Q_INVOKABLE void setLockTime(int time);
+
     Q_INVOKABLE void qmlGlobalMessage(int code){GlobalMessage(code);}
 
     static int V1WorkX;
@@ -113,6 +119,7 @@ signals:
     void sysLanguageNameChanged();
     void sysLanguageCodeChanged();
     void versionChanged();
+    void lockTimeChanged();
     void exglobalMessage(int code);
 
 private:
@@ -124,7 +131,7 @@ private:
     static QString t_ReagentBox;
     static bool test;
 
-    static QString t_sysName;
+    static QString SysName;
     static int t_sysLanguageCode;
     static QString t_version;
     static QString temp_version;
@@ -132,6 +139,7 @@ private:
 
     static void CaliParamInit();
     static void SetCaliParam(const QString &caliName, int caliValue);
+    static void SetTextParam(const QString &textName, QString textValue);
 public:
     void GlobalMessage(int code);
 };

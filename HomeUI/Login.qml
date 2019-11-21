@@ -120,6 +120,7 @@ Page {
                 ExGlobal.user = "user001";
             else
                 ExGlobal.user = login_name.text;
+            console.log("login:",login_name.text,ExGlobal.user);
             stackView.pop();
             stackView.push("qrc:/HomeUI/Idle.qml");
         }

@@ -15,8 +15,6 @@ private:
     QWidget *widget;
     int timerid;
 
-public slots:
-    void timerTimeout();
 protected:
     void timerEvent(QTimerEvent *event);
 };

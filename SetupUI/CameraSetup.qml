@@ -151,6 +151,7 @@ Page {
         font.pixelSize: 50
         onClicked: Sequence.setGain(gainValue.value)
     }
+
     Text {
         id: lbfocus
         text: qsTr("焦距:")
@@ -202,6 +203,46 @@ Page {
                 ExGlobal.updateCaliParam("CamFocus",focusValue.value);
             }
         }
+    }
+
+    CheckBox {
+        id: lbwhite
+        text: qsTr("打开自动白平衡")
+        anchors.right: focusValue.right
+        anchors.top: lbfocus.bottom
+        anchors.topMargin: 80
+        font.pixelSize: 40
+    }
+    Text {
+        id: lbwhiteTemperture
+        text: qsTr("白平衡温度:")
+        anchors.right: lbgain.right
+        anchors.top: lbwhite.bottom
+        anchors.topMargin: 40
+        font.pixelSize: 40
+    }
+    SpinBox{
+        id:whiteValue
+        anchors.left: lbwhiteTemperture.right
+        anchors.leftMargin: 30
+        anchors.verticalCenter: lbwhiteTemperture.verticalCenter
+        from:2800
+        value: Sequence.getWhiteBalance()
+        to:6500
+        stepSize: 100
+        width: 250
+        transformOrigin: Item.Center
+        font.pixelSize: 50
+    }
+
+    Button{
+        id:whiteBt
+        anchors.left: whiteValue.right
+        anchors.leftMargin: 30
+        anchors.verticalCenter: whiteValue.verticalCenter
+        text: qsTr("设置")
+        font.pixelSize: 50
+        onClicked: Sequence.setWhiteBalance(lbwhite.checked?0:whiteValue.value)
     }
 
     Bt1 {

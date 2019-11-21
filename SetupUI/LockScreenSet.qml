@@ -92,10 +92,10 @@ Item {
             color: "darkgray"
             radius: 5
         }
-        onClicked: {
+        onPressed: {
+        //onClicked: {
             console.log(spinLock.value);
-            ExGlobal.updateCaliParam("LockScreenTime",spinLock.value);
-            //setup_menu.lockScreenTime = spinLock.value
+            ExGlobal.lockTime = spinLock.value;
             setupView.pop();
         }
     }
@@ -112,6 +112,6 @@ Item {
     }
 
     Component.onCompleted: {
-        spinLock.value = ExGlobal.getCaliParam("LockScreenTime")
+        spinLock.value = ExGlobal.lockTime
     }
 }

@@ -5,11 +5,12 @@ import QtQuick.Window 2.12
 import QtQuick 2.0
 
 import Dx.Global 1.0
+import Dx.UserMgr 1.0
 
 Rectangle {
     id: lockDialog
     visible: false
-    color: Qt.rgba(0.5,0.5,0.5,0.5)
+    color: Qt.rgba(0.5,0.5,0.5,0.8)
     Rectangle{
         z:2
         width: 800
@@ -33,13 +34,14 @@ Rectangle {
         }
 
         Text{
+            id: labelUser
             anchors.verticalCenter: labelName.verticalCenter
             anchors.left: labelName.right
             anchors.leftMargin: 50
             width: 300
             height: 30
             text: ExGlobal.user
-            horizontalAlignment: Text.AlignRight
+            horizontalAlignment: Text.AlignLeft
             verticalAlignment: Text.AlignVCenter
             font.pixelSize: 40
         }
@@ -83,37 +85,16 @@ Rectangle {
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
-                    console.log("unlock")
-                    ExGlobal.qmlGlobalMessage(2);
-                    //exit();
+                    if (UserMgr.logon(ExGlobal.user,login_password.text)){
+                        console.log("unlock")
+                        ExGlobal.qmlGlobalMessage(2);
+                    }
                 }
             }
         }
-/*
-        Rectangle {
-            id: unlock
-            width: 128
-            height: 128
-            anchors.bottom: login_password.bottom
-            anchors.bottomMargin: -10
-            anchors.left: login_password.right
-            anchors.leftMargin: 50
-
-            Image {
-                source: "qrc:/image/unlock.png"
-            }
-
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-                    console.log("unlock")
-                    exit()
-                }
-            }
-        }
-*/
     }
     function show(){
+        labelUser.text = ExGlobal.user
         lockDialog.visible = true
     }
     function exit(){

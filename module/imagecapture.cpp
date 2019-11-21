@@ -299,7 +299,7 @@ int ImageCapture::init_device(){
     min = fmt.fmt.pix.bytesperline*fmt.fmt.pix.height;
     if (fmt.fmt.pix.sizeimage < min)
         fmt.fmt.pix.sizeimage = min;
-#if 1
+
     struct v4l2_control ctrl;
     struct v4l2_queryctrl setting;
 
@@ -421,6 +421,60 @@ int ImageCapture::init_device(){
         Log::LogCam(QString("init_device,Get GAIN:%1").arg(ctrl.value));
     }
 #endif
+
+    //set white blance
+#if 1
+    setting.id = V4L2_CID_AUTO_WHITE_BALANCE;
+    if (-1 == xioctl(fd,VIDIOC_QUERYCTRL,&setting))
+    {
+        qDebug()<<"V4L2_CID_AUTO_WHITE_BALANCE query error";
+        Log::LogCam("init_device,V4L2_CID_AUTO_WHITE_BALANCE query error");
+    }
+    else {
+        qDebug()<<"query WHITE BALANCE:max="<<setting.maximum<<",min="<<setting.minimum<<",step="<<setting.step<<",default="<<setting.default_value;
+        Log::LogCam(QString("init_device,query WHITE BALANCE:max=%1,min=%2,step=%3,default=%4").arg(setting.maximum).arg(setting.minimum).arg(setting.step).arg(setting.default_value));
+    }
+#if 0
+    ctrl.id = V4L2_CID_AUTO_WHITE_BALANCE;
+    ctrl.value = 0;
+    if (-1 == xioctl(fd,VIDIOC_S_CTRL,&ctrl))
+    {
+        qDebug()<<"VIDIOC_S_CTRL V4L2_CID_AUTO_WHITE_BALANCE error";
+        Log::LogCam("init_device,VIDIOC_S_CTRL V4L2_CID_AUTO_WHITE_BALANCE error");
+    }
+#endif
+    ctrl.id = V4L2_CID_AUTO_WHITE_BALANCE;
+    if (-1 == xioctl(fd,VIDIOC_G_CTRL,&ctrl))
+    {
+        qDebug()<<"V4L2_CID_AUTO_WHITE_BALANCE error";
+        Log::LogCam("init_device,V4L2_CID_AUTO_WHITE_BALANCE error");
+    }
+    else {
+        qDebug()<<"Get AUTO_WHITE_BALANCE:"<<ctrl.value;
+        Log::LogCam(QString("init_device,Get AUTO_WHITE_BALANCE:%1").arg(ctrl.value));
+    }
+
+    setting.id = V4L2_CID_WHITE_BALANCE_TEMPERATURE;
+    if (-1 == xioctl(fd,VIDIOC_QUERYCTRL,&setting))
+    {
+        qDebug()<<"V4L2_CID__WHITE_BALANCE_TEMPERATURE query error";
+        Log::LogCam("init_device,V4L2_CID__WHITE_BALANCE_TEMPERATURE query error");
+    }
+    else {
+        qDebug()<<"query WHITE_BALANCE_TEMPERATURE:max="<<setting.maximum<<",min="<<setting.minimum<<",step="<<setting.step<<",default="<<setting.default_value;
+        Log::LogCam(QString("init_device,query WHITE_BALANCE_TEMPERATURE:max=%1,min=%2,step=%3,default=%4").arg(setting.maximum).arg(setting.minimum).arg(setting.step).arg(setting.default_value));
+    }
+
+    ctrl.id = V4L2_CID_WHITE_BALANCE_TEMPERATURE;
+    if (-1 == xioctl(fd,VIDIOC_G_CTRL,&ctrl))
+    {
+        qDebug()<<"V4L2_CID_WHITE_BALANCE_TEMPERATURE error";
+        Log::LogCam("init_device,V4L2_CID_WHITE_BALANCE_TEMPERATURE error");
+    }
+    else {
+        qDebug()<<"Get V4L2_CID_WHITE_BALANCE_TEMPERATURE:"<<ctrl.value;
+        Log::LogCam(QString("init_device,Get V4L2_CID_WHITE_BALANCE_TEMPERATURE:%1").arg(ctrl.value));
+    }
 
 #endif
 
@@ -885,6 +939,81 @@ bool ImageCapture::setGain(int value){
     qmutex.unlock();
     qDebug()<<"setGain value:"<<value;
     ExGlobal::updateCaliParam("CamGain",value);
+    return true;
+}
+
+int ImageCapture::getWhite(){
+    struct v4l2_control ctrl;
+
+    if (camerainited == false)
+        return -1;
+    qmutex.lock();
+    ctrl.id = V4L2_CID_WHITE_BALANCE_TEMPERATURE;
+    if (-1 == xioctl(fd,VIDIOC_G_CTRL,&ctrl))
+    {
+        Log::LogCam("getWhiteBalance,V4L2_CID_WHITE_BALANCE_TEMPERATURE error");
+        ctrl.value = -1;
+    }
+    qmutex.unlock();
+    qDebug()<<"getWhiteBalance:"<<ctrl.value;
+    return ctrl.value;
+}
+
+bool ImageCapture::setWhite(int value){
+    struct v4l2_control ctrl;
+
+    qDebug()<<"setWhiteBalance camerainited:"<<camerainited<<"value="<<value;
+    if (camerainited == false)
+        return false;
+
+    qmutex.lock();
+    ctrl.id = V4L2_CID_AUTO_WHITE_BALANCE;
+    if (value == 0)
+        ctrl.value = 1;
+    else
+        ctrl.value = 0;
+    if (-1 == xioctl(fd,VIDIOC_S_CTRL,&ctrl))
+    {
+        qDebug()<<"VIDIOC_S_CTRL V4L2_CID_AUTO_WHITE_BALANCE error";
+        Log::LogCam("init_device,VIDIOC_S_CTRL V4L2_CID_AUTO_WHITE_BALANCE error");
+    }
+    if (value > 0)
+    {
+        ctrl.id = V4L2_CID_WHITE_BALANCE_TEMPERATURE;
+        ctrl.value = value;
+
+        if (-1 == xioctl(fd,VIDIOC_S_CTRL,&ctrl))
+        {
+            qDebug()<<"setWhite VIDIOC_S_CTRL V4L2_CID_WHITE_BALANCE_TEMPERATURE error";
+            Log::LogCam("setWhite,VIDIOC_S_CTRL V4L2_CID_WHITE_BALANCE_TEMPERATURE error");
+        }
+    }
+
+    ctrl.id = V4L2_CID_AUTO_WHITE_BALANCE;
+    if (-1 == xioctl(fd,VIDIOC_G_CTRL,&ctrl))
+    {
+        qDebug()<<"V4L2_CID_AUTO_WHITE_BALANCE error";
+        Log::LogCam("init_device,V4L2_CID_AUTO_WHITE_BALANCE error");
+    }
+    else {
+        qDebug()<<"Get AUTO_WHITE_BALANCE:"<<ctrl.value;
+        Log::LogCam(QString("init_device,Get AUTO_WHITE_BALANCE:%1").arg(ctrl.value));
+    }
+
+    ctrl.id = V4L2_CID_WHITE_BALANCE_TEMPERATURE;
+    if (-1 == xioctl(fd,VIDIOC_G_CTRL,&ctrl))
+    {
+        qDebug()<<"V4L2_CID_WHITE_BALANCE_TEMPERATURE error";
+        Log::LogCam("init_device,V4L2_CID_WHITE_BALANCE_TEMPERATURE error");
+    }
+    else {
+        qDebug()<<"Get V4L2_CID_WHITE_BALANCE_TEMPERATURE:"<<ctrl.value;
+        Log::LogCam(QString("init_device,Get V4L2_CID_WHITE_BALANCE_TEMPERATURE:%1").arg(ctrl.value));
+    }
+
+    qmutex.unlock();
+    qDebug()<<"setWhiteBalance value:"<<value;
+    //ExGlobal::updateCaliParam("WhiteBalance",value);
     return true;
 }
 

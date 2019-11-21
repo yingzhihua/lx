@@ -53,8 +53,9 @@ Item {
             color: "darkgray"
             radius: 5
         }
-        onClicked: {
-            console.log(inputName.text);
+        onClicked: {            
+            ExGlobal.sysName = inputName.text;
+            setupView.pop();
         }
     }
 

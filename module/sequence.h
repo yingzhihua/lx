@@ -75,7 +75,9 @@ public:
     Q_INVOKABLE int getAbs();
     Q_INVOKABLE bool setAbs(int value);
     Q_INVOKABLE int getGain();
-    Q_INVOKABLE bool setGain(int value);
+    Q_INVOKABLE bool setGain(int value);    
+    Q_INVOKABLE int getWhiteBalance();
+    Q_INVOKABLE bool setWhiteBalance(int value);
 
     Q_INVOKABLE bool startView(int id);
     Q_INVOKABLE bool stopView();

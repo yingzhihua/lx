@@ -33,6 +33,8 @@ public:
     bool setabsExpose(int value);
     int getGain();
     bool setGain(int value);
+    int getWhite();
+    bool setWhite(int value);
     void *getyData(){return bufy;}
     bool Running();
 

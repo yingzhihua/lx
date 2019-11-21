@@ -217,6 +217,18 @@ Item {
         }
     }
 
+    Button {
+        id: btquit
+        text: qsTr("关闭程序")
+        anchors.right: parent.right
+        anchors.rightMargin: 50
+        anchors.bottom: btCannel.top
+        anchors.bottomMargin: 100
+        onClicked: {
+            Qt.quit()
+        }
+    }
+
     MessageDialog{
         id:messageDialog
         title: "Please choose an image file"

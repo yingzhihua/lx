@@ -14,10 +14,10 @@ QString ExGlobal::t_user = "NotLoggedIn";
 QString ExGlobal::t_ReagentBox = "201";
 bool ExGlobal::test = false;
 
-QString ExGlobal::t_sysName = "样机02";
+QString ExGlobal::SysName = "样机02";
 int ExGlobal::t_sysLanguageCode = 1;
 
-QString ExGlobal::t_version = "V2.05";
+QString ExGlobal::t_version = "V2.06";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
@@ -112,10 +112,16 @@ void ExGlobal::CaliParamInit()
         SetCaliParam(query.value(0).toString(),query.value(1).toInt());
     }
 
+    sql = "select * from TextParam";
+    query = sqlitemgrinstance->select(sql);
+    while(query.next()){
+        SetTextParam(query.value(0).toString(),query.value(1).toString());
+    }
+
     sql = "select * from AssayItem order by Itemid";
     query = sqlitemgrinstance->select(sql);
     while(query.next()){
-        qDebug()<<"Itemid:"<<query.value(0).toInt()<<"ItemName:"<<query.value(1).toString()<<"ItemCT:"<<query.value(2).toInt();
+        //qDebug()<<"Itemid:"<<query.value(0).toInt()<<"ItemName:"<<query.value(1).toString()<<"ItemCT:"<<query.value(2).toInt();
         AssayItem[query.value(0).toInt()] = query.value(1).toString().toLatin1();
         ItemCT[query.value(0).toInt()] = query.value(2).toInt();
     }
@@ -281,6 +287,24 @@ void ExGlobal::updateCaliParam(const QString &caliName, int caliValue)
     SetCaliParam(caliName,caliValue);
 }
 
+void ExGlobal::SetTextParam(const QString &textName, QString textValue){
+    if (textName == "SysName")
+        SysName = textValue;
+}
+
+QString ExGlobal::getTextParam(const QString &caliName){
+    QString result;
+    if (caliName == "SysName")
+        result = SysName;
+    return result;
+}
+
+void ExGlobal::updateTextParam(const QString &textName, QString textValue){
+    QString sql = QString("replace into TextParam(ParamName,ParamValue) values('%1','%2')").arg(textName).arg(textValue);
+    sqlitemgrinstance->execute(sql);
+    SetTextParam(textName,textValue);
+}
+
 QString ExGlobal::sysLanguageName()
 {
     QString lang = "中文";
@@ -430,8 +454,4 @@ void ExGlobal::addTest(){
         if (!pTestModel->ExistTest(test.Testid))
             pTestModel->AddTest(test);
     }
-}
-
-void ExGlobal::setLockTime(int time){
-    qDebug()<<"setLockTime:"<<time;
 }

@@ -16,26 +16,24 @@ bool GlobalApplication::notify(QObject *obj, QEvent *e){
     const QMetaObject* objMeta = obj->metaObject();
     QString clName = objMeta->className();
 
-    if (clName == "QQuickApplicationWindow_QML_30" && ExGlobal::user() == "NotLoggedIn")
-    if(e->type() == QEvent::MouseButtonPress){
-        QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(e);
-        qDebug()<<"clName:"<<clName<<"mouse:"<<mouseEvent->x();
-        if (timerid != -1)
-            this->killTimer(timerid);
-        int timerout = ExGlobal::getCaliParam("LockScreenTime");
-        if (timerout != 0)
-            timerid = this->startTimer(timerout*1000);
+    if(e->type() == QEvent::MouseButtonRelease){
+        if (clName == "QQuickApplicationWindow_QML_30"){
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(e);
+            qDebug()<<"clName:"<<clName<<"mouse:"<<mouseEvent->x();
+            if (timerid != -1)
+                this->killTimer(timerid);
+            int timerout = ExGlobal::getCaliParam("LockScreenTime");
+            if (timerout != 0)
+                timerid = this->startTimer(timerout*1000);
+        }
     }
 
     return QApplication::notify(obj,e);
 }
 
-void GlobalApplication::timerTimeout(){
-    qDebug()<<"timerTimeout";
-    global->GlobalMessage(1);
-}
-
 void GlobalApplication::timerEvent(QTimerEvent *event){
     qDebug()<<"timerEvent:"<<event->timerId();
-    global->GlobalMessage(1);
+    this->killTimer(event->timerId());
+    timerid = -1;
+    global->GlobalMessage(1);    
 }

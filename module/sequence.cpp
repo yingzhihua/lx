@@ -738,6 +738,15 @@ bool Sequence::setGain(int value){
     return imageCapture->setGain(value);
 }
 
+int Sequence::getWhiteBalance(){
+    return imageCapture->getWhite();
+}
+
+bool Sequence::setWhiteBalance(int value){
+    return imageCapture->setWhite(value);
+}
+
+
 void Sequence::lxDebug(){
     qDebug()<<"lxDebug";
     //ImageAnalysis::QRDecode(QCoreApplication::applicationDirPath()+"/codebar/Cycle00.tif");
