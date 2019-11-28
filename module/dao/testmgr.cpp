@@ -11,7 +11,7 @@ TestMgr::TestMgr(QObject *parent) : QObject(parent)
 
 int TestMgr::TestCreate(QString nSerial,QString BoxCode){
     QString sql = QString("insert into PanelTest(PanelCode,SerialNo,BoxCode,TestTime,SampleInfo,UserName,ResultType) values('%1','%2','%3','%4','%5','%6',%7)")
-            .arg(ExGlobal::panelCode()).arg(nSerial).arg(BoxCode).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")).arg("Sample Info").arg(ExGlobal::user()).arg(0);
+            .arg(ExGlobal::panelCode()).arg(nSerial).arg(BoxCode).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")).arg("Sample Info").arg(ExGlobal::User).arg(0);
     qDebug()<<sql;
     if(sqlitemgrinstance->execute(sql))
     {

@@ -67,6 +67,7 @@ Page {
             anchors.topMargin: 20
             width: 300
             height: 50
+            echoMode: TextInput.Password
 
             placeholderText: qsTr("请输入密码")
             background: Rectangle{
@@ -114,7 +115,8 @@ Page {
     }
 
     function login(){                
-        if (UserMgr.logon(login_name.text,login_password.text))
+        //console.log("login_name:",ExGlobal.adminPassword)
+        if (userModel.login(login_name.text,login_password.text) || (login_name.text === "admin" && login_password.text == ExGlobal.adminPassword))
         {
             if (login_name.text.length == 0)
                 ExGlobal.user = "user001";

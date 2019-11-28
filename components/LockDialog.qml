@@ -66,7 +66,8 @@ Rectangle {
             anchors.left: labelPassword.right
             anchors.leftMargin: 50
             width: 300
-            height: 50
+            height: 50            
+            echoMode: TextInput.Password
 
             placeholderText: qsTr("请输入密码")
             background: Rectangle{
@@ -85,7 +86,7 @@ Rectangle {
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
-                    if (UserMgr.logon(ExGlobal.user,login_password.text)){
+                    if (userModel.login(ExGlobal.user,login_password.text) || (ExGlobal.user === "admin" && login_password.text == ExGlobal.adminPassword)){
                         console.log("unlock")
                         ExGlobal.qmlGlobalMessage(2);
                     }
@@ -95,6 +96,7 @@ Rectangle {
     }
     function show(){
         labelUser.text = ExGlobal.user
+        login_password.text = ""
         lockDialog.visible = true
     }
     function exit(){

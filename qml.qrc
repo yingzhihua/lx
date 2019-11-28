@@ -44,5 +44,7 @@
         <file>SetupUI/SystemParam.qml</file>
         <file>SetupUI/LockScreenSet.qml</file>
         <file>image/unlock.png</file>
+        <file>SetupUI/User.qml</file>
+        <file>SetupUI/AdminPassword.qml</file>
     </qresource>
 </RCC>

@@ -10,14 +10,15 @@ QString ExGlobal::t_panelCode = "012315";
 QString ExGlobal::t_panelName = "上呼吸道测试";
 QString ExGlobal::t_sampleCode = "SLX 01079";
 QString ExGlobal::t_sampleInfo = "华山11";
-QString ExGlobal::t_user = "NotLoggedIn";
+QString ExGlobal::User = "NotLoggedIn";
 QString ExGlobal::t_ReagentBox = "201";
 bool ExGlobal::test = false;
 
 QString ExGlobal::SysName = "样机02";
+QString ExGlobal::AdminPassword = "123456";
 int ExGlobal::t_sysLanguageCode = 1;
 
-QString ExGlobal::t_version = "V2.06";
+QString ExGlobal::t_version = "V2.07";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
@@ -45,9 +46,10 @@ int ExGlobal::V2ToolHomeX = 8178;
 int ExGlobal::V3ToolHomeX = 5686;
 int ExGlobal::VPToolHomeX = 9043;
 
-int ExGlobal::CamAbs = 500;
+int ExGlobal::CamAbs = 0;
 int ExGlobal::CamGain = 0;
 int ExGlobal::CamFocus = 0;
+int ExGlobal::CamWhiteBlance = 0;
 
 int ExGlobal::PumpSoftHomeX = 0;
 int ExGlobal::PumpToolHomeX = 0;
@@ -58,6 +60,7 @@ int ExGlobal::LockScreenTime = 30;
 static uchar ReagentBox[121];
 TestModel * ExGlobal::pTestModel = nullptr;
 TestResultModel * ExGlobal::pTestResultModel = nullptr;
+UserModel * ExGlobal::pUserModel = nullptr;
 
 QHash<int, QByteArray> ExGlobal::AssayItem;
 QHash<int, int> ExGlobal::ItemCT;
@@ -127,6 +130,7 @@ void ExGlobal::CaliParamInit()
     }
 
     addTest();
+    pUserModel->LoadUser();
 }
 
 uchar* ExGlobal::getReagentBox(QString BoxCode){
@@ -202,10 +206,12 @@ void ExGlobal::SetCaliParam(const QString &name, int caliValue)
     else if (name == "CamGain")
         CamGain = caliValue;
     else if (name == "CamFocus")
-        CamFocus = caliValue;    
+        CamFocus = caliValue;
+    else if (name == "CamWhiteBlance")
+        CamWhiteBlance = caliValue;
     else if (name == "LockScreenTime")
         LockScreenTime = caliValue;
-
+    //qDebug()<<"setCaliParam,"<<name<<",result="<<caliValue;
 }
 
 int ExGlobal::getCaliParam(const QString &caliName)
@@ -268,6 +274,8 @@ int ExGlobal::getCaliParam(const QString &caliName)
         result = CamGain;
     else if(caliName == "CamFocus")
         result = CamFocus;
+    else if(caliName == "CamWhiteBlance")
+        result = CamWhiteBlance;
     else if(caliName == "LockScreenTime")
         result = LockScreenTime;
 
@@ -290,12 +298,16 @@ void ExGlobal::updateCaliParam(const QString &caliName, int caliValue)
 void ExGlobal::SetTextParam(const QString &textName, QString textValue){
     if (textName == "SysName")
         SysName = textValue;
+    else if(textName == "AdminPassword")
+        AdminPassword = textValue;
 }
 
 QString ExGlobal::getTextParam(const QString &caliName){
     QString result;
     if (caliName == "SysName")
         result = SysName;
+    else if(caliName == "AdminPassword")
+        result = AdminPassword;
     return result;
 }
 

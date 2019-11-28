@@ -7,19 +7,19 @@ Rectangle {
     color: "darkgrey"
     ListModel{
         id:setModel
-        ListElement{name:qsTr("系统名称");info:"";qrc_res:"qrc:/SetupUI/SystemName.qml"}
-        ListElement{name:qsTr("锁屏时间");info:"";qrc_res:"qrc:/SetupUI/LockScreenSet.qml"}
-        ListElement{name:qsTr("语言");info:"";qrc_res:"qrc:/SetupUI/Incomplete.qml"}
-        ListElement{name:qsTr("管理员密码");info:"";qrc_res:"qrc:/SetupUI/Incomplete.qml"}
-        ListElement{name:qsTr("网络");info:"";qrc_res:"qrc:/SetupUI/Incomplete.qml"}
-        ListElement{name:qsTr("时间设置");info:"";qrc_res:"qrc:/SetupUI/Incomplete.qml"}
-        ListElement{name:qsTr("用户帐号");info:"";qrc_res:"qrc:/SetupUI/Incomplete.qml"}
-        ListElement{name:qsTr("机械校准");info:"";qrc_res:"qrc:/SetupUI/MachineCalibration.qml"}
+        ListElement{Eid: "SystemName"; name:qsTr("系统名称");info:"";qrc_res:"qrc:/SetupUI/SystemName.qml"}
+        ListElement{Eid: "LockTime"; name:qsTr("锁屏时间");info:"";qrc_res:"qrc:/SetupUI/LockScreenSet.qml"}
+        ListElement{Eid: "Language"; name:qsTr("语言");info:"";qrc_res:"qrc:/SetupUI/Incomplete.qml"}
+        ListElement{Eid: "AdminPassword"; name:qsTr("管理员密码");info:"";qrc_res:"qrc:/SetupUI/AdminPassword.qml"}
+        ListElement{Eid: "Wlan"; name:qsTr("网络");info:"";qrc_res:"qrc:/SetupUI/Incomplete.qml"}
+        ListElement{Eid: "TimeSet"; name:qsTr("时间设置");info:"";qrc_res:"qrc:/SetupUI/Incomplete.qml"}
+        ListElement{Eid: "User"; name:qsTr("用户帐号");info:"";qrc_res:"qrc:/SetupUI/User.qml"}
+        ListElement{Eid: "Cali"; name:qsTr("机械校准");info:"";qrc_res:"qrc:/SetupUI/MachineCalibration.qml"}
         //ListElement{name:qsTr("温度控制");info:"";qrc_res:"qrc:/SetupUI/TempCtrl.qml"}
         //ListElement{name:qsTr("帕尔贴校准");info:"";qrc_res:"qrc:/SetupUI/TempCali.qml"}
-        ListElement{name:qsTr("摄像头参数设置");info:"";qrc_res:"qrc:/SetupUI/CameraSetup.qml"}
-        ListElement{name:qsTr("测试设置");info:"";qrc_res:"qrc:/SetupUI/TestSetup.qml"}
-        ListElement{name:qsTr("版本号");info:"";qrc_res:"qrc:/SetupUI/Version.qml"}
+        ListElement{Eid: "Camera"; name:qsTr("摄像头参数设置");info:"";qrc_res:"qrc:/SetupUI/CameraSetup.qml"}
+        ListElement{Eid: "TestSetup"; name:qsTr("测试设置");info:"";qrc_res:"qrc:/SetupUI/TestSetup.qml"}
+        ListElement{Eid: "Version"; name:qsTr("版本号");info:"";qrc_res:"qrc:/SetupUI/Version.qml"}
     }
 
     ScrollView{
@@ -83,10 +83,18 @@ Rectangle {
     onTitlemsgChanged: headerMsg.text = titlemsg;
 
     Component.onCompleted: {
-        setModel.get(0).info = ExGlobal.sysName;
-        setModel.get(1).info = ExGlobal.getCaliParam("LockScreenTime")+qsTr(" 秒");
-        setModel.get(2).info = ExGlobal.sysLanguageName;
-        setModel.get(10).info = ExGlobal.version;
+        setInfo("SystemName",ExGlobal.sysName);
+        setInfo("LockTime",ExGlobal.getCaliParam("LockScreenTime")+qsTr(" 秒"));
+        setInfo("Language",ExGlobal.sysLanguageName);
+        setInfo("Version",ExGlobal.version);
+
+        if (ExGlobal.user != "admin"){
+            removeItem("User");
+            setName("AdminPassword",qsTr("设置密码"))
+        }
+
+        //removeItem("Language");
+        //removeItem("Wlan");
     }
 
     Connections{
@@ -96,6 +104,30 @@ Rectangle {
         }
         onSysNameChanged:{
             setModel.get(0).info = ExGlobal.sysName;
+        }
+    }
+
+    function removeItem(id){
+        for (var i = 0; i < setModel.count; i++){
+            if (setModel.get(i).Eid === id){
+                setModel.remove(i,1);
+            }
+        }
+    }
+
+    function setInfo(id,info){
+        for (var i = 0; i < setModel.count; i++){
+            if (setModel.get(i).Eid === id){
+                setModel.get(i).info = info
+            }
+        }
+    }
+
+    function setName(id,name){
+        for (var i = 0; i < setModel.count; i++){
+            if (setModel.get(i).Eid === id){
+                setModel.get(i).name = name
+            }
         }
     }
 }

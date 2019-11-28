@@ -5,6 +5,7 @@
 #include <QQmlEngine>
 #include "dao/testmodel.h"
 #include "dao/testresultmodel.h"
+#include "dao/usermodel.h"
 
 class ExGlobal : public QObject
 {
@@ -23,12 +24,13 @@ class ExGlobal : public QObject
     Q_PROPERTY(QString tempversion READ tempversion NOTIFY versionChanged)
     Q_PROPERTY(QString ctrlversion READ ctrlversion NOTIFY versionChanged)    
     Q_PROPERTY(int lockTime READ lockTime WRITE setLockTime NOTIFY lockTimeChanged)
+    Q_PROPERTY(QString adminPassword READ adminPassword WRITE setAdminPassword NOTIFY adminPasswordChanged)
 public:
     explicit ExGlobal(QObject *parent = nullptr);
     static void exInit();
 
-    static QString user() {return t_user;}
-    static void setUser(const QString &user){t_user = user;}
+    QString user() {return User;}
+    void setUser(const QString &user){User = user;emit userChanged();}
     static QString panelName(){return t_panelName;}
     static void setPanelName(const QString &panelName){t_panelName = panelName;}
     static QString panelCode(){return t_panelCode;}
@@ -45,6 +47,8 @@ public:
     static void setDebug(bool debug){test = debug;}
     QString sysName(){return SysName;}
     void setSysName(const QString &name){updateTextParam("SysName",name);emit sysNameChanged();}
+    QString adminPassword(){return AdminPassword;}
+    void setAdminPassword(const QString &password){updateTextParam("AdminPassword",password);emit adminPasswordChanged();}
     static QString sysLanguageName();
     static int sysLanguageCode(){return t_sysLanguageCode;}
     static QString version(){return t_version;}
@@ -103,10 +107,17 @@ public:
     static int CamAbs;
     static int CamGain;
     static int CamFocus;
+    static int CamWhiteBlance;
+
     static TestModel *pTestModel;
     static TestResultModel *pTestResultModel;
+    static UserModel *pUserModel;
+
     static QHash<int, QByteArray> AssayItem;
     static QHash<int, int> ItemCT;
+
+    static QString AdminPassword;
+    static QString User;
 signals:
     void userChanged();
     void panelNameChanged();
@@ -116,6 +127,7 @@ signals:
     void serialPortChanged();
     void debugChanged();
     void sysNameChanged();
+    void adminPasswordChanged();
     void sysLanguageNameChanged();
     void sysLanguageCodeChanged();
     void versionChanged();
@@ -126,12 +138,12 @@ private:
     static QString t_panelCode;
     static QString t_panelName;
     static QString t_sampleCode;
-    static QString t_sampleInfo;
-    static QString t_user;
+    static QString t_sampleInfo;    
     static QString t_ReagentBox;
     static bool test;
 
     static QString SysName;
+
     static int t_sysLanguageCode;
     static QString t_version;
     static QString temp_version;

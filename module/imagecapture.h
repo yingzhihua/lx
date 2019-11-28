@@ -47,9 +47,11 @@ signals:
 
 private:
     int open_device();
+    void close_device();
     int init_device();
     int init_read(unsigned int buffer_size);
     int init_mmap();
+    int uninit_device();
     int read_frame(int index);
     int clear_frame();
     int process_image(int index, const void *p, int size);
@@ -64,6 +66,9 @@ private:
     unsigned int *sum;
     QString filename;
     CaptureMode captureMode;    
+    bool stopping;
+    int internal_stop_capturing();
+    void recordParam();
 };
 
 #endif // IMAGECAPTURE_H

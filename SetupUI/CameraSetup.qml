@@ -210,6 +210,7 @@ Page {
         text: qsTr("打开自动白平衡")
         anchors.right: focusValue.right
         anchors.top: lbfocus.bottom
+        checked: Sequence.getWhiteBalance() == 0
         anchors.topMargin: 80
         font.pixelSize: 40
     }

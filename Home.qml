@@ -1,6 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.5
 import Dx.Global 1.0
+
 Page {
     property string titlemsg: ""
     property bool enableTabBar: true
@@ -10,7 +11,7 @@ Page {
     StackView{
         id: stackView
         anchors.fill: parent
-        initialItem: ExGlobal.debug?"./HomeUI/Idle.qml":"./HomeUI/Startup.qml"
+        initialItem: ExGlobal.debug?"./HomeUI/Login.qml":"./HomeUI/Startup.qml"
         //initialItem: "./HomeUI/Idle.qml"
     }
     onTitlemsgChanged: {

@@ -13,6 +13,7 @@
 
 #include "module/dao/testmodel.h"
 #include "module/dao/testresultmodel.h"
+#include "module/dao/usermodel.h"
 
 int main(int argc, char *argv[])
 {
@@ -33,6 +34,7 @@ int main(int argc, char *argv[])
     sqlitemgrinstance = new SqliteMgr();
     ExGlobal::pTestModel = new TestModel();
     ExGlobal::pTestResultModel = new TestResultModel();
+    ExGlobal::pUserModel = new UserModel();
 
     sqlitemgrinstance->conn(Log::getDir()+"/data.db","sa","123456");
     //init dao manager
@@ -52,6 +54,7 @@ int main(int argc, char *argv[])
 
     engine.rootContext()->setContextProperty("testModel",ExGlobal::pTestModel);
     engine.rootContext()->setContextProperty("testResultModel",ExGlobal::pTestResultModel);
+    engine.rootContext()->setContextProperty("userModel",ExGlobal::pUserModel);
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     engine.addImageProvider("CodeImg",sequence->imageProvider);

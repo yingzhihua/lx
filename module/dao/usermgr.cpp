@@ -1,4 +1,5 @@
 #include "usermgr.h"
+#include "../exglobal.h"
 
 QList<QString> UserMgr::getAll()
 {
@@ -22,7 +23,8 @@ bool UserMgr::logon(QString name, QString password)
     {
         return true;
     }
-    return true;
+
+    return false;
 }
 
 bool UserMgr::update(QString name, QString password){

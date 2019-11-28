@@ -205,6 +205,16 @@ void Sequence::ActionFinish(QByteArray data)
 {
     qDebug()<<"Sequence ActionFinish:"<<data.toHex(' ');
 
+    if (data[7] == '\x72'){
+        if (currSequenceId != SequenceId::Sequence_Test){
+            if (bDoorState == false)//close
+                sequenceDo(SequenceId::Sequence_OpenBox);
+            else
+                sequenceDo(SequenceId::Sequence_CloseBox);
+        }
+        return;
+    }
+
     if (currOrder != data[7])
         return;
 

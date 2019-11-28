@@ -25,6 +25,8 @@
 #define CAPTURE_COUNT 1
 #define device_name "/dev/video0"
 
+#define begin_inited false
+
 static bool camerainited = false;
 static QByteArray resultData;
 static QMutex qmutex;
@@ -153,14 +155,21 @@ ImageCapture::ImageCapture(QObject *parent) : QThread(parent),io(IO_METHOD_MMAP)
     resultData[8] = '\x00';
     resultData[9] = '\x02';
     resultData[11] = '\x55';
-//return;
-    if (open_device() != 0)
-        return;
 
-    if (init_device() != 0)
-        return;
+    bufrgb = (unsigned char *)malloc(2592 * 1944 * 3);
+    bufy = (unsigned char *)malloc(2592 * 1944);
+    buf2y = (unsigned short *)malloc(2592 * 1944 * 2);
+    sum = (unsigned int *)malloc(2592 * 1944 * 8);
 
-    camerainited = true;
+    if (open_device() == 0 && init_device() == 0)
+        camerainited = true;
+
+    if (begin_inited == false && camerainited == true){
+        uninit_device();
+        close_device();
+        camerainited = false;
+    }
+
     captureMode = CaptureMode::Idle;
 }
 
@@ -187,6 +196,14 @@ int ImageCapture::open_device(){
         return -1;
     }
     return 0;
+}
+
+void ImageCapture::close_device(){
+    if (-1 == close(fd)){
+        qDebug()<<"close video,errno:"<<errno;
+        Log::LogCam(QString("close_device,Cannot close video,errno:%1").arg(errno));
+    }
+    fd = -1;
 }
 
 int ImageCapture::init_device(){
@@ -370,10 +387,12 @@ int ImageCapture::init_device(){
     ctrl.id = V4L2_CID_EXPOSURE_ABSOLUTE;
     ctrl.value = ExGlobal::CamAbs;
 
-    if (-1 == xioctl(fd,VIDIOC_S_CTRL,&ctrl))
-    {
-        qDebug()<<"VIDIOC_S_CTRL V4L2_CID_EXPOSURE_ABSOLUTE error";
-        Log::LogCam("init_device,VIDIOC_S_CTRL V4L2_CID_EXPOSURE_ABSOLUTE error");
+    if (ctrl.value != 0){
+        if (-1 == xioctl(fd,VIDIOC_S_CTRL,&ctrl))
+        {
+            qDebug()<<"VIDIOC_S_CTRL V4L2_CID_EXPOSURE_ABSOLUTE error";
+            Log::LogCam("init_device,VIDIOC_S_CTRL V4L2_CID_EXPOSURE_ABSOLUTE error");
+        }
     }
 
     ctrl.id = V4L2_CID_EXPOSURE_ABSOLUTE;
@@ -386,6 +405,7 @@ int ImageCapture::init_device(){
         qDebug()<<"Get ABS Exposure:"<<ctrl.value;
         Log::LogCam(QString("init_device,Get ABS Exposure:%1").arg(ctrl.value));
     }
+
 #endif
 
     //set GAIN
@@ -404,10 +424,13 @@ int ImageCapture::init_device(){
 
     ctrl.id = V4L2_CID_GAIN;
     ctrl.value = ExGlobal::CamGain;
-    if (-1 == xioctl(fd,VIDIOC_S_CTRL,&ctrl))
+    if (ctrl.value != 0)
     {
-        qDebug()<<"VIDIOC_S_CTRL V4L2_CID_GAIN error";
-        Log::LogCam("init_device,VIDIOC_S_CTRL V4L2_CID_GAIN error");
+        if (-1 == xioctl(fd,VIDIOC_S_CTRL,&ctrl))
+        {
+            qDebug()<<"VIDIOC_S_CTRL V4L2_CID_GAIN error";
+            Log::LogCam("init_device,VIDIOC_S_CTRL V4L2_CID_GAIN error");
+        }
     }
 
     ctrl.id = V4L2_CID_GAIN;
@@ -434,15 +457,25 @@ int ImageCapture::init_device(){
         qDebug()<<"query WHITE BALANCE:max="<<setting.maximum<<",min="<<setting.minimum<<",step="<<setting.step<<",default="<<setting.default_value;
         Log::LogCam(QString("init_device,query WHITE BALANCE:max=%1,min=%2,step=%3,default=%4").arg(setting.maximum).arg(setting.minimum).arg(setting.step).arg(setting.default_value));
     }
-#if 0
-    ctrl.id = V4L2_CID_AUTO_WHITE_BALANCE;
-    ctrl.value = 0;
-    if (-1 == xioctl(fd,VIDIOC_S_CTRL,&ctrl))
-    {
-        qDebug()<<"VIDIOC_S_CTRL V4L2_CID_AUTO_WHITE_BALANCE error";
-        Log::LogCam("init_device,VIDIOC_S_CTRL V4L2_CID_AUTO_WHITE_BALANCE error");
+
+    ctrl.id = V4L2_CID_AUTO_WHITE_BALANCE;    
+    if (ExGlobal::CamWhiteBlance != 0){
+        ctrl.value = 0;
+        if (-1 == xioctl(fd,VIDIOC_S_CTRL,&ctrl))
+        {
+            qDebug()<<"VIDIOC_S_CTRL V4L2_CID_AUTO_WHITE_BALANCE error";
+            Log::LogCam("init_device,VIDIOC_S_CTRL V4L2_CID_AUTO_WHITE_BALANCE error");
+        }
+
+        ctrl.id = V4L2_CID_WHITE_BALANCE_TEMPERATURE;
+        ctrl.value = ExGlobal::CamWhiteBlance;
+        if (-1 == xioctl(fd,VIDIOC_S_CTRL,&ctrl))
+        {
+            qDebug()<<"V4L2_CID__WHITE_BALANCE_TEMPERATURE query error";
+            Log::LogCam("init_device,V4L2_CID__WHITE_BALANCE_TEMPERATURE query error");
+        }        
     }
-#endif
+
     ctrl.id = V4L2_CID_AUTO_WHITE_BALANCE;
     if (-1 == xioctl(fd,VIDIOC_G_CTRL,&ctrl))
     {
@@ -452,17 +485,6 @@ int ImageCapture::init_device(){
     else {
         qDebug()<<"Get AUTO_WHITE_BALANCE:"<<ctrl.value;
         Log::LogCam(QString("init_device,Get AUTO_WHITE_BALANCE:%1").arg(ctrl.value));
-    }
-
-    setting.id = V4L2_CID_WHITE_BALANCE_TEMPERATURE;
-    if (-1 == xioctl(fd,VIDIOC_QUERYCTRL,&setting))
-    {
-        qDebug()<<"V4L2_CID__WHITE_BALANCE_TEMPERATURE query error";
-        Log::LogCam("init_device,V4L2_CID__WHITE_BALANCE_TEMPERATURE query error");
-    }
-    else {
-        qDebug()<<"query WHITE_BALANCE_TEMPERATURE:max="<<setting.maximum<<",min="<<setting.minimum<<",step="<<setting.step<<",default="<<setting.default_value;
-        Log::LogCam(QString("init_device,query WHITE_BALANCE_TEMPERATURE:max=%1,min=%2,step=%3,default=%4").arg(setting.maximum).arg(setting.minimum).arg(setting.step).arg(setting.default_value));
     }
 
     ctrl.id = V4L2_CID_WHITE_BALANCE_TEMPERATURE;
@@ -478,10 +500,10 @@ int ImageCapture::init_device(){
 
 #endif
 
-    bufrgb = (unsigned char *)malloc(fmt.fmt.pix.height * fmt.fmt.pix.width * 3);
-    bufy = (unsigned char *)malloc(fmt.fmt.pix.height * fmt.fmt.pix.width);
-    buf2y = (unsigned short *)malloc(fmt.fmt.pix.height * fmt.fmt.pix.width * 2);
-    sum = (unsigned int *)malloc(fmt.fmt.pix.height * fmt.fmt.pix.width * 8);
+    //bufrgb = (unsigned char *)malloc(fmt.fmt.pix.height * fmt.fmt.pix.width * 3);
+    //bufy = (unsigned char *)malloc(fmt.fmt.pix.height * fmt.fmt.pix.width);
+    //buf2y = (unsigned short *)malloc(fmt.fmt.pix.height * fmt.fmt.pix.width * 2);
+    //sum = (unsigned int *)malloc(fmt.fmt.pix.height * fmt.fmt.pix.width * 8);
     if (io == IO_METHOD_READ)
         return init_read(fmt.fmt.pix.sizeimage);
     else
@@ -559,13 +581,46 @@ int ImageCapture::init_mmap(){
     return 0;
 }
 
+int ImageCapture::uninit_device(){
+    unsigned int i;
+    switch (io) {
+    case IO_METHOD_READ:
+        free(buffers[0].start);
+        break;
+
+    case IO_METHOD_MMAP:
+        for (i = 0; i < n_buffers; ++i)
+            if(-1 == munmap(buffers[i].start,buffers[i].length))
+            {
+                qDebug()<<"munmap error,return";
+                Log::LogCam("uninit_device,munmap,return -1");
+                return -1;
+            }
+        break;
+
+    }
+    return 0;
+}
+
 int ImageCapture::start_capturing(CaptureMode mode)
 {
     qDebug()<<"start_capturing,camerainited:"<<camerainited<<"captureMode:"<<captureMode;
     Log::LogCam(QString("start_capturing,camerainited:%1").arg(camerainited));
-    if (camerainited == false || captureMode != CaptureMode::Idle)
+
+    if (captureMode != CaptureMode::Idle)
         return -1;
+
+    if (begin_inited){
+        if (camerainited == false)
+            return -1;
+    }
+    else {
+        if (open_device() == 0 && init_device() == 0)
+            camerainited = true;
+    }
+
     captureMode = mode;
+    stopping = false;
     if (io == IO_METHOD_MMAP)
     {
         enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -596,13 +651,21 @@ int ImageCapture::start_capturing(CaptureMode mode)
 
 int ImageCapture::stop_capturing()
 {
-    qDebug()<<"stop_capturing,captureMode:"<<captureMode;
-    if (captureMode == CaptureMode::View)
-    {
-        captureMode = CaptureMode::Idle;
+    qDebug()<<"stop_capturing,captureMode:"<<captureMode<<",this.Running="<<this->isRunning();
+    if (captureMode == CaptureMode::Idle)
         return 0;
-    }
-    captureMode = CaptureMode::Idle;
+
+    if (this->isRunning())
+        stopping = true;
+    else
+        internal_stop_capturing();
+
+    return 0;
+}
+
+int ImageCapture::internal_stop_capturing(){
+    if (captureMode == CaptureMode::Idle)
+        return 0;
     if (io == IO_METHOD_MMAP){
         enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         if (-1 == xioctl(fd, VIDIOC_STREAMOFF, &type))
@@ -612,6 +675,14 @@ int ImageCapture::stop_capturing()
             return -1;
         }
     }
+
+    if (begin_inited == false){
+        uninit_device();
+        close_device();
+        camerainited = false;
+    }
+
+    captureMode = CaptureMode::Idle;
     return 0;
 }
 
@@ -808,11 +879,19 @@ void ImageCapture::run()
 
     for (int i = 1; i <= count; i++)
     {
-        qDebug()<<"Capture:"<<i;
-        Log::LogCam(QString("run,Capture:%1").arg(i));
         fd_set fds;
         struct timeval tv;
         int r;
+
+        if (stopping == true){
+            internal_stop_capturing();
+            return;
+        }
+
+        qDebug()<<"Capture:"<<i;
+        Log::LogCam(QString("run,Capture:%1").arg(i));
+        recordParam();
+
         qmutex.lock();
         FD_ZERO(&fds);
         FD_SET(fd,&fds);
@@ -851,12 +930,7 @@ void ImageCapture::run()
 
         if (captureMode == CaptureMode::View)
             i = 1;
-        else if (captureMode == CaptureMode::Idle)
-        {
-            qmutex.unlock();
-            stop_capturing();
-            return;
-        }
+
         qmutex.unlock();
     }
     resultData[10] = 0;
@@ -864,10 +938,13 @@ void ImageCapture::run()
 }
 
 int ImageCapture::getabsExpose(){
+#if 1
+    return ExGlobal::CamAbs;
+#else
     struct v4l2_control ctrl;
     struct v4l2_queryctrl setting;
 
-    if (camerainited == false)
+    if (captureMode == CaptureMode::Idle && camerainited == false && open_device() != 0)
         return -1;
 
     qmutex.lock();
@@ -879,15 +956,21 @@ int ImageCapture::getabsExpose(){
     }
     qDebug()<<"getabsExpose:"<<ctrl.value;
     qmutex.unlock();
+
+    if (begin_inited == false && captureMode == CaptureMode::Idle)
+        close_device();
     return ctrl.value;
+#endif
 }
 
 bool ImageCapture::setabsExpose(int value){
     struct v4l2_control ctrl;
 
     qDebug()<<"setabsExpose camerainited:"<<camerainited;
-    if (camerainited == false)
+
+    if (captureMode == CaptureMode::Idle && camerainited == false && open_device() != 0)
         return false;
+
     qmutex.lock();
     ctrl.id = V4L2_CID_EXPOSURE_ABSOLUTE;
     ctrl.value = value;
@@ -898,16 +981,24 @@ bool ImageCapture::setabsExpose(int value){
         Log::LogCam("setabsExpose,VIDIOC_S_CTRL V4L2_CID_EXPOSURE_ABSOLUTE error");
     }
     qmutex.unlock();
+
+    if (begin_inited == false && captureMode == CaptureMode::Idle)
+        close_device();
+
     qDebug()<<"setabsExpose value:"<<value;
     ExGlobal::updateCaliParam("CamAbs",value);   
     return true;
 }
 
 int ImageCapture::getGain(){
+#if 1
+    return ExGlobal::CamGain;
+#else
     struct v4l2_control ctrl;
 
-    if (camerainited == false)
+    if (captureMode == CaptureMode::Idle && camerainited == false && open_device() != 0)
         return -1;
+
     qmutex.lock();
     ctrl.id = V4L2_CID_GAIN;
     if (-1 == xioctl(fd,VIDIOC_G_CTRL,&ctrl))
@@ -916,15 +1007,20 @@ int ImageCapture::getGain(){
         ctrl.value = -1;
     }
     qmutex.unlock();
+
+    if (begin_inited == false && captureMode == CaptureMode::Idle)
+        close_device();
+
     qDebug()<<"getGain:"<<ctrl.value;
     return ctrl.value;
+#endif
 }
 
 bool ImageCapture::setGain(int value){
     struct v4l2_control ctrl;
 
     qDebug()<<"setGain camerainited:"<<camerainited;
-    if (camerainited == false)
+    if (captureMode == CaptureMode::Idle && camerainited == false && open_device() != 0)
         return false;
 
     qmutex.lock();
@@ -937,33 +1033,64 @@ bool ImageCapture::setGain(int value){
         Log::LogCam("setGain,VIDIOC_S_CTRL V4L2_CID_GAIN error");
     }
     qmutex.unlock();
+
+    if (begin_inited == false && captureMode == CaptureMode::Idle)
+        close_device();
+
     qDebug()<<"setGain value:"<<value;
     ExGlobal::updateCaliParam("CamGain",value);
     return true;
 }
 
 int ImageCapture::getWhite(){
+#if 1
+    return ExGlobal::CamWhiteBlance;
+#else
     struct v4l2_control ctrl;
 
-    if (camerainited == false)
+    if (captureMode == CaptureMode::Idle && camerainited == false && open_device() != 0)
         return -1;
+
     qmutex.lock();
-    ctrl.id = V4L2_CID_WHITE_BALANCE_TEMPERATURE;
+
+    ctrl.id = V4L2_CID_AUTO_WHITE_BALANCE;
     if (-1 == xioctl(fd,VIDIOC_G_CTRL,&ctrl))
     {
-        Log::LogCam("getWhiteBalance,V4L2_CID_WHITE_BALANCE_TEMPERATURE error");
-        ctrl.value = -1;
+        qDebug()<<"V4L2_CID_AUTO_WHITE_BALANCE error";
+        Log::LogCam("init_device,V4L2_CID_AUTO_WHITE_BALANCE error");
     }
+    else {
+        qDebug()<<"Get AUTO_WHITE_BALANCE:"<<ctrl.value;
+        Log::LogCam(QString("init_device,Get AUTO_WHITE_BALANCE:%1").arg(ctrl.value));
+    }
+
+    if (ctrl.value == 0){
+        ctrl.id = V4L2_CID_WHITE_BALANCE_TEMPERATURE;
+        if (-1 == xioctl(fd,VIDIOC_G_CTRL,&ctrl))
+        {
+            Log::LogCam("getWhiteBalance,V4L2_CID_WHITE_BALANCE_TEMPERATURE error");
+            ctrl.value = -1;
+        }
+    }
+    else
+        ctrl.value = 0;
+
     qmutex.unlock();
+
+    if (begin_inited == false && captureMode == CaptureMode::Idle)
+        close_device();
+
+    Log::LogCam("getWhiteBalance, error");
     qDebug()<<"getWhiteBalance:"<<ctrl.value;
     return ctrl.value;
+#endif
 }
 
 bool ImageCapture::setWhite(int value){
     struct v4l2_control ctrl;
 
     qDebug()<<"setWhiteBalance camerainited:"<<camerainited<<"value="<<value;
-    if (camerainited == false)
+    if (captureMode == CaptureMode::Idle && camerainited == false && open_device() != 0)
         return false;
 
     qmutex.lock();
@@ -1012,11 +1139,50 @@ bool ImageCapture::setWhite(int value){
     }
 
     qmutex.unlock();
+    if (begin_inited == false && captureMode == CaptureMode::Idle)
+        close_device();
     qDebug()<<"setWhiteBalance value:"<<value;
-    //ExGlobal::updateCaliParam("WhiteBalance",value);
+    ExGlobal::updateCaliParam("CamWhiteBlance",value);
     return true;
 }
 
+void ImageCapture::recordParam(){
+    struct v4l2_control ctrl;
+
+    ctrl.id = V4L2_CID_EXPOSURE_ABSOLUTE;
+    if (-1 == xioctl(fd,VIDIOC_G_CTRL,&ctrl))
+    {
+        qDebug()<<"V4L2_CID_EXPOSURE error";
+        Log::LogCam("recordParam,V4L2_CID_EXPOSURE error");
+    }
+    else {
+        qDebug()<<"Get ABS Exposure:"<<ctrl.value;
+        Log::LogCam(QString("recordParam,Get ABS Exposure:%1").arg(ctrl.value));
+    }
+
+    ctrl.id = V4L2_CID_AUTO_WHITE_BALANCE;
+    if (-1 == xioctl(fd,VIDIOC_G_CTRL,&ctrl))
+    {
+        qDebug()<<"V4L2_CID_AUTO_WHITE_BALANCE error";
+        Log::LogCam("recordParam,V4L2_CID_AUTO_WHITE_BALANCE error");
+    }
+    else {
+        qDebug()<<"Get AUTO_WHITE_BALANCE:"<<ctrl.value;
+        Log::LogCam(QString("recordParam,Get AUTO_WHITE_BALANCE:%1").arg(ctrl.value));
+    }
+
+    ctrl.id = V4L2_CID_WHITE_BALANCE_TEMPERATURE;
+    if (-1 == xioctl(fd,VIDIOC_G_CTRL,&ctrl))
+    {
+        qDebug()<<"V4L2_CID_WHITE_BALANCE_TEMPERATURE error";
+        Log::LogCam("recordParam,V4L2_CID_WHITE_BALANCE_TEMPERATURE error");
+    }
+    else {
+        qDebug()<<"Get V4L2_CID_WHITE_BALANCE_TEMPERATURE:"<<ctrl.value;
+        Log::LogCam(QString("recordParam,Get V4L2_CID_WHITE_BALANCE_TEMPERATURE:%1").arg(ctrl.value));
+    }
+
+}
 bool ImageCapture::Running(){
     int count = 0;
     while(this->isRunning() && count<30){
