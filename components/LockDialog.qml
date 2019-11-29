@@ -86,17 +86,34 @@ Rectangle {
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
-                    if (userModel.login(ExGlobal.user,login_password.text) || (ExGlobal.user === "admin" && login_password.text == ExGlobal.adminPassword)){
+                    if (userModel.login(ExGlobal.user,login_password.text)){
                         console.log("unlock")
                         ExGlobal.qmlGlobalMessage(2);
                     }
+                    else
+                        labelMessage.text = qsTr("密码错误！")
                 }
             }
+        }
+
+        Text{
+            id:labelMessage
+            anchors.left: login_password.right
+            anchors.leftMargin: 0
+            anchors.top: login_password.bottom
+            anchors.topMargin: 60
+            width: 80
+            height: 30
+            text: ""
+            horizontalAlignment: Text.AlignRight
+            verticalAlignment: Text.AlignVCenter
+            font.pixelSize: 40
         }
     }
     function show(){
         labelUser.text = ExGlobal.user
         login_password.text = ""
+        labelMessage.text = ""
         lockDialog.visible = true
     }
     function exit(){

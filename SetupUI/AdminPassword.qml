@@ -83,7 +83,10 @@ Item {
             radius: 5
         }
         onClicked: {
+            if (userModel.updatePassword(inputOldPassword.text,inputNewPassword.text))
             setupView.pop();
+            else
+                labelMessage.text = qsTr("密码错误！")
         }
     }
 
@@ -95,7 +98,7 @@ Item {
         anchors.topMargin: 60
         width: 80
         height: 30
-        text: qsTr("错误提示！")
+        text: ""
         horizontalAlignment: Text.AlignRight
         verticalAlignment: Text.AlignVCenter
         font.pixelSize: 40

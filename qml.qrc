@@ -46,5 +46,7 @@
         <file>image/unlock.png</file>
         <file>SetupUI/User.qml</file>
         <file>SetupUI/AdminPassword.qml</file>
+        <file>SetupUI/LanguageSet.qml</file>
+        <file>SetupUI/TimeSet.qml</file>
     </qresource>
 </RCC>

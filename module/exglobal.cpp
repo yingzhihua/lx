@@ -16,7 +16,7 @@ bool ExGlobal::test = false;
 
 QString ExGlobal::SysName = "样机02";
 QString ExGlobal::AdminPassword = "123456";
-int ExGlobal::t_sysLanguageCode = 1;
+int ExGlobal::LanguageCode = 1;
 
 QString ExGlobal::t_version = "V2.07";
 QString ExGlobal::temp_version = "V0.00";
@@ -56,6 +56,7 @@ int ExGlobal::PumpToolHomeX = 0;
 int ExGlobal::PumpSoftHomeOffset = 0;
 
 int ExGlobal::LockScreenTime = 30;
+bool ExGlobal::bChildImage = false;
 
 static uchar ReagentBox[121];
 TestModel * ExGlobal::pTestModel = nullptr;
@@ -211,6 +212,8 @@ void ExGlobal::SetCaliParam(const QString &name, int caliValue)
         CamWhiteBlance = caliValue;
     else if (name == "LockScreenTime")
         LockScreenTime = caliValue;
+    else if (name == "LanguageCode")
+        LanguageCode = caliValue;
     //qDebug()<<"setCaliParam,"<<name<<",result="<<caliValue;
 }
 
@@ -278,6 +281,8 @@ int ExGlobal::getCaliParam(const QString &caliName)
         result = CamWhiteBlance;
     else if(caliName == "LockScreenTime")
         result = LockScreenTime;
+    else if(caliName == "LanguageCode")
+        result = LanguageCode;
 
     qDebug()<<"getCaliParam,"<<caliName<<",result="<<result;
     return result;
@@ -320,7 +325,7 @@ void ExGlobal::updateTextParam(const QString &textName, QString textValue){
 QString ExGlobal::sysLanguageName()
 {
     QString lang = "中文";
-    if (t_sysLanguageCode == 0)
+    if (LanguageCode == 0)
         lang = "English";
 
     return lang;

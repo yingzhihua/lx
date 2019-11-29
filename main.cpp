@@ -56,6 +56,13 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("testResultModel",ExGlobal::pTestResultModel);
     engine.rootContext()->setContextProperty("userModel",ExGlobal::pUserModel);
 
+    if (ExGlobal::LanguageCode == 0){
+        QTranslator tor;
+        tor.load(Log::getDir()+"/en_US.qm");
+        app.installTranslator(&tor);
+    }
+
+
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     engine.addImageProvider("CodeImg",sequence->imageProvider);
 

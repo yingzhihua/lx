@@ -794,18 +794,22 @@ int ImageCapture::process_image(int i, const void *p, int size){
         char filenames[100] = {0};
         unsigned char *data = (unsigned char *)p;
 
-#if 0
-        sprintf(filenames,"%s/%s_%02d.bmp",Log::getDir().toLatin1().data(),filename.toLatin1().data(),i);
-        convert_yuv_to_rgb_buffer((unsigned char *)p,bufrgb,2592,1944);
-        QImage image(bufrgb,2592,1944,QImage::Format_RGB888);
-        image.save(filenames);
+#if 1
+        if (ExGlobal::bChildImage){
+            sprintf(filenames,"%s/%s_%02d.bmp",Log::getDir().toLatin1().data(),filename.toLatin1().data(),i);
+            convert_yuv_to_rgb_buffer((unsigned char *)p,bufrgb,2592,1944);
+            QImage image(bufrgb,2592,1944,QImage::Format_RGB888);
+            image.save(filenames);
+        }
 #endif
-#if 0
-        sprintf(filenames,"%s/%s_%02d.y",Log::getDir().toLatin1().data(),filename.toLatin1().data(),i);
-        convert_yuv_to_y_buffer((unsigned char *)p,bufy,2592,1944);
-        FILE *file_f = fopen(filenames,"w");
-        fwrite(bufy,size>>1,1,file_f);
-        fclose(file_f);
+#if 1
+        if (ExGlobal::bChildImage){
+            sprintf(filenames,"%s/%s_%02d.y",Log::getDir().toLatin1().data(),filename.toLatin1().data(),i);
+            convert_yuv_to_y_buffer((unsigned char *)p,bufy,2592,1944);
+            FILE *file_f = fopen(filenames,"w");
+            fwrite(bufy,size>>1,1,file_f);
+            fclose(file_f);
+        }
 #endif
 
         if (count == 1)

@@ -1,4 +1,6 @@
 #include "usermodel.h"
+#include "../exglobal.h"
+
 #include<QDebug>
 UserModel::UserModel(QObject *parent):QAbstractListModel (parent)
 {
@@ -95,5 +97,32 @@ bool UserModel::login(QString name, QString password){
         return true;
     }
 
+    if (name == "admin" && password == ExGlobal::AdminPassword)
+        return true;
+
     return true;
+}
+
+bool UserModel::updatePassword(QString oldpassword, QString newpassword){
+    if (ExGlobal::User == "admin")
+    {
+        if (oldpassword == ExGlobal::AdminPassword)
+        {
+            ExGlobal::updateTextParam("AdminPassword",newpassword);
+            return true;
+        }
+    }
+    else{
+        QString sql = "SELECT * FROM User WHERE Name = '"+ExGlobal::User+"' AND Password = '"+oldpassword+"'";
+        QSqlQuery query = sqlitemgrinstance->select(sql);
+
+        while(query.next())
+        {
+            if (sqlitemgrinstance->execute("update User set Password = '"+newpassword+"' where Name = '"+ExGlobal::User+"'"))
+                return true;
+            else
+                return false;
+        }
+    }
+    return false;
 }

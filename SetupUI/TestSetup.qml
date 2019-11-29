@@ -59,6 +59,18 @@ Item {
     }
 
     CheckBox{
+        id:cbChildImage
+        anchors.left: btTest.right
+        anchors.leftMargin: 100
+        anchors.verticalCenter: btLoad.verticalCenter
+        text: "记录子图像"
+        checked: ExGlobal.childImage
+        onClicked: {
+            ExGlobal.childImage = cbChildImage.checked;
+        }
+    }
+
+    CheckBox{
         id: openlight
         anchors.left: parent.left
         anchors.leftMargin: 50

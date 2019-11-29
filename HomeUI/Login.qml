@@ -98,11 +98,26 @@ Page {
             }
             onClicked: login()
         }
+
+        Text{
+            id:labelMessage
+            anchors.left: login_btlogin.right
+            anchors.leftMargin: 100
+            anchors.top: login_btlogin.bottom
+            anchors.topMargin: 60
+            width: 80
+            height: 30
+            text: ""
+            horizontalAlignment: Text.AlignRight
+            verticalAlignment: Text.AlignVCenter
+            font.pixelSize: 40
+        }
     }
 
     Component.onCompleted: {
         home_page.titlemsg=qsTr("登录");
         home_page.enableTabBar = false;
+        labelMessage.text = "";
         console.log("Login Completed");
     }
 
@@ -116,7 +131,7 @@ Page {
 
     function login(){                
         //console.log("login_name:",ExGlobal.adminPassword)
-        if (userModel.login(login_name.text,login_password.text) || (login_name.text === "admin" && login_password.text == ExGlobal.adminPassword))
+        if (userModel.login(login_name.text,login_password.text))
         {
             if (login_name.text.length == 0)
                 ExGlobal.user = "user001";
@@ -126,6 +141,8 @@ Page {
             stackView.pop();
             stackView.push("qrc:/HomeUI/Idle.qml");
         }
+        else
+            labelMessage.text = qsTr("密码错误！")
     }
 
     function createtable(){

@@ -9,10 +9,10 @@ Rectangle {
         id:setModel
         ListElement{Eid: "SystemName"; name:qsTr("系统名称");info:"";qrc_res:"qrc:/SetupUI/SystemName.qml"}
         ListElement{Eid: "LockTime"; name:qsTr("锁屏时间");info:"";qrc_res:"qrc:/SetupUI/LockScreenSet.qml"}
-        ListElement{Eid: "Language"; name:qsTr("语言");info:"";qrc_res:"qrc:/SetupUI/Incomplete.qml"}
+        ListElement{Eid: "Language"; name:qsTr("语言");info:"";qrc_res:"qrc:/SetupUI/LanguageSet.qml"}
         ListElement{Eid: "AdminPassword"; name:qsTr("管理员密码");info:"";qrc_res:"qrc:/SetupUI/AdminPassword.qml"}
         ListElement{Eid: "Wlan"; name:qsTr("网络");info:"";qrc_res:"qrc:/SetupUI/Incomplete.qml"}
-        ListElement{Eid: "TimeSet"; name:qsTr("时间设置");info:"";qrc_res:"qrc:/SetupUI/Incomplete.qml"}
+        ListElement{Eid: "TimeSet"; name:qsTr("时间设置");info:"";qrc_res:"qrc:/SetupUI/TimeSet.qml"}
         ListElement{Eid: "User"; name:qsTr("用户帐号");info:"";qrc_res:"qrc:/SetupUI/User.qml"}
         ListElement{Eid: "Cali"; name:qsTr("机械校准");info:"";qrc_res:"qrc:/SetupUI/MachineCalibration.qml"}
         //ListElement{name:qsTr("温度控制");info:"";qrc_res:"qrc:/SetupUI/TempCtrl.qml"}
@@ -105,12 +105,35 @@ Rectangle {
         onSysNameChanged:{
             setModel.get(0).info = ExGlobal.sysName;
         }
+        onUserChanged:{
+            console.log("onUserChanged")
+            if (ExGlobal.user != "admin"){
+                removeItem("User");
+                setName("AdminPassword",qsTr("设置密码"))
+            }
+            else{
+                setName("AdminPassword",qsTr("管理员密码"))
+                insertItem("TimeSet",{Eid: "User", name:qsTr("用户帐号"),info:"",qrc_res:"qrc:/SetupUI/User.qml"})
+            }
+        }
+        onSysLanguageCodeChanged:{
+            console.log("onSysLanguageCodeChanged")
+            setInfo("Language",ExGlobal.sysLanguageName);
+        }
     }
 
     function removeItem(id){
         for (var i = 0; i < setModel.count; i++){
             if (setModel.get(i).Eid === id){
                 setModel.remove(i,1);
+            }
+        }
+    }
+    function insertItem(id,item){
+        for (var i = 0; i < setModel.count; i++){
+            if (setModel.get(i).Eid === id){
+                setModel.insert(i,item)
+                return;
             }
         }
     }

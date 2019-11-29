@@ -37,6 +37,7 @@ public:
     Q_INVOKABLE bool addUser(QString name,QString password);
     Q_INVOKABLE bool deleteUser(int row);
     Q_INVOKABLE bool login(QString name,QString password);
+    Q_INVOKABLE bool updatePassword(QString oldpassword,QString newpassword);
 
 protected:
     QHash<int, QByteArray> roleNames() const;

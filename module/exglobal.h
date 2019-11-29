@@ -19,12 +19,13 @@ class ExGlobal : public QObject
     Q_PROPERTY(bool debug READ isDebug WRITE setDebug NOTIFY debugChanged)
     Q_PROPERTY(QString sysName READ sysName WRITE setSysName NOTIFY sysNameChanged)
     Q_PROPERTY(QString sysLanguageName READ sysLanguageName NOTIFY sysLanguageNameChanged)
-    Q_PROPERTY(int sysLanguageCode READ sysLanguageCode NOTIFY sysLanguageCodeChanged)
+    Q_PROPERTY(int sysLanguageCode READ sysLanguageCode WRITE setSysLanguageCode NOTIFY sysLanguageCodeChanged)
     Q_PROPERTY(QString version READ version NOTIFY versionChanged)
     Q_PROPERTY(QString tempversion READ tempversion NOTIFY versionChanged)
     Q_PROPERTY(QString ctrlversion READ ctrlversion NOTIFY versionChanged)    
     Q_PROPERTY(int lockTime READ lockTime WRITE setLockTime NOTIFY lockTimeChanged)
     Q_PROPERTY(QString adminPassword READ adminPassword WRITE setAdminPassword NOTIFY adminPasswordChanged)
+    Q_PROPERTY(bool childImage READ childImage WRITE setChildImage)
 public:
     explicit ExGlobal(QObject *parent = nullptr);
     static void exInit();
@@ -50,7 +51,8 @@ public:
     QString adminPassword(){return AdminPassword;}
     void setAdminPassword(const QString &password){updateTextParam("AdminPassword",password);emit adminPasswordChanged();}
     static QString sysLanguageName();
-    static int sysLanguageCode(){return t_sysLanguageCode;}
+    int sysLanguageCode(){return LanguageCode;}
+    void setSysLanguageCode(int code){updateCaliParam("LanguageCode",code);emit sysLanguageCodeChanged();}
     static QString version(){return t_version;}
     static QString tempversion(){return temp_version;}
     static QString ctrlversion(){return ctrl_version;}
@@ -58,6 +60,8 @@ public:
     static void setctrlversion(const QString &version){ctrl_version = version;}
     int lockTime(){return getCaliParam("LockScreenTime");}
     void setLockTime(int time){updateCaliParam("LockScreenTime",time);emit lockTimeChanged();}
+    bool childImage(){return bChildImage;}
+    void setChildImage(bool set){bChildImage = set;}
 
     static uchar* getReagentBox(QString BoxCode);
     static void addTest();
@@ -102,7 +106,7 @@ public:
     static int VDSoftHomeX;
 
     static int LockScreenTime;
-
+    static int LanguageCode;
 
     static int CamAbs;
     static int CamGain;
@@ -118,6 +122,7 @@ public:
 
     static QString AdminPassword;
     static QString User;
+    static bool bChildImage;
 signals:
     void userChanged();
     void panelNameChanged();
@@ -142,9 +147,7 @@ private:
     static QString t_ReagentBox;
     static bool test;
 
-    static QString SysName;
-
-    static int t_sysLanguageCode;
+    static QString SysName;    
     static QString t_version;
     static QString temp_version;
     static QString ctrl_version;
