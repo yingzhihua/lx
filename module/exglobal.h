@@ -25,7 +25,7 @@ class ExGlobal : public QObject
     Q_PROPERTY(QString ctrlversion READ ctrlversion NOTIFY versionChanged)    
     Q_PROPERTY(int lockTime READ lockTime WRITE setLockTime NOTIFY lockTimeChanged)
     Q_PROPERTY(QString adminPassword READ adminPassword WRITE setAdminPassword NOTIFY adminPasswordChanged)
-    Q_PROPERTY(bool childImage READ childImage WRITE setChildImage)
+    Q_PROPERTY(bool childImage READ childImage WRITE setChildImage NOTIFY childImageChanged)
 public:
     explicit ExGlobal(QObject *parent = nullptr);
     static void exInit();
@@ -70,6 +70,7 @@ public:
     Q_INVOKABLE static void updateTextParam(const QString &caliName, QString caliValue);
     Q_INVOKABLE static QString getTextParam(const QString &caliName);
     Q_INVOKABLE static QString getIP();
+    Q_INVOKABLE static bool setTime(QString time);
     Q_INVOKABLE static void exClose();
     Q_INVOKABLE static QString getPosName(int pos);
     Q_INVOKABLE static int getItemCT(int Itemid);
@@ -135,6 +136,7 @@ signals:
     void adminPasswordChanged();
     void sysLanguageNameChanged();
     void sysLanguageCodeChanged();
+    void childImageChanged();
     void versionChanged();
     void lockTimeChanged();
     void exglobalMessage(int code);

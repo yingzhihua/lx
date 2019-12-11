@@ -500,6 +500,84 @@ int ImageCapture::init_device(){
 
 #endif
 
+    setting.id = V4L2_CID_BACKLIGHT_COMPENSATION;
+    if (-1 == xioctl(fd,VIDIOC_QUERYCTRL,&setting))
+    {
+        qDebug()<<"V4L2_CID_BACKLIGHT_COMPENSATION query error";
+        Log::LogCam("init_device,V4L2_CID_BACKLIGHT_COMPENSATION query error");
+    }
+    else {
+        qDebug()<<"query V4L2_CID_BACKLIGHT_COMPENSATION:max="<<setting.maximum<<",min="<<setting.minimum<<",step="<<setting.step<<",default="<<setting.default_value;
+        Log::LogCam(QString("init_device,query backlight compensation:max=%1,min=%2,step=%3,default=%4").arg(setting.maximum).arg(setting.minimum).arg(setting.step).arg(setting.default_value));
+    }
+
+    ctrl.id = V4L2_CID_BACKLIGHT_COMPENSATION;
+    ctrl.value = 0;
+    if (-1 == xioctl(fd,VIDIOC_S_CTRL,&ctrl))
+    {
+        qDebug()<<"VIDIOC_S_CTRL V4L2_CID_BACKLIGHT_COMPENSATION error";
+        Log::LogCam("init_device,VIDIOC_S_CTRL V4L2_CID_BACKLIGHT_COMPENSATION error");
+    }
+
+    ctrl.id = V4L2_CID_BACKLIGHT_COMPENSATION;
+    if (-1 == xioctl(fd,VIDIOC_G_CTRL,&ctrl))
+    {
+        qDebug()<<"V4L2_CID_BACKLIGHT_COMPENSATION error";
+        Log::LogCam("init_device,V4L2_CID_BACKLIGHT_COMPENSATION error");
+    }
+    else {
+        qDebug()<<"Get backlight compensation:"<<ctrl.value;
+        Log::LogCam(QString("init_device,Get backlight compensation:%1").arg(ctrl.value));
+    }
+
+    //set auto brightness
+#if 0
+    qDebug()<<"start query brightness";
+    setting.id = V4L2_CID_BRIGHTNESS;
+    if (-1 == xioctl(fd,VIDIOC_QUERYCTRL,&setting))
+    {
+        qDebug()<<"V4L2_CID_BRIGHTNESS query error";
+        Log::LogCam("init_device,V4L2_CID_BRIGHTNESS query error");
+    }
+    else {
+        qDebug()<<"query V4L2_CID_BRIGHTNESS:max="<<setting.maximum<<",min="<<setting.minimum<<",step="<<setting.step<<",default="<<setting.default_value;
+        Log::LogCam(QString("init_device,query brightness:max=%1,min=%2,step=%3,default=%4").arg(setting.maximum).arg(setting.minimum).arg(setting.step).arg(setting.default_value));
+    }
+
+    ctrl.id = V4L2_CID_BRIGHTNESS;
+    if (-1 == xioctl(fd,VIDIOC_G_CTRL,&ctrl))
+    {
+        qDebug()<<"V4L2_CID_BRIGHTNESS error";
+        Log::LogCam("init_device,V4L2_CID_AUTOBRIGHTNESS error");
+    }
+    else {
+        qDebug()<<"Get BRIGHTNESS:"<<ctrl.value;
+        Log::LogCam(QString("init_device,Get BRIGHTNESS:%1").arg(ctrl.value));
+    }
+
+    setting.id = V4L2_CID_AUTOBRIGHTNESS;
+    if (-1 == xioctl(fd,VIDIOC_QUERYCTRL,&setting))
+    {
+        qDebug()<<"V4L2_CID_AUTOBRIGHTNESS query error";
+        Log::LogCam("init_device,V4L2_CID_AUTOBRIGHTNESS query error");
+    }
+    else {
+        qDebug()<<"query auto brightness:max="<<setting.maximum<<",min="<<setting.minimum<<",step="<<setting.step<<",default="<<setting.default_value;
+        Log::LogCam(QString("init_device,query brightness:max=%1,min=%2,step=%3,default=%4").arg(setting.maximum).arg(setting.minimum).arg(setting.step).arg(setting.default_value));
+    }
+
+    ctrl.id = V4L2_CID_AUTOBRIGHTNESS;
+    if (-1 == xioctl(fd,VIDIOC_G_CTRL,&ctrl))
+    {
+        qDebug()<<"V4L2_CID_AUTOBRIGHTNESS error";
+        Log::LogCam("init_device,V4L2_CID_AUTOBRIGHTNESS error");
+    }
+    else {
+        qDebug()<<"Get AUTOBRIGHTNESS:"<<ctrl.value;
+        Log::LogCam(QString("init_device,Get AUTOBRIGHTNESS:%1").arg(ctrl.value));
+    }
+#endif
+
     //bufrgb = (unsigned char *)malloc(fmt.fmt.pix.height * fmt.fmt.pix.width * 3);
     //bufy = (unsigned char *)malloc(fmt.fmt.pix.height * fmt.fmt.pix.width);
     //buf2y = (unsigned short *)malloc(fmt.fmt.pix.height * fmt.fmt.pix.width * 2);

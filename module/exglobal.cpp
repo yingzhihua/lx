@@ -18,7 +18,7 @@ QString ExGlobal::SysName = "样机02";
 QString ExGlobal::AdminPassword = "123456";
 int ExGlobal::LanguageCode = 1;
 
-QString ExGlobal::t_version = "V2.07";
+QString ExGlobal::t_version = "V2.09";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
@@ -88,6 +88,13 @@ QString ExGlobal::getIP(){
         if(hostAddress != QHostAddress::LocalHost && hostAddress.toIPv4Address())
             return hostAddress.toString();
     return "127.0.0.1";
+}
+
+bool ExGlobal::setTime(QString time){
+    QString order = "date -s '"+time+"'";
+    int result = system(order.toLatin1().data());
+    qDebug()<<"setTime,result="<<result;
+    return true;
 }
 
 void ExGlobal::exInit()

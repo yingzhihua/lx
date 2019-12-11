@@ -1,61 +1,85 @@
 import QtQuick 2.12
+import QtQuick.Controls 1.6
 import QtQuick.Controls 2.5
+import QtQuick.Controls.Styles 1.4
 import "../components"
 import Dx.Global 1.0
-Item {
-    Text{
-        id:labelName
-        anchors.centerIn: parent
-        anchors.horizontalCenterOffset: -100
-        anchors.verticalCenterOffset: -50
-        width: 80
-        height: 30
-        text: qsTr("系统名称：")
-        horizontalAlignment: Text.AlignRight
-        verticalAlignment: Text.AlignVCenter
-        font.pixelSize: 40
-    }
 
-    TextField{
-        id:inputName
-        anchors.verticalCenter: labelName.verticalCenter
-        anchors.left: labelName.right
-        anchors.leftMargin: 50
-        width:300
-        height: 50
-        verticalAlignment: Text.AlignBottom
-        font.pixelSize: 20
-        background: Rectangle{
-            border.color: "darkgray"
-            radius: 5
+Item {
+    Calendar{
+        id: calendar
+        anchors.centerIn: parent
+        anchors.verticalCenterOffset: -100        
+
+        style: CalendarStyle{
+            gridVisible: false
         }
 
-
-    }
-    Button{
-        id: btSave
-        anchors.top: labelName.bottom
-        anchors.topMargin: 80
-        anchors.horizontalCenter: labelName.horizontalCenter
-        anchors.horizontalCenterOffset: 100
-        width: 150
-        height: 50
-
-        contentItem: Text {
-                  text: qsTr("设置")
-                  color: "white"
-                  horizontalAlignment: Text.AlignHCenter
-                  verticalAlignment: Text.AlignVCenter
-                  elide: Text.ElideRight
-                  font.pixelSize: 30
-              }
-        background: Rectangle{
-            color: "darkgray"
-            radius: 5
+        onSelectedDateChanged: {
+            console.debug(calendar.selectedDate.toLocaleDateString(Qt.locale("en_US"),"yyyy-MM-dd"))
+            console.debug("2----",calendar.selectedDate.toLocaleString(Qt.locale("en_US"),"yyyy-MM-dd HH:mm:ss"))
+            console.debug(calendar.selectedDate.getTime())
         }
         onClicked: {
-            ExGlobal.sysName = inputName.text;
-            setupView.pop();
+            console.debug("click",date)
+        }
+    }
+
+    Row{
+        id:rowData
+        anchors.top: calendar.bottom
+        anchors.topMargin: 50
+        anchors.left: calendar.left
+        anchors.leftMargin: -100
+
+        Text {
+            width: 90
+            horizontalAlignment: Text.AlignRight
+            text: qsTr("时：")
+        }
+
+        SpinBox{
+            id:spHour
+            width: 150
+            from:0
+            to:23
+            stepSize: 1
+        }
+        Text{
+            width: 90
+            horizontalAlignment: Text.AlignRight
+            text:qsTr("分：")
+        }
+        SpinBox{
+            id:spMinute
+            width: 150
+            from:0
+            to:59
+        }
+        Text{
+            width: 90
+            horizontalAlignment: Text.AlignRight
+            text:qsTr("秒：")
+        }
+        SpinBox{
+            id:spSecond
+            width: 150
+            from:0
+            to:59
+        }
+    }
+
+    Button{
+        id:startView
+        anchors.horizontalCenter: calendar.horizontalCenter
+        anchors.top: rowData.bottom
+        anchors.topMargin: 50
+        text: qsTr("设置")
+
+        onClicked: {
+            var setStr = calendar.selectedDate.toLocaleDateString(Qt.locale("en_US"),"yyyy-MM-dd")+" "+spHour.value+":"+spMinute.value+":"+spSecond.value
+            console.debug("set--",setStr)
+            ExGlobal.setTime(setStr)
         }
     }
 
@@ -69,9 +93,14 @@ Item {
             setupView.pop();
         }
     }
-
     Component.onCompleted: {
-        inputName.text = ExGlobal.sysName
-    }
+        console.debug(calendar.selectedDate.toLocaleDateString())
+        if (ExGlobal.sysLanguageCode == 0)
+            calendar.locale = Qt.locale("en_US");
 
+        var dt = new Date();
+        spHour.value = dt.getHours()
+        spMinute.value = dt.getMinutes()
+        spSecond.value = dt.getSeconds()
+    }
 }

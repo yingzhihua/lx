@@ -59,7 +59,7 @@ public:
     Q_PROPERTY(bool box READ readBoxState NOTIFY boxStateChanged)
 
     Q_INVOKABLE bool sequenceDo(SequenceId id);
-
+    Q_INVOKABLE QString getCurrTestTime();
     Q_INVOKABLE bool actionDo(QString device, int value, int param1, int param2, int param3);
     Q_INVOKABLE void sequenceCancel();
     Q_INVOKABLE QString sequenceMessage();

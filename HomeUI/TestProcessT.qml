@@ -187,7 +187,7 @@ Page {
                 //stackView.push("qrc:/HomeUI/Idle.qml");
             }
             else
-                headerMsg.text = "预计剩余"+((total-finish)/1000)+"秒";
+                headerMsg.text = "预计剩余"+((total-finish)/1000)+"秒，"+"  耗时："+Sequence.getCurrTestTime();
             message.text = Sequence.sequenceMessage();
         }
 

@@ -11,6 +11,7 @@ static QDomDocument doc;
 static char currOrder = 0;
 static int currCameraCaptureType = 0;
 static int currCameraCycle = 0;
+static QDateTime testStartTime;
 Sequence::Sequence(QObject *parent) : QObject(parent)
 {    
     imageAna = new ImageAnalysis();
@@ -85,6 +86,10 @@ void Sequence::sequenceSetPanel(QString panelName)
     }
 }
 
+QString Sequence::getCurrTestTime(){
+    return QDateTime::fromMSecsSinceEpoch(QDateTime::currentDateTime().toMSecsSinceEpoch() - testStartTime.toMSecsSinceEpoch()).toUTC().toString("hh:mm:ss");
+}
+
 bool Sequence::sequenceDo(SequenceId id)
 {
     if (currSequenceId != SequenceId::Sequence_Idle)
@@ -103,8 +108,8 @@ bool Sequence::sequenceDo(SequenceId id)
         {
             if (sequenceAction.attribute("PanelCode")==ExGlobal::panelCode())
             {
-                QDateTime current_time = QDateTime::currentDateTime();
-                QString current_time_str = current_time.toString("yyyyMMdd_hhmmss");
+                testStartTime = QDateTime::currentDateTime();
+                QString current_time_str = testStartTime.toString("yyyyMMdd_hhmmss");
                 Log::setDir(QCoreApplication::applicationDirPath()+"/"+current_time_str);
                 imageCapture->start_capturing(ImageCapture::CaptureMode::Capture);                
                 ExGlobal::setPanelName(sequenceAction.attribute("PanelName"));
@@ -166,6 +171,7 @@ void Sequence::sequenceCancel()
     qDebug()<<"sequenceCancel:"<<",currSequenceId:"<<currSequenceId<<",durationState:"<<durationState<<",bFinishAction:"<<bFinishAction;
     if (currSequenceId != SequenceId::Sequence_Test)
         return;
+    imageCapture->stop_capturing();
 
     if(durationState == TimeState::running)
         timer->stop();
@@ -282,9 +288,10 @@ void Sequence::ActionFinish(QByteArray data)
         }        
     }
     else if (data[1] == '\x04'){
+        if (data[2] == '\x01')
+            emit callQmlRefeshQrImg();
         data.remove(0,10);
         emit qrDecode(data.data());
-        emit callQmlRefeshQrImg();
     }
 
 

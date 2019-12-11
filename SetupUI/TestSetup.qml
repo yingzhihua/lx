@@ -261,7 +261,7 @@ Item {
             messageTest.text = info;
         }
         onCallQmlRefeshQrImg:{
-            qrBox.source = "";
+            //qrBox.source = "";
             qrBox.source = "image://CodeImg/qr";
             qrBox2.source = "image://CodeImg/qr2";
             l3.visible = true;

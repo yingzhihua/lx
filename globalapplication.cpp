@@ -19,10 +19,10 @@ bool GlobalApplication::notify(QObject *obj, QEvent *e){
     if(e->type() == QEvent::MouseButtonRelease){
         if (clName == "QQuickApplicationWindow_QML_30"){
             QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(e);
-            qDebug()<<"clName:"<<clName<<"mouse:"<<mouseEvent->x();
+            //qDebug()<<"clName:"<<clName<<"mouse:"<<mouseEvent->x();
             if (timerid != -1)
                 this->killTimer(timerid);
-            int timerout = ExGlobal::getCaliParam("LockScreenTime");
+            int timerout = ExGlobal::LockScreenTime;
             if (timerout != 0)
                 timerid = this->startTimer(timerout*1000);
         }
