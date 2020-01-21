@@ -92,12 +92,12 @@ Page {
         anchors.topMargin: 10
         //anchors.left: mainAnaImage.right
         //anchors.leftMargin: 1
-        columns:7
+        columns:6
         rowSpacing: 20
         columnSpacing: 4
 
         Repeater{
-            model: ["IC","IFA","IFB","RSV-A","RSV-B","ADV-1","ADV-2","PIV-1","PIV-2","PIV-3","PIV-4","MP","BP"]
+            model: ["IC","IFA","IFB","RSV-A","RSV-B","ADV-1","ADV-2","PIV-1","PIV-2","PIV-3","PIV-4","MP","BP","BP-IS97","HRV","MP-r2","BP-893"]
             CheckBox{
                 checked: true
                 text:modelData

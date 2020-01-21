@@ -6,6 +6,7 @@
 #include "dao/testmodel.h"
 #include "dao/testresultmodel.h"
 #include "dao/usermodel.h"
+#include "dao/wifimodel.h"
 
 class ExGlobal : public QObject
 {
@@ -26,6 +27,9 @@ class ExGlobal : public QObject
     Q_PROPERTY(int lockTime READ lockTime WRITE setLockTime NOTIFY lockTimeChanged)
     Q_PROPERTY(QString adminPassword READ adminPassword WRITE setAdminPassword NOTIFY adminPasswordChanged)
     Q_PROPERTY(bool childImage READ childImage WRITE setChildImage NOTIFY childImageChanged)
+    Q_PROPERTY(int autoFocus READ autoFocus WRITE setAutoFocus NOTIFY autoFocusChanged)
+    Q_PROPERTY(int qrCode READ qrCode WRITE setQrCode NOTIFY qrCodeChanged)
+
 public:
     explicit ExGlobal(QObject *parent = nullptr);
     static void exInit();
@@ -62,6 +66,10 @@ public:
     void setLockTime(int time){updateCaliParam("LockScreenTime",time);emit lockTimeChanged();}
     bool childImage(){return bChildImage;}
     void setChildImage(bool set){bChildImage = set;}
+    bool autoFocus(){return AutoFocus;}
+    void setAutoFocus(int set){updateCaliParam("AutoFocus",set);emit autoFocusChanged();}
+    int qrCode(){return QrCode;}
+    void setQrCode(int set){updateCaliParam("QrCode",set);emit qrCodeChanged();}
 
     static uchar* getReagentBox(QString BoxCode);
     static void addTest();
@@ -114,9 +122,19 @@ public:
     static int CamFocus;
     static int CamWhiteBlance;
 
+    static int QrX1;
+    static int QrY1;
+    static int QrX2;
+    static int QrY2;
+    static int QrX3;
+    static int QrY3;
+    static int QrX4;
+    static int QrY4;
+
     static TestModel *pTestModel;
     static TestResultModel *pTestResultModel;
     static UserModel *pUserModel;
+    static WifiModel *pWifiModel;
 
     static QHash<int, QByteArray> AssayItem;
     static QHash<int, int> ItemCT;
@@ -124,6 +142,11 @@ public:
     static QString AdminPassword;
     static QString User;
     static bool bChildImage;
+    static int AutoFocus;
+    static int QrCode;
+    static unsigned char *bufrgb;
+    static unsigned char *hbufrgb;
+
 signals:
     void userChanged();
     void panelNameChanged();
@@ -137,6 +160,8 @@ signals:
     void sysLanguageNameChanged();
     void sysLanguageCodeChanged();
     void childImageChanged();
+    void autoFocusChanged();
+    void qrCodeChanged();
     void versionChanged();
     void lockTimeChanged();
     void exglobalMessage(int code);
@@ -157,6 +182,7 @@ private:
     static void CaliParamInit();
     static void SetCaliParam(const QString &caliName, int caliValue);
     static void SetTextParam(const QString &textName, QString textValue);
+
 public:
     void GlobalMessage(int code);
 };

@@ -11,6 +11,8 @@ import "./components"
 ApplicationWindow {
     property string waitMsg: ""
     property int languageIndex: 0
+    property bool timeinited: false
+    property int t_runtime: 0
     id: window
     visible: true
     width: screen.width
@@ -117,6 +119,25 @@ ApplicationWindow {
             font.pixelSize: 30
             text:qsTr("")
         }
+
+        Text{
+            id:starttime
+            anchors.centerIn: parent
+            anchors.horizontalCenterOffset: -100
+            anchors.bottom: parent.bottom
+            font.pixelSize: 30
+            text:qsTr("")
+        }
+
+        Text{
+            id:runtime
+            anchors.left: starttime.right
+            anchors.leftMargin: 30
+            anchors.bottom: parent.bottom
+            font.pixelSize: 30
+            text:qsTr("")
+        }
+
         Text {
             id: headerdate
             anchors.right: parent.right
@@ -208,6 +229,14 @@ ApplicationWindow {
         onTriggered: {
             headertime.text = Qt.formatTime(new Date(),"hh:mm:ss")
             headerdate.text = Qt.formatDate(new Date(),"yyyy-MM-dd")
+            if (timeinited == false){
+                timeinited = true;
+                starttime.text = Qt.formatTime(new Date(),"hh:mm:ss");
+            }
+            else{
+                t_runtime++;
+                runtime.text = t_runtime;
+            }
         }
     }
 

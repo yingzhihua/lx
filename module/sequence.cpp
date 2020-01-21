@@ -7,6 +7,17 @@
 #include "imageanalysis.h"
 #include "sqlitemgr.h"
 
+#define AUTOFOCUS_MIN 2600
+#define AUTOFOCUS_MAX 7000
+#define AUTOFOCUS_STEP 100
+#define AUTOFOCUS_MAXOFFSET 6
+
+static int autoFocus_CurrPoint = 0;
+static int autoFocus_ClarityPoint = 0;
+static double autoFocus_ClarityValue = 0;
+static int autoFocus_JumpStep = 0;
+static bool autoFocus_dec = false;
+
 static QDomDocument doc;
 static char currOrder = 0;
 static int currCameraCaptureType = 0;
@@ -16,6 +27,7 @@ Sequence::Sequence(QObject *parent) : QObject(parent)
 {    
     imageAna = new ImageAnalysis();
     timer = new QTimer(this);
+    timer->setTimerType(Qt::PreciseTimer);
     timer->setSingleShot(true);
     waitNextSequence = new QTimer(this);
     waitNextSequence->setSingleShot(true);
@@ -28,6 +40,7 @@ Sequence::Sequence(QObject *parent) : QObject(parent)
 
     imageCapture = new ImageCapture();
     imageProvider = new ImageProvider();
+    cvcap = new cvCapture();
     connect(imageCapture,&ImageCapture::finishCapture,this,&Sequence::ActionFinish);
     connect(imageCapture,&ImageCapture::reView,this,&Sequence::CameraView);
 
@@ -44,6 +57,7 @@ Sequence::Sequence(QObject *parent) : QObject(parent)
     //ReadMask(QCoreApplication::applicationDirPath()+"/pos");
     //imageAna->SetMask(ExGlobal::getReagentBox("201"),0);
 
+    t_fan1Speed = t_fan2Speed = t_fan3Speed = 0;
 #if 0
     qDebug()<<"startTrans:"<<sqlitemgrinstance->StartTransations();
     testMgr->TestCreate("123456","201");
@@ -123,10 +137,18 @@ bool Sequence::sequenceDo(SequenceId id)
     }
     else if(id == SequenceId::Sequence_OpenBox)
     {
-        sequenceAction = root.firstChildElement("OpenDoor");
+        //sequenceAction = root.firstChildElement("OpenDoor");
+        if (bDoorState == false)//close
+            sequenceAction = root.firstChildElement("OpenDoor");
+        else
+            sequenceAction = root.firstChildElement("CloseDoor");
     }
     else if(id == SequenceId::Sequence_CloseBox){
-        sequenceAction = root.firstChildElement("CloseDoor");
+        //sequenceAction = root.firstChildElement("CloseDoor");
+        if (bDoorState == false)//close
+            sequenceAction = root.firstChildElement("OpenDoor");
+        else
+            sequenceAction = root.firstChildElement("CloseDoor");
     }
     else if(id == SequenceId::Sequence_SelfCheck){
         sequenceAction = root.firstChildElement("SelfCheck");
@@ -198,7 +220,7 @@ void Sequence::WaitSequenceTimeout()
 {
     qDebug()<<"WaitSequenceTimeout,count:"<<waitCount;
     waitCount++;
-    if (waitCount < 5)
+    if (waitCount < 10)
     {
         if (currSequenceId != SequenceId::Sequence_Idle)
             waitNextSequence->start(1000);
@@ -228,8 +250,19 @@ void Sequence::ActionFinish(QByteArray data)
     {        
         if (data[1] == '\x02')
         {
-            if (data[7] == '\x62')
+            if (data[7] == '\x62'){
                 ExGlobal::settempversion(data.mid(13,5).data());
+            }
+            else if(data[7] == '\x20'){
+            }
+            else if(data[7] == '\x1F'){
+                if (data[12] == '\x00')
+                    fan1SetSpeed((data[13]<<8)+data[14]);
+                else if (data[12] == '\x01')
+                    fan1SetSpeed((data[13]<<8)+data[14]);
+                else if (data[12] == '\x02')
+                    fan1SetSpeed((data[13]<<8)+data[14]);
+            }
         }
         else if (data[1] == '\x01')
         {
@@ -237,15 +270,17 @@ void Sequence::ActionFinish(QByteArray data)
                 ExGlobal::setctrlversion(data.mid(13,5).data());
             else if (data[7] == '\x32')
                 setSenorState(data[12],data[13]);
+            else if(bAutoFocus == true && data[7] == '\x70' && data.length()>12 && (data[12] == '\x2a'||data[12] == '\x2b'))
+                autoFocus_JumpStep = 1;
         }
         else if(data[1] == '\x03')//CameraCapture
         {
             qDebug()<<"CameraCapture ActionFinish,type="<<currCameraCaptureType;
             if (data[7] == '\xa0' && data[10] == '\x00' && currCameraCaptureType == 5){
                 if (currCameraCycle < 2)                
-                    imageAna->FirstImage(imageCapture->getyData(),0);                
+                    imageAna->FirstImage(imageCapture->getyData(),imageCapture->imagetype);
                 else                
-                    imageAna->AddImage(imageCapture->getyData(),0);
+                    imageAna->AddImage(imageCapture->getyData(),imageCapture->imagetype);
 
                 imageProvider->anaMainImg = imageAna->getMainImg(0,1);
                 emit callQmlRefeshAnaMainImg();
@@ -316,11 +351,16 @@ void Sequence::ActionFinish(QByteArray data)
     else{
         bFinishAction = true;
         //qDebug()<<"Sequence ActionFinish,durationState:"<<durationState;
+
+
+        Log::LogTime(QString("Action finish,duration state:%1").arg((int)durationState));
+
         if (durationState == TimeState::idle)
             FindAction(true);
         else if(durationState == TimeState::wait)
         {
             durationState = TimeState::running;
+            Log::LogTime(QString("Start timer:%1").arg(nDuration));
             timer->start(nDuration);
         }
     }
@@ -437,6 +477,14 @@ bool Sequence::DoAction(QDomElement action,bool isChild)
     message += action.attribute("Device")+","+action.attribute("ActionValue")+","+action.attribute("ActionParam1")+","+action.attribute("ActionParam2");
     Log::LogWithTime(message);
 
+    if (isChild){
+        QDomElement p = action.parentNode().toElement();
+        int cycle = p.attribute("currcycle").toInt();
+        if (action.attribute("No").toInt() == 1){
+            Log::LogTime(QString("\ncycle=%1").arg(cycle));
+        }
+    }
+    Log::LogTime(message);
     bFinishAction = false;    
 
     if (action.attribute("Device")=="CameraCapture")
@@ -475,20 +523,18 @@ bool Sequence::DoAction(QDomElement action,bool isChild)
 
         currOrder = '\xA0';
         imageCapture->setImageCount(action.attribute("ActionParam1").toInt());
-        if (!imageCapture->Running())
+        if (imageCapture->waitStop())
             imageCapture->start();
     }
     else if(action.attribute("Device")=="Door" || action.attribute("Device")=="Light" || action.attribute("Device")=="Temperature"
             ||action.attribute("Device")=="V1" || action.attribute("Device")=="V2" || action.attribute("Device")=="V3"
             ||action.attribute("Device")=="VP" || action.attribute("Device")=="Pump" || action.attribute("Device")=="Query"
-            ||action.attribute("Device")=="SetPID")
+            ||action.attribute("Device")=="SetPID" || action.attribute("Device")=="Fan")
     {
         QByteArray send = ActionParser::ActionToByte(action);
         currOrder = send[7];
         serialMgr->serialWrite(send);
     }
-
-
 
     if (isChild){
         QDomElement p = action.parentNode().toElement();
@@ -502,13 +548,22 @@ bool Sequence::DoAction(QDomElement action,bool isChild)
 
     emit processFinish(sequenceAction.attribute("Duration").toInt(),nPreTime);
 
+    Log::LogTime(QString("start timer,duration=%1,type=%2").arg(nDuration).arg(action.attribute("DurationType")));
     durationState = TimeState::running;
     if (nDuration == 0)
+    {
         SequenceTimeout();
+    }
     else if(action.attribute("DurationType")=="1")
+    {
+        Log::LogTime(QString("Timing before action"));
         timer->start(nDuration);
+    }
     else
+    {
+        Log::LogTime(QString("Timing after action"));
         durationState = TimeState::wait;
+    }
 
     return true;
 }
@@ -691,14 +746,65 @@ void Sequence::CameraView(QImage img)
 {
     imageProvider->img = img;
     emit callQmlRefeshView();
+
+    if (bAutoFocus){
+        qDebug()<<"JumpStep:"<<autoFocus_JumpStep<<"CurrPoint:"<<autoFocus_CurrPoint<<"ClarityValue:"<<autoFocus_ClarityValue<<"ClarityPoint:"<<autoFocus_ClarityPoint;
+        if (autoFocus_JumpStep == 2){
+            if (autoFocus_CurrPoint > 0)
+            {
+                double value = getDefinition();
+                qDebug()<<"currValue:"<<value;
+                if (value > autoFocus_ClarityValue)
+                {
+                    autoFocus_ClarityValue = value;
+                    autoFocus_ClarityPoint = autoFocus_CurrPoint;
+                }
+
+                if (autoFocus_CurrPoint - autoFocus_ClarityPoint > AUTOFOCUS_MAXOFFSET || autoFocus_CurrPoint > (AUTOFOCUS_MAX-AUTOFOCUS_MIN)/AUTOFOCUS_STEP){
+                    if (autoFocus_dec == false && autoFocus_ClarityPoint == 1){
+                        autoFocus_dec = true;
+                        autoFocus_CurrPoint = 0;
+                        autoFocus_ClarityValue = 0;
+                    }
+                    else{
+                        if (autoFocus_dec == true){
+                            actionDo("Focus",2,AUTOFOCUS_MAX-AUTOFOCUS_STEP*(autoFocus_ClarityPoint-1),0,0);
+                            emit autoFocusNotify(0,AUTOFOCUS_MAX-AUTOFOCUS_STEP*(autoFocus_ClarityPoint-1)-AUTOFOCUS_MIN);
+                        }
+                        else {
+                            actionDo("Focus",2,AUTOFOCUS_STEP*(autoFocus_ClarityPoint-1)+AUTOFOCUS_MIN,0,0);
+                            emit autoFocusNotify(1,AUTOFOCUS_STEP*(autoFocus_ClarityPoint-1));
+                        }
+                        bAutoFocus = false;
+                        return;
+                    }
+                }
+            }
+
+            autoFocus_CurrPoint++;
+            autoFocus_JumpStep = 0;
+            if (autoFocus_dec == true){
+                actionDo("Focus",2,AUTOFOCUS_MAX-AUTOFOCUS_STEP*(autoFocus_CurrPoint-1),0,0);
+                emit autoFocusNotify(0,AUTOFOCUS_MAX-AUTOFOCUS_STEP*(autoFocus_CurrPoint-1)-AUTOFOCUS_MIN);
+            }
+            else{
+                actionDo("Focus",2,AUTOFOCUS_STEP*(autoFocus_CurrPoint-1)+AUTOFOCUS_MIN,0,0);
+                emit autoFocusNotify(0,AUTOFOCUS_STEP*(autoFocus_CurrPoint-1));
+            }
+        }
+        else if(autoFocus_JumpStep == 1)
+            autoFocus_JumpStep = 2;
+    }
 }
 
 bool Sequence::startView(int id){
     if (id == 0){        
-        if (!imageCapture->Running())
+        if (imageCapture->waitStop())
         {
+            actionDo("Light",5,0,0,0);
+            imageCapture->imagetype = 0;
             imageCapture->start_capturing(ImageCapture::CaptureMode::View);
-            imageCapture->setImageCount(10);
+            imageCapture->setImageCount(99999);
             imageCapture->start();
         }
     }
@@ -724,8 +830,10 @@ bool Sequence::saveView(){
 
 void Sequence::errReceive(int code){
     QString errStr;
-    if (code == 0x101)
+    if (code == 0x101){
         errStr = "温控板通讯出错！";
+        //return;
+    }
     else if(code == 0x201)
         errStr = "驱动板通讯出错！";
     else if(code >= 0x301 && code <= 0x3FF)
@@ -772,6 +880,12 @@ void Sequence::lxDebug(){
     //emit callQmlRefeshData(data);
     //qr->saveFrame();
     //ExGlobal::addTest();
+
+    return;
+    serialMgr->serialWrite(ActionParser::ParamToByte("Light",4,0,0,0));
+    cvcap->setCurrCamera(0);
+    cvcap->setImageCount(3);
+    cvcap->start();
 }
 
 void Sequence::showAnaImg(int type, int light){
@@ -831,4 +945,22 @@ void Sequence::qrSet(bool bopenlight, bool scale, bool handlimage, int bin, int 
     qr->poxValue = pox;
     qr->handleimage = handlimage;
     qr->scale = scale;
+}
+
+void Sequence::fan1SetSpeed(int speed)
+{
+    qDebug()<<"fan1SetSpeed:"<<speed<<"prespeed:"<<t_fan1Speed;
+    t_fan1Speed = speed;
+    emit fan1SpeedChanged();
+}
+
+void Sequence::autoFocus(){    
+    if (imageCapture->isRunning() && bAutoFocus == false){
+        actionDo("Focus",1,0,0,0);
+        bAutoFocus = true;
+        autoFocus_CurrPoint = 0;
+        autoFocus_ClarityValue = 0;
+        autoFocus_JumpStep = 0;
+        autoFocus_dec = false;
+    }
 }

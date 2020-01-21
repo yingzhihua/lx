@@ -36,7 +36,10 @@ public:
     int getWhite();
     bool setWhite(int value);
     void *getyData(){return bufy;}
-    bool Running();
+    bool waitStop();
+    double getDefinition();
+    double getDefinition2();
+    int imagetype;
 
 protected:
     void run();
@@ -60,7 +63,7 @@ private:
     int count;
     buffer *buffers;
     unsigned int n_buffers;
-    unsigned char *bufrgb;
+    //unsigned char *bufrgb;
     unsigned char *bufy;
     unsigned short *buf2y;
     unsigned int *sum;

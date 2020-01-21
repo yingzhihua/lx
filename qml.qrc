@@ -48,5 +48,7 @@
         <file>SetupUI/AdminPassword.qml</file>
         <file>SetupUI/LanguageSet.qml</file>
         <file>SetupUI/TimeSet.qml</file>
+        <file>SetupUI/WifiMenu.qml</file>
+        <file>components/Query.qml</file>
     </qresource>
 </RCC>

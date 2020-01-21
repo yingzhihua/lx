@@ -18,7 +18,7 @@ QString ExGlobal::SysName = "样机02";
 QString ExGlobal::AdminPassword = "123456";
 int ExGlobal::LanguageCode = 1;
 
-QString ExGlobal::t_version = "V2.09";
+QString ExGlobal::t_version = "V2.12";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
@@ -57,14 +57,40 @@ int ExGlobal::PumpSoftHomeOffset = 0;
 
 int ExGlobal::LockScreenTime = 30;
 bool ExGlobal::bChildImage = false;
+int ExGlobal::AutoFocus = 0;
+int ExGlobal::QrCode = 0;
+#if 0
+int ExGlobal::QrX1 = 536;
+int ExGlobal::QrY1 = 234;
+int ExGlobal::QrX2 = 963;
+int ExGlobal::QrY2 = 244;
+int ExGlobal::QrX3 = 962;
+int ExGlobal::QrY3 = 652;
+int ExGlobal::QrX4 = 555;
+int ExGlobal::QrY4 = 647;
+#else
+int ExGlobal::QrX1 = 424;
+int ExGlobal::QrY1 = 204;
+int ExGlobal::QrX2 = 952;
+int ExGlobal::QrY2 = 217;
+int ExGlobal::QrX3 = 975;
+int ExGlobal::QrY3 = 731;
+int ExGlobal::QrX4 = 456;
+int ExGlobal::QrY4 = 715;
+#endif
 
 static uchar ReagentBox[121];
 TestModel * ExGlobal::pTestModel = nullptr;
 TestResultModel * ExGlobal::pTestResultModel = nullptr;
 UserModel * ExGlobal::pUserModel = nullptr;
+WifiModel * ExGlobal::pWifiModel = nullptr;
 
 QHash<int, QByteArray> ExGlobal::AssayItem;
 QHash<int, int> ExGlobal::ItemCT;
+
+unsigned char * ExGlobal::bufrgb = nullptr;
+unsigned char * ExGlobal::hbufrgb = nullptr;
+
 ExGlobal::ExGlobal(QObject *parent) : QObject(parent)
 {
     //qDebug()<<"ExGlobal";    
@@ -139,6 +165,7 @@ void ExGlobal::CaliParamInit()
 
     addTest();
     pUserModel->LoadUser();
+    pWifiModel->LoadData();
 }
 
 uchar* ExGlobal::getReagentBox(QString BoxCode){
@@ -221,6 +248,26 @@ void ExGlobal::SetCaliParam(const QString &name, int caliValue)
         LockScreenTime = caliValue;
     else if (name == "LanguageCode")
         LanguageCode = caliValue;
+    else if (name == "AutoFocus")
+        AutoFocus = caliValue;
+    else if (name == "QrCode")
+        QrCode = caliValue;
+    else if(name == "QrX1")
+        QrX1 = caliValue;
+    else if(name == "QrY1")
+        QrY1 = caliValue;
+    else if(name == "QrX2")
+        QrX2 = caliValue;
+    else if(name == "QrY2")
+        QrY2 = caliValue;
+    else if(name == "QrX3")
+        QrX3 = caliValue;
+    else if(name == "QrY3")
+        QrY3 = caliValue;
+    else if(name == "QrX4")
+        QrX4 = caliValue;
+    else if(name == "QrY4")
+        QrY4 = caliValue;
     //qDebug()<<"setCaliParam,"<<name<<",result="<<caliValue;
 }
 
@@ -290,6 +337,26 @@ int ExGlobal::getCaliParam(const QString &caliName)
         result = LockScreenTime;
     else if(caliName == "LanguageCode")
         result = LanguageCode;
+    else if(caliName == "AutoFocus")
+        result = AutoFocus;
+    else if(caliName == "QrCode")
+        result = QrCode;
+    else if(caliName == "QrX1")
+        result = QrX1;
+    else if(caliName == "QrY1")
+        result = QrY1;
+    else if(caliName == "QrX2")
+        result = QrX2;
+    else if(caliName == "QrY2")
+        result = QrY2;
+    else if(caliName == "QrX3")
+        result = QrX3;
+    else if(caliName == "QrY3")
+        result = QrY3;
+    else if(caliName == "QrX4")
+        result = QrX4;
+    else if(caliName == "QrY4")
+        result = QrY4;
 
     qDebug()<<"getCaliParam,"<<caliName<<",result="<<result;
     return result;

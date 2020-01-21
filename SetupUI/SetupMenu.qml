@@ -11,7 +11,7 @@ Rectangle {
         ListElement{Eid: "LockTime"; name:qsTr("锁屏时间");info:"";qrc_res:"qrc:/SetupUI/LockScreenSet.qml"}
         ListElement{Eid: "Language"; name:qsTr("语言");info:"";qrc_res:"qrc:/SetupUI/LanguageSet.qml"}
         ListElement{Eid: "AdminPassword"; name:qsTr("管理员密码");info:"";qrc_res:"qrc:/SetupUI/AdminPassword.qml"}
-        ListElement{Eid: "Wlan"; name:qsTr("网络");info:"";qrc_res:"qrc:/SetupUI/Incomplete.qml"}
+        ListElement{Eid: "Wlan"; name:qsTr("网络");info:"";qrc_res:"qrc:/SetupUI/WifiMenu.qml"}
         ListElement{Eid: "TimeSet"; name:qsTr("时间设置");info:"";qrc_res:"qrc:/SetupUI/TimeSet.qml"}
         ListElement{Eid: "User"; name:qsTr("用户帐号");info:"";qrc_res:"qrc:/SetupUI/User.qml"}
         ListElement{Eid: "Cali"; name:qsTr("机械校准");info:"";qrc_res:"qrc:/SetupUI/MachineCalibration.qml"}

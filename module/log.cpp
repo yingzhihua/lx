@@ -83,7 +83,7 @@ void Log::LogTemp(QByteArray data)
 
 void Log::LogPos(QString log){
     QFile file;
-qDebug()<<"LogPos:"<<log;
+
     file.setFileName(getDir()+"/pos.csv");
     if (!file.open(QIODevice::WriteOnly|QIODevice::Text|QIODevice::Append))
     {
@@ -91,6 +91,24 @@ qDebug()<<"LogPos:"<<log;
     }
     QTextStream textStream(&file);
     textStream<<log<<endl;
+    textStream.flush();
+    file.close();
+}
+
+void Log::LogTime(QString log)
+{
+    QFile file;
+
+    file.setFileName(getDir()+"/time.txt");
+    if (!file.open(QIODevice::WriteOnly|QIODevice::Text|QIODevice::Append))
+    {
+        qDebug()<<"time file open error!";
+    }
+    QTextStream textStream(&file);
+
+    QDateTime current_time = QDateTime::currentDateTime();
+    QString current_time_str = current_time.toString("yyyy-MM-dd hh:mm:ss.zzz ");
+    textStream<<current_time_str<<log<<endl;
     textStream.flush();
     file.close();
 }

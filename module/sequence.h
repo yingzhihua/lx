@@ -12,6 +12,7 @@
 #include "entity.h"
 #include "qrcoder.h"
 #include "dao/testmgr.h"
+#include "cvcapture.h"
 
 class Sequence : public QObject
 {
@@ -86,6 +87,13 @@ public:
     Q_INVOKABLE void showAnaImg(int type,int light);
     Q_INVOKABLE void qrSet(bool bopenlight, bool scale, bool handlimage, int bin,int pox);
 
+    Q_INVOKABLE double getDefinition(){return imageCapture->getDefinition();}
+    Q_INVOKABLE double getDefinition2(){return imageCapture->getDefinition2();}
+
+    Q_PROPERTY(int fan1Speed READ fan1Speed NOTIFY fan1SpeedChanged)
+    Q_PROPERTY(int fan2Speed READ fan2Speed NOTIFY fan2SpeedChanged)
+    Q_PROPERTY(int fan3Speed READ fan3Speed NOTIFY fan3SpeedChanged)
+    Q_INVOKABLE void autoFocus();
     ImageProvider *imageProvider;
 
 signals:
@@ -101,6 +109,10 @@ signals:
     void callQmlRefeshAnaMainImg();
     void callQmlRefeshData(int index, QVector<int> item,QVector<int> value);
     void qrDecode(QString info);
+    void fan1SpeedChanged();
+    void fan2SpeedChanged();
+    void fan3SpeedChanged();
+    void autoFocusNotify(int status, int value);
 
 public slots:
     void SequenceTimeout();
@@ -129,6 +141,7 @@ private:
     QString message;
     SerialMgr *serialMgr;
     ImageCapture *imageCapture;
+    cvCapture *cvcap;
     TestMgr *testMgr;
     bool bFinishAction;
     TimeState durationState;
@@ -144,6 +157,17 @@ private:
     bool listNextAction(bool first);
     void qrDect();
     bool bQrOpenLight = true;
+    bool bAutoFocus = false;
+
+    int t_fan1Speed;
+    int t_fan2Speed;
+    int t_fan3Speed;
+    int fan1Speed(){return t_fan1Speed;}
+    int fan2Speed(){return t_fan2Speed;}
+    int fan3Speed(){return t_fan3Speed;}
+    void fan1SetSpeed(int speed);
+    void fan2SetSpeed(int speed){t_fan2Speed = speed;emit fan2SpeedChanged();}
+    void fan3SetSpeed(int speed){t_fan3Speed = speed;emit fan3SpeedChanged();}
 };
 
 static Sequence *sequence;

@@ -9,8 +9,11 @@
 #include "opencv2/objdetect.hpp"
 #include "opencv2/imgproc.hpp"
 
+//#include "zbar.h"
+
 using namespace cv;
 using namespace std;
+//using namespace zbar;
 
 class QRcoder : public QThread
 {

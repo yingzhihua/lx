@@ -13,6 +13,7 @@ public:
     static void LogCam(QString log);
     static void LogTemp(QByteArray data);
     static void LogPos(QString log);    
+    static void LogTime(QString log);
 };
 
 #endif // LOG_H

@@ -16,6 +16,9 @@ class ImageAnalysis : public QObject
 public:
     explicit ImageAnalysis(QObject *parent = nullptr);
     static QString QRDecode(QImage img);
+    static double GetDefinition(void *data, int imageType);
+    static double GetDefinition2(void *data, int imageType);
+    static double GetDefinition3(void *data, int imageType);
     void FirstImage(void *data, int imageType);
     void AddImage(void *data, int imageType);
 
@@ -43,6 +46,8 @@ private:
     Mat firstImg,mask1,mask2,maskPos;
     //Point **basePos;
     Point basePos[11][11];
+    Point firstCenter;
+
     vector<int> x,y;
     QVector<int> posItem,posValue,posIndex;
 
@@ -50,9 +55,13 @@ private:
     void FindPeaks(int *number, int numberLen, int mpp, std::vector<int>& pos);
     void FindGrid(Mat img, int mpp, std::vector<int>& x, std::vector<int>& y);
     int SpotCal(int x, int y);
+    int SpotCal(int x, int y, Point& offset);
     int subImageHandle(bool debug, size_t x, size_t y, Mat &img, Mat &subimg, int thrsh,vector<vector<Point>> &contours,Point &centerPoint);
     void UpdateMask(int top, int left, vector<vector<Point>> &contours, int center);
     void EllipseMask(int top, int left, vector<Point> &contour);
+
+    int refPoint = -1;
+    int refValue,refValue0;
 signals:
 
 public slots:

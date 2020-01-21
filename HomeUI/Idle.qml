@@ -9,7 +9,9 @@ Page {
     id: idle_page
 
     Image {
-        id: openDoor        
+        id: openDoor
+        width: 150
+        height: 150
         anchors.centerIn: parent
         anchors.verticalCenterOffset: -60
 
@@ -47,7 +49,7 @@ Page {
         text:qsTr("未检测到试剂盒")
         font.pixelSize: 30
         anchors.top: openDoor.bottom
-        anchors.topMargin: 20
+        anchors.topMargin: 30
         anchors.horizontalCenter: openDoor.horizontalCenter
     }
 

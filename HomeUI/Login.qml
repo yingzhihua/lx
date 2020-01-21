@@ -80,9 +80,9 @@ Page {
             id:login_btlogin
             x:150
             anchors.top: login_password.bottom
-            anchors.topMargin: 50
-            width: 116
-            height: 50
+            anchors.topMargin: 80
+            width: 200
+            height: 80
 
             contentItem: Text {
                       text: qsTr("登录")
@@ -90,7 +90,7 @@ Page {
                       horizontalAlignment: Text.AlignHCenter
                       verticalAlignment: Text.AlignVCenter
                       elide: Text.ElideRight
-                      font.pixelSize: 30
+                      font.pixelSize: 50
                   }
             background: Rectangle{
                 color: "darkgray"
@@ -130,7 +130,7 @@ Page {
     }
 
     function login(){                
-        //console.log("login_name:",ExGlobal.adminPassword)
+        console.log("login_name:",ExGlobal.adminPassword)
         if (userModel.login(login_name.text,login_password.text))
         {
             if (login_name.text.length == 0)

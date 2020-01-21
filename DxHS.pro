@@ -34,7 +34,9 @@ SOURCES += \
     module/dao/testmodel.cpp \
     module/dao/testresultmodel.cpp \
     globalapplication.cpp \
-    module/dao/usermodel.cpp
+    module/dao/usermodel.cpp \
+    module/dao/wifimodel.cpp \
+    module/cvcapture.cpp
 
 RESOURCES += qml.qrc
 
@@ -72,7 +74,9 @@ HEADERS += \
     module/entity/testresult.h \
     module/dao/testresultmodel.h \
     globalapplication.h \
-    module/dao/usermodel.h
+    module/dao/usermodel.h \
+    module/dao/wifimodel.h \
+    module/cvcapture.h
 
 if(contains(DEFINES,PLUTFORM_ARM)){
 INCLUDEPATH += /opt/opencv-4.1.1/include \
@@ -84,7 +88,14 @@ LIBS += /opt/opencv-4.1.1/lib/libopencv_highgui.so \
         /opt/opencv-4.1.1/lib/libopencv_videoio.so \
         /opt/opencv-4.1.1/lib/libopencv_imgproc.so \
         /opt/opencv-4.1.1/lib/libopencv_objdetect.so \
+        /opt/opencv-4.1.1/lib/libopencv_calib3d.so \
+        /opt/opencv-4.1.1/lib/libopencv_features2d.so \
+        /opt/opencv-4.1.1/lib/libopencv_flann.so \
         /opt/opencv-4.1.1/lib/libopencv_imgcodecs.so
+
+INCLUDEPATH += /opt/zbar-0.10/include
+LIBS += /opt/zbar-0.10/lib/libzbar.so
+
 }else{
 INCLUDEPATH += /opt/opencv-4.1.1L/include \
                 /opt/opencv-4.1.1L/include/opencv4 \
@@ -95,6 +106,11 @@ LIBS += /opt/opencv-4.1.1L/lib/libopencv_highgui.so \
         /opt/opencv-4.1.1L/lib/libopencv_videoio.so \
         /opt/opencv-4.1.1L/lib/libopencv_imgproc.so \
         /opt/opencv-4.1.1L/lib/libopencv_objdetect.so \
+        /opt/opencv-4.1.1L/lib/libopencv_calib3d.so \
+        /opt/opencv-4.1.1L/lib/libopencv_features2d.so \
+        /opt/opencv-4.1.1L/lib/libopencv_flann.so \
         /opt/opencv-4.1.1L/lib/libopencv_imgcodecs.so
 
+INCLUDEPATH += /opt/zbar-0.10L/include
+LIBS += /opt/zbar-0.10L/lib/libzbar.so
 }

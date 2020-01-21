@@ -71,11 +71,41 @@ Item {
     }
 
     CheckBox{
+        id:cbAutoFocus
+        anchors.left: cbChildImage.right
+        anchors.leftMargin: 50
+        anchors.verticalCenter: btLoad.verticalCenter
+        text: qsTr("打开自动对焦")
+        checked: ExGlobal.autoFocus == 1?true:false
+        onClicked: {
+            if (cbAutoFocus.checked)
+                ExGlobal.autoFocus = 1;
+            else
+                ExGlobal.autoFocus = 0;
+        }
+    }
+
+    CheckBox{
+        id:cbqrCode
+        anchors.left: cbAutoFocus.right
+        anchors.leftMargin: 50
+        anchors.verticalCenter: btLoad.verticalCenter
+        text: qsTr("打开二维码识别")
+        checked: ExGlobal.qrCode == 1?true:false
+        onClicked: {
+            if (cbqrCode.checked)
+                ExGlobal.qrCode = 1;
+            else
+                ExGlobal.qrCode = 0;
+        }
+    }
+
+    CheckBox{
         id: openlight
         anchors.left: parent.left
         anchors.leftMargin: 50
         anchors.top: btTest.bottom
-        anchors.topMargin: 50
+        anchors.topMargin: 100
         checked: true
         text: qsTr("开灯")
     }
@@ -134,7 +164,7 @@ Item {
     SpinBox{
         id:pox
         from:10
-        value: 200
+        value: 1000
         to:3000
         width: 200
         stepSize: 10
@@ -150,6 +180,8 @@ Item {
         anchors.leftMargin: 50
         anchors.top: openlight.bottom
         anchors.topMargin: 30
+        width: 300
+        height: 80
         onClicked: {
             qrBox.source = "";
             qrBox2.source = "";
@@ -218,6 +250,146 @@ Item {
         visible: false
 
     }
+
+    GroupBox{
+        id:qrxy
+        title: qsTr("二维码剪切坐标")
+        anchors.left: qrBox2.right
+        anchors.leftMargin: 50
+        anchors.top: messageTest.bottom
+        anchors.topMargin: 20
+        width: 850
+        font.pixelSize: 40
+
+        Grid{
+            id: gridqr
+            //anchors.horizontalCenter: parent.horizontalCenter
+            columns:5
+            rowSpacing: 20
+            columnSpacing: 30
+
+            Text{
+                text:qsTr("左上角坐标")
+            }
+            Text{
+                text:qsTr("X：")
+            }
+            SpinBox{
+                id:x1
+                from:0
+                value: ExGlobal.getCaliParam("QrX1")
+                to:2000
+                stepSize: 1
+                font.pixelSize: 40
+                width: 220
+                onValueChanged: ExGlobal.updateCaliParam("QrX1",x1.value)
+            }
+            Text{
+                text:qsTr("Y：")
+            }
+            SpinBox{
+                id:y1
+                from:0
+                value: ExGlobal.getCaliParam("QrY1")
+                to:2000
+                stepSize: 1
+                font.pixelSize: 40
+                width: 220
+                onValueChanged: ExGlobal.updateCaliParam("QrY1",y1.value)
+            }
+
+            Text{
+                text:qsTr("右上角坐标")
+            }
+            Text{
+                text:qsTr("X：")
+            }
+            SpinBox{
+                id:x2
+                from:0
+                value: ExGlobal.getCaliParam("QrX2")
+                to:2000
+                stepSize: 1
+                font.pixelSize: 40
+                width: 220
+                onValueChanged: ExGlobal.updateCaliParam("QrX2",x2.value)
+            }
+            Text{
+                text:qsTr("Y：")
+            }
+            SpinBox{
+                id:y2
+                from:0
+                value: ExGlobal.getCaliParam("QrY2")
+                to:2000
+                stepSize: 1
+                font.pixelSize: 40
+                width: 220
+                onValueChanged: ExGlobal.updateCaliParam("QrY2",y2.value)
+            }
+
+            Text{
+                text:qsTr("右下角坐标")
+            }
+            Text{
+                text:qsTr("X：")
+            }
+            SpinBox{
+                id:x3
+                from:0
+                value: ExGlobal.getCaliParam("QrX3")
+                to:2000
+                stepSize: 1
+                font.pixelSize: 40
+                width: 220
+                onValueChanged: ExGlobal.updateCaliParam("QrX3",x3.value)
+            }
+            Text{
+                text:qsTr("Y：")
+            }
+            SpinBox{
+                id:y3
+                from:0
+                value: ExGlobal.getCaliParam("QrY3")
+                to:2000
+                stepSize: 1
+                font.pixelSize: 40
+                width: 220
+                onValueChanged: ExGlobal.updateCaliParam("QrY3",y3.value)
+            }
+
+            Text{
+                text:qsTr("左下角坐标")
+            }
+            Text{
+                text:qsTr("X：")
+            }
+            SpinBox{
+                id:x4
+                from:0
+                value: ExGlobal.getCaliParam("QrX4")
+                to:2000
+                stepSize: 1
+                font.pixelSize: 40
+                width: 220
+                onValueChanged: ExGlobal.updateCaliParam("QrX4",x4.value)
+            }
+            Text{
+                text:qsTr("Y：")
+            }
+            SpinBox{
+                id:y4
+                from:0
+                value: ExGlobal.getCaliParam("QrY4")
+                to:2000
+                stepSize: 1
+                font.pixelSize: 40
+                width: 220
+                onValueChanged: ExGlobal.updateCaliParam("QrY4",y4.value)
+            }
+        }
+    }
+
     Bt1 {
         id: btCannel
         anchors.bottom: parent.bottom
@@ -235,7 +407,7 @@ Item {
         anchors.right: parent.right
         anchors.rightMargin: 50
         anchors.bottom: btCannel.top
-        anchors.bottomMargin: 100
+        anchors.bottomMargin: 50
         onClicked: {
             Qt.quit()
         }

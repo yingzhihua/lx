@@ -14,6 +14,7 @@
 #include "module/dao/testmodel.h"
 #include "module/dao/testresultmodel.h"
 #include "module/dao/usermodel.h"
+#include "module/dao/wifimodel.h"
 
 int main(int argc, char *argv[])
 {
@@ -35,6 +36,7 @@ int main(int argc, char *argv[])
     ExGlobal::pTestModel = new TestModel();
     ExGlobal::pTestResultModel = new TestResultModel();
     ExGlobal::pUserModel = new UserModel();
+    ExGlobal::pWifiModel = new WifiModel();
 
     sqlitemgrinstance->conn(Log::getDir()+"/data.db","sa","123456");
     //init dao manager
@@ -55,6 +57,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("testModel",ExGlobal::pTestModel);
     engine.rootContext()->setContextProperty("testResultModel",ExGlobal::pTestResultModel);
     engine.rootContext()->setContextProperty("userModel",ExGlobal::pUserModel);
+    engine.rootContext()->setContextProperty("wifiModel",ExGlobal::pWifiModel);
 
     if (ExGlobal::LanguageCode == 0){
         QTranslator tor;

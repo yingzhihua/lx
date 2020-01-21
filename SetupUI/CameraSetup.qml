@@ -29,12 +29,21 @@ Page {
         }
     }
 
+    Text{
+        id: definition
+        anchors.top: viewWin.bottom
+        anchors.topMargin: 20
+        anchors.left: viewWin.left
+        anchors.leftMargin: 0
+        width: viewWin.width
+    }
+
     Button{
         id:startView
-        anchors.left: viewWin.leftimageProvider
-        anchors.leftMargin: 150
+        anchors.left: viewWin.left
+        anchors.leftMargin: 10
         anchors.top: viewWin.bottom
-        anchors.topMargin: 30
+        anchors.topMargin: 80
         text: qsTr("打开预览")
         font.pixelSize: 30
         onClicked: {
@@ -87,6 +96,17 @@ Page {
         font.pixelSize: 30
         onClicked: Sequence.saveView()
     }
+
+    Button{
+        id:btfocus
+        anchors.left: capture.right
+        anchors.leftMargin: 50
+        anchors.verticalCenter: startView.verticalCenter
+        text: qsTr("自动对焦")
+        font.pixelSize: 30
+        onClicked: Sequence.autoFocus()
+    }
+
     Text {
         id: lbabs
         text: qsTr("曝光时间:")
@@ -265,8 +285,13 @@ Page {
             if (bView == true){
                 cameraBox.source = "";
                 cameraBox.source = "image://CodeImg/view";
+                definition.text = "清晰度："+Sequence.getDefinition().toFixed(4)+",  "+Sequence.getDefinition2().toFixed(4)
                 console.log("CameraSetup.qml,onCallQmlRefeshImg");
             }
+        }
+
+        onAutoFocusNotify:{
+            focusValue.value = value;
         }
     }
 }

@@ -9,6 +9,8 @@ Page {
 
     Image {
         id: startbutton
+        width: 200
+        height: 200
         anchors.centerIn: parent
 
         source: "qrc:/image/start.png"

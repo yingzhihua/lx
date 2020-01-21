@@ -384,6 +384,7 @@ Rectangle {
             text:qsTr("硬件复位")
             onClicked: {
                 dev5Sp.value = 0;
+                predoorpos = dev5Sp.value;
                 if (Sequence.actionDo("Door",5,0,0,0))
                     busyIndicator.running = true;
             }
@@ -394,6 +395,7 @@ Rectangle {
             text:qsTr("出仓位置")
             onClicked: {
                 dev5Sp.value = 0;
+                predoorpos = dev5Sp.value;
                 if (Sequence.actionDo("Door",1,0,0,0))
                     busyIndicator.running = true;
             }
@@ -495,9 +497,9 @@ Rectangle {
         }
         SpinBox{
             id:dev6Sp
-            from:-10000
+            from:-30000
             value: 0
-            to:10000
+            to:30000
             stepSize: 100
             font.pixelSize: 40
             width: 220
@@ -522,6 +524,29 @@ Rectangle {
             }
         }
 
+    }
+
+    Button{
+        id:btfan1
+        anchors.left: gridDev.left
+        anchors.leftMargin: 0
+        anchors.top: gridDev.bottom
+        anchors.topMargin: 30
+        font.pixelSize: 40
+        text:qsTr("获取转速")
+        onClicked: {
+            if (Sequence.actionDo("Fan",3,1,0,0))
+                busyIndicator.running = true;
+        }
+    }
+
+    Text {
+        id: txfun1
+        anchors.left: btfan1.right
+        anchors.leftMargin: 50
+        anchors.verticalCenter: btfan1.verticalCenter
+        font.pixelSize: 40
+        text: qsTr("风扇一转速：")+Sequence.fan1Speed
     }
 
     Button {

@@ -107,6 +107,39 @@ QByteArray ActionParser::DrvParamToByte(const QString &action, int value, int pa
         data[11] = value&0xFF;
         FormatBytes(0x01,data);
     }
+    else if(action == "Fan"){
+        data[6] = 0x00;
+        if (value == 1){    //query fan's speed
+            data.resize(13);
+            data[7] = 0x20;
+            data[8] = 0x00;
+            data[9] = 0x02;
+            data[10] = 0x01;
+            data[11] = param1-1;
+        }
+        else if(value == 2) //set fan's speed
+        {
+            data.resize(15);
+            data[7] = 0x22;
+            data[8] = 0x00;
+            data[9] = 0x04;
+            data[10] = 0x01;
+            data[11] = param1-1;
+            data[12] = (param2>>8)&0xFF;
+            data[13] = param2&0xFF;
+        }
+        else if(value == 3) //query actual fan's speed
+        {
+            data.resize(13);
+            data[7] = 0x1F;
+            data[8] = 0x00;
+            data[9] = 0x02;
+            data[10] = 0x01;
+            data[11] = param1-1;
+        }
+
+        FormatBytes(0x02,data);
+    }
 
     return data;
 }

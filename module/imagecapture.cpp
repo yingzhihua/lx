@@ -20,12 +20,14 @@
 #include <linux/videodev2.h>
 #include "log.h"
 #include "exglobal.h"
+#include "imageanalysis.h"
 
 #define CLEAR(x) memset (&(x),0,sizeof(x))
 #define CAPTURE_COUNT 1
 #define device_name "/dev/video0"
 
 #define begin_inited false
+#define FRAME_TOTALNUM 2
 
 static bool camerainited = false;
 static QByteArray resultData;
@@ -156,7 +158,8 @@ ImageCapture::ImageCapture(QObject *parent) : QThread(parent),io(IO_METHOD_MMAP)
     resultData[9] = '\x02';
     resultData[11] = '\x55';
 
-    bufrgb = (unsigned char *)malloc(2592 * 1944 * 3);
+    ExGlobal::bufrgb = (unsigned char *)malloc(2592 * 1944 * 3);
+    ExGlobal::hbufrgb = (ExGlobal::bufrgb) + (1296*1944*3);
     bufy = (unsigned char *)malloc(2592 * 1944);
     buf2y = (unsigned short *)malloc(2592 * 1944 * 2);
     sum = (unsigned int *)malloc(2592 * 1944 * 8);
@@ -171,6 +174,7 @@ ImageCapture::ImageCapture(QObject *parent) : QThread(parent),io(IO_METHOD_MMAP)
     }
 
     captureMode = CaptureMode::Idle;
+    imagetype = 0;
 }
 
 int ImageCapture::open_device(){
@@ -237,6 +241,21 @@ int ImageCapture::init_device(){
         Log::LogCam("open_device,dev does not support streaming io, return -1");
         return -1;
     }
+    qDebug("driver is %s, card is %s,bus_info is %s,version is %d",cap.driver,cap.card,cap.bus_info,cap.version);
+
+    //get support format
+#if 0
+    struct v4l2_fmtdesc fmt_desc;
+    CLEAR(fmt_desc);
+    fmt_desc.index = 0;
+    fmt_desc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    qDebug()<<"Support format:";
+    while (xioctl(fd,VIDIOC_ENUM_FMT,&fmt_desc) != -1){
+        qDebug("index=%d,des:%s",fmt_desc.index,fmt_desc.description);
+        fmt_desc.index++;
+    }
+#endif
+
     //set frame rat
 #if 0
     CLEAR(streamparam);
@@ -295,11 +314,23 @@ int ImageCapture::init_device(){
     }else {
         qDebug()<<"VIDIOC_CROPCAP Errors ignored";
     }
+    qDebug("cropcap bounds:[%d,%d,%d,%d],defrect:[%d,%d,%d,%d],pixelaspect:%d/%d",cropcap.bounds.top,cropcap.bounds.left,cropcap.bounds.width,cropcap.bounds.height,
+           cropcap.defrect.top,cropcap.defrect.left,cropcap.defrect.width,cropcap.defrect.height,cropcap.pixelaspect.numerator,cropcap.pixelaspect.denominator);
 
     CLEAR(fmt);
     fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     fmt.fmt.pix.width = cropcap.defrect.width;
     fmt.fmt.pix.height = cropcap.defrect.height;
+    if (imagetype == 1){
+        fmt.fmt.pix.width = 1920;
+        fmt.fmt.pix.height = 1080;
+    }
+    else if(imagetype == 2)
+    {
+        fmt.fmt.pix.width = 640;
+        fmt.fmt.pix.height = 480;
+    }
+    imagetype = 0;
     fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
     fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
 
@@ -309,7 +340,15 @@ int ImageCapture::init_device(){
         Log::LogCam("init_device,VIDIOC_S_FMT error, return -1");
         return -1;
     }
-    qDebug()<<"bytesperline:"<<fmt.fmt.pix.bytesperline<<"height:"<<fmt.fmt.pix.height<<"width:"<<fmt.fmt.pix.width;
+
+    if (-1 == xioctl(fd,VIDIOC_G_FMT,&fmt))
+    {
+        qDebug()<<"VIDIOC_G_FMT error, return";
+        Log::LogCam("init_device,VIDIOC_G_FMT error, return -1");
+        return -1;
+    }
+
+    qDebug()<<"bytesperline:"<<fmt.fmt.pix.bytesperline<<"height:"<<fmt.fmt.pix.height<<"width:"<<fmt.fmt.pix.width<<"sizeimage:"<<fmt.fmt.pix.sizeimage;
     min = fmt.fmt.pix.width*2;
     if (fmt.fmt.pix.bytesperline<min)
         fmt.fmt.pix.bytesperline = min;
@@ -611,7 +650,7 @@ int ImageCapture::init_mmap(){
     struct v4l2_requestbuffers req;
     CLEAR(req);
 
-    req.count = 2;
+    req.count = FRAME_TOTALNUM;
     req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     req.memory = V4L2_MEMORY_MMAP;
     if (-1 == xioctl(fd, VIDIOC_REQBUFS,&req)){
@@ -622,7 +661,7 @@ int ImageCapture::init_mmap(){
         Log::LogCam(QString("init_mmap,VIDIOC_REQBUFS errno:%1").arg(errno));
         return -1;
     }
-    if (req.count<2)
+    if (req.count<FRAME_TOTALNUM)
     {
         qDebug()<<"Insufficient buffer memory, return";
         Log::LogCam("init_mmap,Insufficient buffer memory, return -1");
@@ -647,6 +686,7 @@ int ImageCapture::init_mmap(){
             Log::LogCam("init_mmap,VIDIOC_QUERYBUF return -1");
             return -1;
         }
+        //qDebug("init_mmap,index=%d,length=%d",n_buffers,buf.length);
         buffers[n_buffers].length = buf.length;
         buffers[n_buffers].start = mmap(NULL,buf.length,PROT_READ|PROT_WRITE,MAP_SHARED,fd,buf.m.offset);
         if(MAP_FAILED == buffers[n_buffers].start)
@@ -695,6 +735,8 @@ int ImageCapture::start_capturing(CaptureMode mode)
     else {
         if (open_device() == 0 && init_device() == 0)
             camerainited = true;
+        else
+            return -1;
     }
 
     captureMode = mode;
@@ -862,10 +904,22 @@ int ImageCapture::clear_frame(){
 
 
 int ImageCapture::process_image(int i, const void *p, int size){
+    unsigned int width = 2592;
+    unsigned int height = 1944;
+    if (imagetype == 1){
+        width = 1920;
+        height = 1080;
+    }
+    else if(imagetype == 2){
+        width = 640;
+        height = 480;
+    }
+
     if(captureMode == CaptureMode::View)
     {
-        convert_yuv_to_rgb_buffer((unsigned char *)p,bufrgb,2592,1944);
-        QImage image(bufrgb,2592,1944,QImage::Format_RGB888);
+        convert_yuv_to_rgb_buffer((unsigned char *)p,ExGlobal::bufrgb,width,height);
+        convert_yuv_to_y_buffer((unsigned char *)p,bufy,width,height);
+        QImage image(ExGlobal::bufrgb,width,height,QImage::Format_RGB888);
         emit reView(image);
     }
     else{
@@ -875,15 +929,15 @@ int ImageCapture::process_image(int i, const void *p, int size){
 #if 1
         if (ExGlobal::bChildImage){
             sprintf(filenames,"%s/%s_%02d.bmp",Log::getDir().toLatin1().data(),filename.toLatin1().data(),i);
-            convert_yuv_to_rgb_buffer((unsigned char *)p,bufrgb,2592,1944);
-            QImage image(bufrgb,2592,1944,QImage::Format_RGB888);
+            convert_yuv_to_rgb_buffer((unsigned char *)p,ExGlobal::bufrgb,width,height);
+            QImage image(ExGlobal::bufrgb,width,height,QImage::Format_RGB888);
             image.save(filenames);
         }
 #endif
 #if 1
         if (ExGlobal::bChildImage){
             sprintf(filenames,"%s/%s_%02d.y",Log::getDir().toLatin1().data(),filename.toLatin1().data(),i);
-            convert_yuv_to_y_buffer((unsigned char *)p,bufy,2592,1944);
+            convert_yuv_to_y_buffer((unsigned char *)p,bufy,width,height);
             FILE *file_f = fopen(filenames,"w");
             fwrite(bufy,size>>1,1,file_f);
             fclose(file_f);
@@ -892,32 +946,31 @@ int ImageCapture::process_image(int i, const void *p, int size){
 
         if (count == 1)
         {
-            convert_yuv_to_y_buffer((unsigned char *)p,bufy,2592,1944);
-            convert_yuv_to_2y_buffer((unsigned char *)p,buf2y,2592,1944);
-            convert_yuv_to_rgb_buffer((unsigned char *)p,bufrgb,2592,1944);
+            convert_yuv_to_y_buffer((unsigned char *)p,bufy,width,height);
+            convert_yuv_to_2y_buffer((unsigned char *)p,buf2y,width,height);
+            convert_yuv_to_rgb_buffer((unsigned char *)p,ExGlobal::bufrgb,width,height);
         }
         else
         {
             if (i == 1)
-                memset((void *)sum,0,2592*1944*8);
+                memset((void *)sum,0,width*height*8);
 
-            for (int j = 0; j < 2592*1944*2; j++)
+            for (int j = 0; j < width*height*2; j++)
                 sum[j] += data[j];
 
             if(i == count){
                 unsigned short temp;
-                for (int j = 0; j < 2592*1944; j++)
+                for (int j = 0; j < width*height; j++)
                 {
                     bufy[j] = sum[j<<1]/count;
                     buf2y[j] = sum[j<<1]*256/count;
                     temp = buf2y[j]>>8;
                     buf2y[j] = temp+(buf2y[j]<<8);
                 }
-                //qDebug()<<"buf2y="<<buf2y[2592*500+1000]<<",bufy="<<bufy[2592*500+1000]<<",sum="<<sum[(2592*500+1000)<<1];
 
-                for (int j = 0; j < 2592*1944*2; j++)
+                for (int j = 0; j < width*height*2; j++)
                     sum[j] = sum[j]/count;
-                convert_yuv_to_rgb(sum,bufrgb,2592,1944);
+                convert_yuv_to_rgb(sum,ExGlobal::bufrgb,width,height);
             }
         }
 
@@ -938,7 +991,7 @@ int ImageCapture::process_image(int i, const void *p, int size){
 #endif
 #if 1
             sprintf(filenames,"%s/%s.bmp",Log::getDir().toLatin1().data(),filename.toLatin1().data());            
-            QImage image(bufrgb,2592,1944,QImage::Format_RGB888);
+            QImage image(ExGlobal::bufrgb,width,height,QImage::Format_RGB888);
             image.save(filenames);
 #endif   
         }
@@ -972,14 +1025,16 @@ void ImageCapture::run()
 
         qDebug()<<"Capture:"<<i;
         Log::LogCam(QString("run,Capture:%1").arg(i));
-        recordParam();
+        //recordParam();
 
         qmutex.lock();
         FD_ZERO(&fds);
         FD_SET(fd,&fds);
         tv.tv_sec = 40;
         tv.tv_usec = 0;
+        Log::LogCam("get frame data");
         r = select(fd+1,&fds,NULL,NULL,&tv);
+        Log::LogCam(QString("get frame data finish,r=%1").arg(r));
         if (-1 == r){
             if (EINTR == errno)
                 continue;
@@ -1001,6 +1056,9 @@ void ImageCapture::run()
             return;
         }
 
+#if 0
+        clear_frame();
+#else
         if (read_frame(i))
         {
             resultData[10] = 3;
@@ -1009,10 +1067,7 @@ void ImageCapture::run()
             emit finishCapture(resultData);
             return;
         }
-
-        if (captureMode == CaptureMode::View)
-            i = 1;
-
+#endif
         qmutex.unlock();
     }
     resultData[10] = 0;
@@ -1265,14 +1320,19 @@ void ImageCapture::recordParam(){
     }
 
 }
-bool ImageCapture::Running(){
-    int count = 0;
-    while(this->isRunning() && count<30){
-        qDebug()<<"Running:"<<count;
-        count++;
+bool ImageCapture::waitStop(){
+    for (int i = 0; i < 30; i++){
+        if (!this->isRunning())
+            return true;
         QThread::msleep(100);
     }
-    if (count<100)
-        return false;
-    return true;
+    return false;
+}
+
+double ImageCapture::getDefinition(){
+    return ImageAnalysis::GetDefinition3(bufy,imagetype);
+}
+
+double ImageCapture::getDefinition2(){
+    return ImageAnalysis::GetDefinition2(bufy,imagetype);
 }
