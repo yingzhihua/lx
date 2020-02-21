@@ -101,7 +101,10 @@ Page {
                     onClicked: {
                         console.log("click:"+parent.objectName);
                         testResultModel.setCurrItem(parent.objectName);
-                        dataView.push("qrc:/DataUI/DataLine.qml");
+                        if (ExGlobal.dataEntry() === 0)
+                            dataView.push("qrc:/DataUI/DataLine.qml");
+                        else
+                            stackView.push("qrc:/DataUI/DataLine.qml");
                     }
                 }
             }
@@ -115,10 +118,13 @@ Page {
         anchors.right: parent.right
         anchors.rightMargin: 20
         onClicked: {
-            dataView.pop();
+            if (ExGlobal.dataEntry() === 0)
+                dataView.pop();
+            else
+                stackView.pop();
         }
     }
     Component.onCompleted: {
-        itemList = ExGlobal.getBoxItemList("201");
+        itemList = ExGlobal.getBoxItemList();
     }
 }

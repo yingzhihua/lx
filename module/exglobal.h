@@ -13,9 +13,9 @@ class ExGlobal : public QObject
     Q_OBJECT
     Q_PROPERTY(QString user READ user WRITE setUser NOTIFY userChanged)
     Q_PROPERTY(QString panelName READ panelName NOTIFY panelNameChanged)
-    Q_PROPERTY(QString panelCode READ panelCodeEx NOTIFY panelCodeChanged)
-    Q_PROPERTY(QString sampleCode READ sampleCode NOTIFY sampleCodeChanged)
-    Q_PROPERTY(QString sampleInfo READ sampleInfo NOTIFY sampleInfoChanged)
+    Q_PROPERTY(QString panelCode READ panelCodeEx NOTIFY panelCodeChanged)    
+    Q_PROPERTY(QString sampleCode READ sampleCode WRITE setSampleCode NOTIFY sampleCodeChanged)
+    Q_PROPERTY(QString sampleInfo READ sampleInfo WRITE setSampleInfo NOTIFY sampleInfoChanged)
     Q_PROPERTY(QStringList serialPort READ serialPort NOTIFY serialPortChanged)
     Q_PROPERTY(bool debug READ isDebug WRITE setDebug NOTIFY debugChanged)
     Q_PROPERTY(QString sysName READ sysName WRITE setSysName NOTIFY sysNameChanged)
@@ -42,9 +42,9 @@ public:
     static QString panelCodeEx(){return "Lot# "+t_panelCode;}
     static void setPanelCode(const QString &panelCode){t_panelCode = panelCode;}
     static QString sampleCode(){return t_sampleCode;}
-    static void setSampleCode(const QString &sampleCode){t_sampleCode = sampleCode;}
+    void setSampleCode(const QString &sampleCode){t_sampleCode = sampleCode;emit sampleCodeChanged();}
     static QString sampleInfo(){return t_sampleInfo;}
-    static void setSampleInfo(const QString &sampleInfo){t_sampleInfo = sampleInfo;}
+    void setSampleInfo(const QString &sampleInfo){t_sampleInfo = sampleInfo;emit sampleInfoChanged();}
     static QString reagentBox(){return t_ReagentBox;}
     static void setReagentBox(const QString &reagentBoxType){t_ReagentBox = reagentBoxType;}
     static QStringList serialPort();
@@ -83,10 +83,17 @@ public:
     Q_INVOKABLE static QString getPosName(int pos);
     Q_INVOKABLE static int getItemCT(int Itemid);
     Q_INVOKABLE static int getItemResult(int Testid, int Itemid);
-    Q_INVOKABLE static QList<int> getBoxItemList(QString BoxCode);
+    Q_INVOKABLE static QList<int> getBoxItemList();
     Q_INVOKABLE static QList<int> getCurrItemResult();
 
     Q_INVOKABLE void qmlGlobalMessage(int code){GlobalMessage(code);}
+
+    Q_INVOKABLE static int projectMode(){return ProjectMode;} //0:正式版本；1：临时版本
+    Q_INVOKABLE void panelBoxIndexAddOne();
+    Q_INVOKABLE int dataEntry(){return DataEntry;}
+    Q_INVOKABLE void setDataEntry(int entry){DataEntry = entry;}
+    Q_INVOKABLE static QString boxSerial(){return t_BoxSerial;}
+    static void setBoxSerial(QString serial){t_BoxSerial = serial;}
 
     static int V1WorkX;
     static int V2WorkX;
@@ -116,6 +123,7 @@ public:
 
     static int LockScreenTime;
     static int LanguageCode;
+    static int PanelBoxIndex;
 
     static int CamAbs;
     static int CamGain;
@@ -144,6 +152,8 @@ public:
     static bool bChildImage;
     static int AutoFocus;
     static int QrCode;
+    static int ProjectMode;
+    static int DataEntry;
     static unsigned char *bufrgb;
     static unsigned char *hbufrgb;
 
@@ -155,6 +165,7 @@ signals:
     void sampleInfoChanged();
     void serialPortChanged();
     void debugChanged();
+    void projectModeChanged();
     void sysNameChanged();
     void adminPasswordChanged();
     void sysLanguageNameChanged();
@@ -172,6 +183,8 @@ private:
     static QString t_sampleCode;
     static QString t_sampleInfo;    
     static QString t_ReagentBox;
+    static QString t_BoxSerial;
+
     static bool test;
 
     static QString SysName;    

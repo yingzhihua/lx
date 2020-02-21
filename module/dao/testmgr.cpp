@@ -9,9 +9,9 @@ TestMgr::TestMgr(QObject *parent) : QObject(parent)
     Testid = -1;
 }
 
-int TestMgr::TestCreate(QString nSerial,QString BoxCode){
-    QString sql = QString("insert into PanelTest(PanelCode,SerialNo,BoxCode,TestTime,SampleInfo,UserName,ResultType) values('%1','%2','%3','%4','%5','%6',%7)")
-            .arg(ExGlobal::panelCode()).arg(nSerial).arg(BoxCode).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")).arg("Sample Info").arg(ExGlobal::User).arg(0);
+int TestMgr::TestCreate(QString nSerial){
+    QString sql = QString("insert into PanelTest(PanelCode,SerialNo,BoxCode,TestTime,SampleInfo,Sampleid,UserName,ResultType) values('%1','%2','%3','%4','%5','%6','%7',%8)")
+            .arg(ExGlobal::panelCode()).arg(nSerial).arg(ExGlobal::reagentBox()).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")).arg(ExGlobal::sampleInfo()).arg(ExGlobal::sampleCode()).arg(ExGlobal::User).arg(0);
     qDebug()<<sql;
     if(sqlitemgrinstance->execute(sql))
     {
@@ -36,10 +36,12 @@ void TestMgr::InsertData(int posIndex,int Itemid,int cycle,int value){
     }
 }
 
-void TestMgr::TestClose(int type){
+int TestMgr::TestClose(int type){
+    int result = Testid;
     if (Testid != -1){
         QString sql = QString("update PanelTest set ResultType=%1 where Testid=%2").arg(type).arg(Testid);
-        sqlitemgrinstance->execute(sql);
+        sqlitemgrinstance->execute(sql);        
         Testid = -1;
     }
+    return result;
 }

@@ -84,7 +84,10 @@ Page {
         anchors.right: parent.right
         anchors.rightMargin: 20
         onClicked: {
-            dataView.pop();
+            if (ExGlobal.dataEntry() === 0)
+                dataView.pop();
+            else
+                stackView.pop();
         }
     }
     function setChart(){

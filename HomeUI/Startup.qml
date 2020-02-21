@@ -2,6 +2,8 @@ import QtQuick 2.12
 import QtQuick.Controls 2.5
 
 import Dx.Sequence 1.0
+import Dx.Global 1.0
+
 Page {
     property int titleChange: 0
     id: start_page
@@ -25,9 +27,12 @@ Page {
             {
                 changeTimer.stop();
                 stackView.pop();
-                stackView.push("qrc:/HomeUI/Login.qml");
+                if (ExGlobal.projectMode() === 1)
+                    stackView.push("qrc:/HomeUI/Idle.qml");
+                else
+                    stackView.push("qrc:/HomeUI/Login.qml");
             }
-            console.log("Startup.qml,result:"+result);
+            //console.log("Startup.qml,result:"+result);
         }
     }
 

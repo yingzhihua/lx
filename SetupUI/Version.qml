@@ -84,4 +84,13 @@ V2.12\n1、增加自动对焦功能。\n\
             setupView.pop();
         }
     }
+
+    Component.onCompleted: {
+        if (ExGlobal.projectMode() === 1){
+            fun1.visible = false;
+            fun2.visible = false;
+            fun3.visible = false;
+            updatelog.visible = false;
+        }
+    }
 }

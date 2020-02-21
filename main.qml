@@ -119,7 +119,7 @@ ApplicationWindow {
             font.pixelSize: 30
             text:qsTr("")
         }
-
+/*
         Text{
             id:starttime
             anchors.centerIn: parent
@@ -137,7 +137,7 @@ ApplicationWindow {
             font.pixelSize: 30
             text:qsTr("")
         }
-
+*/
         Text {
             id: headerdate
             anchors.right: parent.right
@@ -229,6 +229,7 @@ ApplicationWindow {
         onTriggered: {
             headertime.text = Qt.formatTime(new Date(),"hh:mm:ss")
             headerdate.text = Qt.formatDate(new Date(),"yyyy-MM-dd")
+            /*
             if (timeinited == false){
                 timeinited = true;
                 starttime.text = Qt.formatTime(new Date(),"hh:mm:ss");
@@ -237,6 +238,7 @@ ApplicationWindow {
                 t_runtime++;
                 runtime.text = t_runtime;
             }
+            */
         }
     }
 

@@ -4,6 +4,7 @@ import QtQuick.Controls 2.5
 import Dx.Sequence 1.0
 import Dx.Global 1.0
 
+import "../components"
 Page {
     id: boxready_page
 
@@ -18,7 +19,10 @@ Page {
             anchors.fill: parent
             onClicked: {
                 stackView.pop();
-                stackView.push("qrc:/HomeUI/TestProcessT.qml");
+                if (ExGlobal.projectMode() === 1)
+                    stackView.push("qrc:/HomeUI/TestProcess.qml");
+                else
+                    stackView.push("qrc:/HomeUI/TestProcessT.qml");
             }
         }
     }
@@ -35,39 +39,68 @@ Page {
     Text{
         id: panelLot
 
-        text:ExGlobal.panelCode
+        text:ExGlobal.boxSerial()
         font.pixelSize: 30
         anchors.horizontalCenter: startbutton.horizontalCenter
         anchors.horizontalCenterOffset: -300
         anchors.verticalCenter: startbutton.verticalCenter
         anchors.verticalCenterOffset: +30
     }
-    Text{
-        id: sampleNo
 
-        text:ExGlobal.sampleCode
-        font.pixelSize: 30
-        anchors.horizontalCenter: startbutton.horizontalCenter
-        anchors.horizontalCenterOffset: +200
-        anchors.verticalCenter: startbutton.verticalCenter
-        anchors.verticalCenterOffset: -30
-    }
-    Text{
-        id: sampleInfo
-
-        text:ExGlobal.sampleInfo
-        font.pixelSize: 30
-        anchors.horizontalCenter: startbutton.horizontalCenter
-        anchors.horizontalCenterOffset: +200
-        anchors.verticalCenter: startbutton.verticalCenter
-        anchors.verticalCenterOffset: +30
-    }
-    Image {
-        id: editsample
+    Rectangle{
+        width: 400
+        height: 200
         anchors.horizontalCenter: startbutton.horizontalCenter
         anchors.horizontalCenterOffset: +300
         anchors.verticalCenter: startbutton.verticalCenter
-        source: "qrc:/image/editInfo.png"
+        //border.color: "black"
+        Text{
+            id: sampleNo
+            anchors.top: parent.top
+            anchors.topMargin: 50
+            anchors.left: parent.left
+            anchors.leftMargin: 100
+            text:ExGlobal.sampleCode
+            font.pixelSize: 30
+        }
+        Text{
+            id: sampleInfo
+
+            text:ExGlobal.sampleInfo
+            font.pixelSize: 30
+            anchors.horizontalCenter: sampleNo.horizontalCenter
+            anchors.top: sampleNo.bottom
+            anchors.topMargin: 20
+        }
+        Image {
+            id: editsample
+            anchors.left: sampleNo.right
+            anchors.leftMargin: 50
+            anchors.top: sampleNo.top
+            anchors.topMargin: 30
+            source: "qrc:/image/editInfo.png"
+        }
+        MouseArea{
+            anchors.fill: parent
+            onClicked: {
+                queryDlg.show(sampleInfo.text)
+            }
+        }
+    }
+
+    TwoQuery{
+        id: queryDlg
+        qtitle: qsTr("输入样本信息")
+        qlable1: qsTr("样本号：")
+        qlable2: qsTr("样本信息：")
+        qtext1: sampleNo.text
+        qtext2: sampleInfo.text
+        anchors.fill: parent
+        onQueryAck: {
+            console.log(res1,res2);
+            ExGlobal.sampleCode = res1;
+            ExGlobal.sampleInfo = res2;
+        }
     }
 
     Text{
@@ -104,7 +137,8 @@ Page {
         target: Sequence
         onPanelNameChanged:{
             panelName.text = ExGlobal.panelName;
-            panelLot.text = ExGlobal.panelCode;
+            //panelLot.text = ExGlobal.panelCode;
+            //panelLot.text = "Lot# " + ExGlobal.getCaliParam("PanelBoxIndex");
         }
     }
 

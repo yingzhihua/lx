@@ -102,6 +102,7 @@ Page {
         anchors.right: parent.right
         anchors.rightMargin: 20
         onClicked: {
+            ExGlobal.panelBoxIndexAddOne();
             stackView.pop();
             stackView.push("qrc:/HomeUI/BoxReady.qml");
         }
@@ -144,6 +145,13 @@ Page {
             boxstate.text = qsTr("试剂盒就绪");
         else
             boxstate.text = qsTr("未检测到试剂盒");
+
+        if (ExGlobal.projectMode() === 1){
+            btReady.visible = false;
+            btExit.visible = false;
+            userName.visible = false;
+        }
+
         console.log("idle onCompleted,box:"+Sequence.box+",door:"+Sequence.door);
     }
 
@@ -165,6 +173,8 @@ Page {
                 busyDes.visible = false;
                 if (Sequence.box)
                 {
+                    if (!Sequence.validBox())
+                        ExGlobal.panelBoxIndexAddOne();
                     stackView.pop();
                     stackView.push("qrc:/HomeUI/BoxReady.qml");
                 }

@@ -8,14 +8,15 @@ class TestMgr : public QObject
     Q_OBJECT
 public:
     explicit TestMgr(QObject *parent = nullptr);
-    int TestCreate(QString nSerial,QString BoxCode);
-    void TestClose(int type);
+    int TestCreate(QString nSerial);
+    int TestClose(int type);
     void InsertData(int posIndex,int Itemid,int cycle,int value);
+    int Testid;
 signals:
 
 public slots:
 private:
-    int Testid;
+
 };
 
 #endif // TESTMGR_H

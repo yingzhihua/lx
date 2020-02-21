@@ -29,6 +29,7 @@ Rectangle {
                     console.log("click:"+index);
                     testModel.setCurrTest(index);
                     dataView.push("qrc:/DataUI/DataView.qml");
+                    ExGlobal.setDataEntry(0);
                 }
             }
         }

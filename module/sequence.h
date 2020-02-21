@@ -44,6 +44,8 @@ public:
         Result_CloseBox_ok,
         Result_CloseBox_err,
         Result_CannelTest_ok,
+        Result_Test_finish,
+        Result_Test_unfinish,
         Result_Test_DataErr,
         Result_Test_ProcessErr
     };
@@ -57,7 +59,7 @@ public:
     Q_ENUM(TimeState)
 
     Q_PROPERTY(bool door READ readDoorState NOTIFY doorStateChanged)
-    Q_PROPERTY(bool box READ readBoxState NOTIFY boxStateChanged)
+    Q_PROPERTY(bool box READ readBoxState NOTIFY boxStateChanged)    
 
     Q_INVOKABLE bool sequenceDo(SequenceId id);
     Q_INVOKABLE QString getCurrTestTime();
@@ -89,6 +91,7 @@ public:
 
     Q_INVOKABLE double getDefinition(){return imageCapture->getDefinition();}
     Q_INVOKABLE double getDefinition2(){return imageCapture->getDefinition2();}
+    Q_INVOKABLE bool validBox(){return bValidBox;}
 
     Q_PROPERTY(int fan1Speed READ fan1Speed NOTIFY fan1SpeedChanged)
     Q_PROPERTY(int fan2Speed READ fan2Speed NOTIFY fan2SpeedChanged)
@@ -150,6 +153,8 @@ private:
     bool bCannelSequence;
     bool bDoorState;
     bool bBoxState;
+    bool bValidBox;
+
     ImageAnalysis *imageAna;
 
     QRcoder *qr;

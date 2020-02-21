@@ -18,19 +18,19 @@ Page {
         text:ExGlobal.panelName
         font.pixelSize: 30
         anchors.horizontalCenter: startbutton.horizontalCenter
-        anchors.horizontalCenterOffset: -300
+        anchors.horizontalCenterOffset: -400
         anchors.verticalCenter: startbutton.verticalCenter
-        anchors.verticalCenterOffset: -30
+        anchors.verticalCenterOffset: -40
     }
     Text{
         id: panelLot
 
-        text:ExGlobal.panelCode
+        text:ExGlobal.boxSerial()
         font.pixelSize: 30
         anchors.horizontalCenter: startbutton.horizontalCenter
-        anchors.horizontalCenterOffset: -300
+        anchors.horizontalCenterOffset: -400
         anchors.verticalCenter: startbutton.verticalCenter
-        anchors.verticalCenterOffset: +30
+        anchors.verticalCenterOffset: +40
     }
     Text{
         id: sampleNo
@@ -38,9 +38,9 @@ Page {
         text:ExGlobal.sampleCode
         font.pixelSize: 30
         anchors.horizontalCenter: startbutton.horizontalCenter
-        anchors.horizontalCenterOffset: +300
+        anchors.horizontalCenterOffset: +400
         anchors.verticalCenter: startbutton.verticalCenter
-        anchors.verticalCenterOffset: -30
+        anchors.verticalCenterOffset: -40
     }
     Text{
         id: sampleInfo
@@ -48,9 +48,9 @@ Page {
         text:ExGlobal.sampleInfo
         font.pixelSize: 30
         anchors.horizontalCenter: startbutton.horizontalCenter
-        anchors.horizontalCenterOffset: +300
+        anchors.horizontalCenterOffset: +400
         anchors.verticalCenter: startbutton.verticalCenter
-        anchors.verticalCenterOffset: +30
+        anchors.verticalCenterOffset: +40
     }    
 
     Text{
@@ -91,6 +91,9 @@ Page {
     }
 
     Component.onCompleted: {
+        message.visible = false;
+        if (ExGlobal.projectMode() === 1)
+            userName.visible = false;
         Sequence.sequenceDo(Sequence.Sequence_Test);
     }
 
@@ -103,9 +106,9 @@ Page {
             home_page.testprocess = ffinish;
             if (total == finish)
             {
-                headerMsg.text = "测试完成！";
-                stackView.pop();
-                stackView.push("qrc:/HomeUI/Idle.qml");
+                //headerMsg.text = "测试完成！";
+                //stackView.pop();
+                //stackView.push("qrc:/HomeUI/Idle.qml");
             }
             else
                 headerMsg.text = "预计剩余"+((total-finish)/1000)+"秒";
@@ -120,6 +123,17 @@ Page {
             }
             else if(result == Sequence.Result_CannelTest_ok)
             {
+                stackView.pop();
+                stackView.push("qrc:/HomeUI/Idle.qml");
+            }
+            else if(result == Sequence.Result_Test_finish){
+                headerMsg.text = "测试完成！";
+                stackView.pop();
+                stackView.push("qrc:/DataUI/DataView.qml");
+                ExGlobal.setDataEntry(1);
+            }
+            else if(result == Sequence.Result_Test_unfinish){
+                headerMsg.text = "测试完成！";
                 stackView.pop();
                 stackView.push("qrc:/HomeUI/Idle.qml");
             }

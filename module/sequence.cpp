@@ -52,6 +52,8 @@ Sequence::Sequence(QObject *parent) : QObject(parent)
     currSequenceId = SequenceId::Sequence_Idle;    
     bCannelSequence = false;
 
+    bValidBox = false;
+
     //actionDo("Sensor",0,0,0);
     serialMgr->serialWrite(ActionParser::ParamToByte("AutoData",1,0,0,0));
     //ReadMask(QCoreApplication::applicationDirPath()+"/pos");
@@ -128,9 +130,9 @@ bool Sequence::sequenceDo(SequenceId id)
                 imageCapture->start_capturing(ImageCapture::CaptureMode::Capture);                
                 ExGlobal::setPanelName(sequenceAction.attribute("PanelName"));
 
-                ExGlobal::setReagentBox("202");
-                imageAna->SetMask(ExGlobal::getReagentBox("202"),0);
-                testMgr->TestCreate("12345",ExGlobal::reagentBox());
+                //ExGlobal::setReagentBox("202");
+                imageAna->SetMask(ExGlobal::getReagentBox(ExGlobal::reagentBox()),0);
+                testMgr->TestCreate(ExGlobal::boxSerial());
                 break;
             }
         }
@@ -389,11 +391,20 @@ void Sequence::FinishSequence()
     {
         imageCapture->stop_capturing();
         if (imageAna->getItem().size() > 45)
-            testMgr->TestClose(2);
+        {
+            int testid = testMgr->TestClose(2);
+            ExGlobal::addTest();            
+            ExGlobal::pTestResultModel->setTestid(testid);
+            emit sequenceFinish(SequenceResult::Result_Test_finish);
+        }
         else
+        {
             testMgr->TestClose(1);
-        ExGlobal::addTest();
+            emit sequenceFinish(SequenceResult::Result_Test_unfinish);
+        }
+
         Log::setDir(QCoreApplication::applicationDirPath());
+
     }
     currSequenceId = SequenceId::Sequence_Idle;
 }
@@ -419,6 +430,10 @@ bool Sequence::ReadTestProcess(QString panel)
     xmlfile.close();
 
     QDomElement root = doc.documentElement();    
+    if (root.hasAttribute("ProjectMode")){
+        ExGlobal::ProjectMode = root.attribute("ProjectMode").toInt();
+    }
+
     if (root.hasAttribute("DefaultPanelCode"))
     {
         for (QDomElement panel = root.firstChildElement("PanelTest"); !panel.isNull(); panel = panel.nextSiblingElement("PanelTest"))
@@ -721,6 +736,7 @@ void Sequence::setSenorState(char char1, char char2)
 {
     bool sensor;
     //qDebug()<<"setSenorState,char1:"<<char1<<",char2:"<<char2;
+    qDebug()<<"setSensorState,bBoxState:"<<bBoxState<<",bDoorState:"<<bDoorState<<",char1:"<<QString::number(char1,16)<<",char2:"<<QString::number(char2,16);
     if (char1&0x08)
         sensor = true;
     else

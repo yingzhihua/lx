@@ -50,5 +50,6 @@
         <file>SetupUI/TimeSet.qml</file>
         <file>SetupUI/WifiMenu.qml</file>
         <file>components/Query.qml</file>
+        <file>components/TwoQuery.qml</file>
     </qresource>
 </RCC>

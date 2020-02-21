@@ -93,8 +93,13 @@ Rectangle {
             setName("AdminPassword",qsTr("设置密码"))
         }
 
-        //removeItem("Language");
-        //removeItem("Wlan");
+        if (ExGlobal.projectMode() === 1){
+            removeItem("LockTime");
+            removeItem("Language");
+            removeItem("AdminPassword");
+            removeItem("Wlan");
+            removeItem("TestSetup");
+        }
     }
 
     Connections{

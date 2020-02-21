@@ -10,13 +10,15 @@ QString ExGlobal::t_panelCode = "012315";
 QString ExGlobal::t_panelName = "上呼吸道测试";
 QString ExGlobal::t_sampleCode = "SLX 01079";
 QString ExGlobal::t_sampleInfo = "华山11";
+QString ExGlobal::t_BoxSerial = "Lot# 000001";
 QString ExGlobal::User = "NotLoggedIn";
-QString ExGlobal::t_ReagentBox = "201";
+QString ExGlobal::t_ReagentBox = "203";
 bool ExGlobal::test = false;
 
 QString ExGlobal::SysName = "样机02";
 QString ExGlobal::AdminPassword = "123456";
 int ExGlobal::LanguageCode = 1;
+int ExGlobal::PanelBoxIndex = 1;
 
 QString ExGlobal::t_version = "V2.12";
 QString ExGlobal::temp_version = "V0.00";
@@ -78,6 +80,9 @@ int ExGlobal::QrY3 = 731;
 int ExGlobal::QrX4 = 456;
 int ExGlobal::QrY4 = 715;
 #endif
+
+int ExGlobal::ProjectMode = 0;
+int ExGlobal::DataEntry = 0;
 
 static uchar ReagentBox[121];
 TestModel * ExGlobal::pTestModel = nullptr;
@@ -248,6 +253,8 @@ void ExGlobal::SetCaliParam(const QString &name, int caliValue)
         LockScreenTime = caliValue;
     else if (name == "LanguageCode")
         LanguageCode = caliValue;
+    else if (name == "PanelBoxIndex")
+        PanelBoxIndex = caliValue;
     else if (name == "AutoFocus")
         AutoFocus = caliValue;
     else if (name == "QrCode")
@@ -337,6 +344,8 @@ int ExGlobal::getCaliParam(const QString &caliName)
         result = LockScreenTime;
     else if(caliName == "LanguageCode")
         result = LanguageCode;
+    else if(caliName == "PanelBoxIndex")
+        result = PanelBoxIndex;
     else if(caliName == "AutoFocus")
         result = AutoFocus;
     else if(caliName == "QrCode")
@@ -508,9 +517,9 @@ QList<int> ExGlobal::getCurrItemResult(){
     return result;
 }
 
-QList<int> ExGlobal::getBoxItemList(QString BoxCode){
+QList<int> ExGlobal::getBoxItemList(){
     QList<int> result;
-    getReagentBox(BoxCode);
+    getReagentBox(t_ReagentBox);
     for (int i = 0; i < 121; i++)
         if (ReagentBox[i] > 2){
             bool find = false;
@@ -545,4 +554,10 @@ void ExGlobal::addTest(){
         if (!pTestModel->ExistTest(test.Testid))
             pTestModel->AddTest(test);
     }
+}
+
+void ExGlobal::panelBoxIndexAddOne(){
+    updateCaliParam("PanelBoxIndex",PanelBoxIndex + 1);
+    t_BoxSerial = QString("Lot# %1").arg(PanelBoxIndex, 6, 10, QChar('0'));
+    t_sampleCode = QString("SLX %1").arg(PanelBoxIndex, 6, 10, QChar('0'));
 }
