@@ -12,6 +12,8 @@ static QString userName;
 
 static QString password;
 
+SqliteMgr *SqliteMgr::sqlitemgrinstance = nullptr;
+
 SqliteMgr::SqliteMgr()
 {
 

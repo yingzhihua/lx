@@ -66,7 +66,7 @@ Page {
                 height: 50
 
                 Text {
-                    text:"H"+Math.floor(itemList[modelData]/1000/11+1)+"N"+Math.floor(itemList[modelData]/1000%11+1)
+                    text:"R"+Math.floor(itemList[modelData]/1000/11+1)+"C"+Math.floor(itemList[modelData]/1000%11+1)
                 }
                 Text {
                     x:100
@@ -83,11 +83,8 @@ Page {
         anchors.bottomMargin: 20
         anchors.right: parent.right
         anchors.rightMargin: 20
-        onClicked: {
-            if (ExGlobal.dataEntry() === 0)
-                dataView.pop();
-            else
-                stackView.pop();
+        onClicked: {            
+            mainView.pop();
         }
     }
     function setChart(){
@@ -95,10 +92,11 @@ Page {
         chartView.title = ExGlobal.getPosName(testResultModel.getCurrItemId());
 
         for (var i = 0; i < testResultModel.rowCount(); i++){
-            var seriesName = "H"+Math.floor(testResultModel.getField(i,"PosIndex")/11+1)+"N"+(testResultModel.getField(i,"PosIndex")%11+1);
+            var seriesName = "R"+Math.floor(testResultModel.getField(i,"PosIndex")/11+1)+"C"+(testResultModel.getField(i,"PosIndex")%11+1);
             var newline =chartView.series(seriesName);
             var value = testResultModel.getField(i,"TestValue");
             var cycle = testResultModel.getField(i,"cycle");
+            //console.debug("setChart,",value)
             if (newline === null)
             {
                 newline =chartView.createSeries(ChartView.SeriesTypeLine,seriesName);

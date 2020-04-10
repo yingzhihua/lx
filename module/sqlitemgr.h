@@ -31,6 +31,9 @@ public:
     bool StartTransations();
     bool EndTransations();
 
+public:
+    static SqliteMgr *sqlitemgrinstance;
+
 public slots:
 
 
@@ -40,13 +43,12 @@ private:
 
 };
 
-static SqliteMgr * sqlitemgrinstance;
-
+/*
 static QObject *sqlitemgr_provider(QQmlEngine *engine, QJSEngine *scriptEngine)
 {
     Q_UNUSED(engine);
     Q_UNUSED(scriptEngine);
-    if(sqlitemgrinstance == nullptr)
+    if(SqliteMgr::sqlitemgrinstance == nullptr)
     {
         qDebug()<<"inner sqlitemgrinstance is nullptr";
     }
@@ -54,7 +56,8 @@ static QObject *sqlitemgr_provider(QQmlEngine *engine, QJSEngine *scriptEngine)
     {
         qDebug()<<"inner sqlitemgrinstance is not nullptr";
     }
-    return sqlitemgrinstance;
+    return SqliteMgr::sqlitemgrinstance;
 }
+*/
 
 #endif // SQLITEMGR_H

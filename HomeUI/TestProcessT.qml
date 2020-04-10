@@ -156,8 +156,8 @@ Page {
         onClicked: {
             if (idle == true)
             {
-                stackView.pop();
-                stackView.push("qrc:/HomeUI/Idle.qml");
+                mainView.pop();
+                mainView.push("qrc:/HomeUI/Idle.qml");
             }
             else
                 Sequence.sequenceCancel();
@@ -176,32 +176,55 @@ Page {
     Connections{
         target: Sequence
         onProcessFinish:{
+            /*
             console.log("TestProcess.qml,total:"+total+",finish:"+finish);
-            var ffinish = finish*1000/total;            
-            home_page.testprocess = ffinish;
+            var ffinish = finish*1000/total;
+            if (ffinish >= 1000)
+            {
+                testCompleted.width = 0;
+                testunCompleted.width = 0;
+            }
+            else
+            {
+                testCompleted.width = ffinish*headerRec.width/1000;
+                testunCompleted.x = testCompleted.width;
+                testunCompleted.width = (1000-ffinish)*headerRec.width/1000;
+            }
+
             if (total == finish)
             {
                 headerMsg.text = "测试完成！";
-                idle = true;
-                //stackView.pop();
-                //stackView.push("qrc:/HomeUI/Idle.qml");
+                idle = true;                
             }
             else
                 headerMsg.text = "预计剩余"+((total-finish)/1000)+"秒，"+"  耗时："+Sequence.getCurrTestTime();
+                */
             message.text = Sequence.sequenceMessage();
         }
 
         onSequenceFinish:{
             if (result == Sequence.Result_SelfCheck_ok)
             {
-                stackView.pop();
-                stackView.push("qrc:/HomeUI/Login.qml");
+                mainView.pop();
+                mainView.push("qrc:/HomeUI/Login.qml");
             }
             else if(result == Sequence.Result_CannelTest_ok)
             {
-                stackView.pop();
-                stackView.push("qrc:/HomeUI/Idle.qml");
+                mainView.pop();
+                mainView.push("qrc:/HomeUI/Idle.qml");
             }
+            else if(result == Sequence.Result_Test_finish){
+                headerMsg.text = "测试完成！";
+                mainView.pop();
+                mainView.push("qrc:/DataUI/DataView.qml");
+                ExGlobal.setDataEntry(1);
+            }
+            else if(result == Sequence.Result_Test_unfinish){
+                headerMsg.text = "测试完成！";
+                mainView.pop();
+                mainView.push("qrc:/HomeUI/Idle.qml");
+            }
+
             console.log("TestProcessT.qml,result:"+result);
         }
 

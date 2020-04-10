@@ -53,7 +53,7 @@ void TestResultModel::setCurrItem(int id){
     m_display_list.clear();
     QString sql = "select * from TestResult where Testid="+QString::number(Testid)+" and Itemid="+QString::number(id);
     qDebug()<<sql;
-    QSqlQuery query = sqlitemgrinstance->select(sql);    
+    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(sql);
 
     dataPos.clear();
     while(query.next()){

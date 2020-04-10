@@ -68,7 +68,7 @@ ApplicationWindow {
     menuBar: Rectangle{
         id:headerRec
         width: parent.width
-        height: 80
+        height: 100
         color: "darkslateblue"
         Rectangle{
             id:testCompleted
@@ -108,16 +108,16 @@ ApplicationWindow {
 
     header:Rectangle{
         id:headerdatetime
-        height: 40
+        height: 60
         width: parent.width
-        color:"gainsboro"
+        //color:"gainsboro"
         Text{
             id:headertime
             anchors.left: parent.left
             anchors.leftMargin: 10
             anchors.bottom: parent.bottom
-            font.pixelSize: 30
-            text:qsTr("")
+            font.pixelSize: 40
+            text:qsTr("17:22:14")
         }
 /*
         Text{
@@ -143,8 +143,8 @@ ApplicationWindow {
             anchors.right: parent.right
             anchors.rightMargin: 10
             anchors.bottom: parent.bottom
-            font.pixelSize: 30
-            text: qsTr("")
+            font.pixelSize: 40
+            text: qsTr("2020-03-12")
         }
     }
 
@@ -183,8 +183,35 @@ ApplicationWindow {
                 }
             }
         }
-    }
 
+        onCurrentIndexChanged: {
+            mainView.clear()
+            if (currentIndex == 0)
+                mainView.push("qrc:/SetupUI/SetupMenu.qml");
+            else if(currentIndex == 1)
+            {
+                if (Sequence.isTesting()){
+                    if (ExGlobal.projectMode() === 0)
+                        mainView.push("qrc:/HomeUI/TestProcessT.qml");
+                    else
+                        mainView.push("qrc:/HomeUI/TestProcess.qml");
+                }
+                else
+                    mainView.push("qrc:/HomeUI/Idle.qml");
+            }
+            else if(currentIndex == 2)
+                mainView.push("qrc:/DataUI/DataMenu.qml");
+
+            console.debug("currIndex",currentIndex)
+        }
+    }
+//*
+    StackView{
+        id: mainView
+        anchors.fill: parent
+        initialItem: ExGlobal.debug?"./HomeUI/Login.qml":"./HomeUI/Startup.qml"
+    }
+/*/
     SwipeView {
         id: swipeView
         anchors.fill: parent
@@ -211,7 +238,7 @@ ApplicationWindow {
                 headerMsg.text = dataPage.titlemsg
         }
     }
-
+//*/
     ErrPage{
         id:err
         visible: false
@@ -252,6 +279,22 @@ ApplicationWindow {
                 tabBar.enabled = false;
             }
         }
+
+        onTitleNotify:{
+            console.log("onTitleNotify:"+titleparam+","+title);
+            if (titleparam == 0){
+                testCompleted.width = 0;
+                testunCompleted.width = 0;
+                headerMsg.text = title;
+            }
+            else if (titleparam >= 100){
+                var finish = titleparam - 100;
+                testCompleted.width = finish*headerRec.width/1000;
+                testunCompleted.x = testCompleted.width;
+                testunCompleted.width = (1000-finish)*headerRec.width/1000;
+                headerMsg.text = title;
+            }
+        }
     }
 
     Connections{
@@ -267,6 +310,7 @@ ApplicationWindow {
                 console.log("main.qml exit",code)
                 lockDialog.exit()
                 tabBar.enabled = true
+                //inputPanel.active = false
             }
         }
     }

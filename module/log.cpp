@@ -68,6 +68,24 @@ void Log::LogCam(QString log)
     file.close();
 }
 
+void Log::LogByFile(QString filename, QString log)
+{
+    QFile file;
+
+    file.setFileName(getDir()+"/"+filename);
+    if (!file.open(QIODevice::WriteOnly|QIODevice::Text|QIODevice::Append))
+    {
+        qDebug()<<"file open error!";
+    }
+    QTextStream textStream(&file);
+
+    QDateTime current_time = QDateTime::currentDateTime();
+    QString current_time_str = current_time.toString("yyyy-MM-dd hh:mm:ss.zzz ");
+    textStream<<current_time_str<<log<<endl;
+    textStream.flush();
+    file.close();
+}
+
 void Log::LogTemp(QByteArray data)
 {
     QFile file;

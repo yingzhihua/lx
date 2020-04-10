@@ -1,4 +1,4 @@
-QT += charts quick
+QT += charts quick webview
 QT += serialport sql xml printsupport
 CONFIG += c++11
 
@@ -36,7 +36,9 @@ SOURCES += \
     globalapplication.cpp \
     module/dao/usermodel.cpp \
     module/dao/wifimodel.cpp \
-    module/cvcapture.cpp
+    module/cvcapture.cpp \
+    module/printmgr.cpp \
+    module/cameraplayer.cpp
 
 RESOURCES += qml.qrc
 
@@ -76,7 +78,9 @@ HEADERS += \
     globalapplication.h \
     module/dao/usermodel.h \
     module/dao/wifimodel.h \
-    module/cvcapture.h
+    module/cvcapture.h \
+    module/printmgr.h \
+    module/cameraplayer.h
 
 if(contains(DEFINES,PLUTFORM_ARM)){
 INCLUDEPATH += /opt/opencv-4.1.1/include \
@@ -96,6 +100,11 @@ LIBS += /opt/opencv-4.1.1/lib/libopencv_highgui.so \
 INCLUDEPATH += /opt/zbar-0.10/include
 LIBS += /opt/zbar-0.10/lib/libzbar.so
 
+INCLUDEPATH += /opt/DVPCamera
+LIBS += /opt/DVPCamera/libdvp.so
+
+INCLUDEPATH += /opt/CKCameraL/include
+LIBS += /opt/CKCamera/libCKCameraSDK_aarch64.so
 }else{
 INCLUDEPATH += /opt/opencv-4.1.1L/include \
                 /opt/opencv-4.1.1L/include/opencv4 \
@@ -113,4 +122,10 @@ LIBS += /opt/opencv-4.1.1L/lib/libopencv_highgui.so \
 
 INCLUDEPATH += /opt/zbar-0.10L/include
 LIBS += /opt/zbar-0.10L/lib/libzbar.so
+
+INCLUDEPATH += /opt/DVPCameraL
+LIBS += /opt/DVPCameraL/libdvp.so
+
+INCLUDEPATH += /opt/CKCameraL/include
+LIBS += /opt/CKCameraL/libCKCameraSDK_x64.so
 }

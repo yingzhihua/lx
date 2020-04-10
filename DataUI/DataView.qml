@@ -9,7 +9,7 @@ Page {
     property var itemList:[]
     Text{
         id: panelName
-        text:ExGlobal.panelName+" / "+ExGlobal.panelCode
+        text:ExGlobal.panelName+" / "+ExGlobal.boxSerial()
         font.pixelSize: 40
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.horizontalCenterOffset: -100
@@ -21,6 +21,13 @@ Page {
         anchors.left: panelName.right
         anchors.leftMargin: 10
         source: "qrc:/image/Print.png"
+        MouseArea{
+            anchors.fill: parent
+            onClicked: {
+                if (Sequence.printTest())
+                    busyIndicator.running = true;
+            }
+        }
     }
 
     Image {
@@ -42,28 +49,36 @@ Page {
             anchors.top: parent.top
             anchors.topMargin: 10
             font.pixelSize: 40
-            text:qsTr("测试有效")
+            //text:qsTr("测试有效")
+            text:qsTr("Internal")
         }
+
         Image {
             id: validico
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.horizontalCenterOffset: -60
-            anchors.top: reference.bottom
-            anchors.topMargin: 10
-            source: "qrc:/image/Valid.png"
+            //anchors.horizontalCenterOffset: -60
+            anchors.horizontalCenterOffset: -150
+            //anchors.top: reference.bottom
+            anchors.verticalCenter: reference.verticalCenter
+            anchors.verticalCenterOffset: 30
+            width: 60
+            height: 60
+            source: "qrc:/image/Valid4.png"
         }
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.horizontalCenterOffset: +20
-            anchors.verticalCenter: validico.verticalCenter
+            //anchors.horizontalCenterOffset: +20
+            //anchors.verticalCenter: validico.verticalCenter
+            anchors.top: reference.bottom
             font.pixelSize: 40
-            text:qsTr("参照物")
+            //text:qsTr("参照物")
+            text:qsTr("Control")
         }
         MouseArea{
             anchors.fill: parent
             onClicked: {
                 testResultModel.setCurrItem(2);
-                dataView.push("qrc:/DataUI/DataLine.qml");
+                mainView.push("qrc:/DataUI/DataLine.qml");
             }
         }
     }
@@ -88,7 +103,7 @@ Page {
                 Image {
                     anchors.verticalCenter: parent.verticalCenter
                     x:10
-                    source: ExGlobal.getItemResult(testResultModel.getTestid(),itemList[modelData])>0?"qrc:/image/Positive.png":"qrc:/image/Negative.png"
+                    source: ExGlobal.getItemResult(testResultModel.getTestid(),(itemList[modelData])>0||modelData==2)?"qrc:/image/Positive.png":"qrc:/image/Negative.png"
                 }
                 Text{
                     anchors.verticalCenter: parent.verticalCenter
@@ -100,11 +115,8 @@ Page {
                     anchors.fill: parent
                     onClicked: {
                         console.log("click:"+parent.objectName);
-                        testResultModel.setCurrItem(parent.objectName);
-                        if (ExGlobal.dataEntry() === 0)
-                            dataView.push("qrc:/DataUI/DataLine.qml");
-                        else
-                            stackView.push("qrc:/DataUI/DataLine.qml");
+                        testResultModel.setCurrItem(parent.objectName);                        
+                        mainView.push("qrc:/DataUI/DataLine.qml");
                     }
                 }
             }
@@ -117,14 +129,32 @@ Page {
         anchors.bottomMargin: 20
         anchors.right: parent.right
         anchors.rightMargin: 20
-        onClicked: {
-            if (ExGlobal.dataEntry() === 0)
-                dataView.pop();
-            else
-                stackView.pop();
+        onClicked: {            
+            mainView.pop();
         }
     }
+
+    BusyIndicator{
+        id:busyIndicator
+        anchors.centerIn: parent
+        implicitWidth: 200
+        implicitHeight: 200
+        opacity: 1.0
+        running: false
+    }
+
     Component.onCompleted: {
         itemList = ExGlobal.getBoxItemList();
+        console.debug(itemList)
+    }
+
+    Connections{
+        target: Sequence
+        onSequenceFinish:{
+            if (result == Sequence.Result_Print_finish)
+            {
+                busyIndicator.running = false;
+            }
+        }
     }
 }

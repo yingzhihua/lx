@@ -4,6 +4,8 @@
 #include <QThread>
 #include <QImage>
 
+#include "DVPCamera.h"
+
 struct buffer
 {
     void * start;
@@ -13,6 +15,10 @@ struct buffer
 typedef enum{
     IO_METHOD_READ,IO_METHOD_MMAP,
 } io_method;
+
+typedef enum{
+    CAMERA_V4L2,CAMERA_DVP,CAMERA_CK,
+} CAMERA_TYPE;
 
 class ImageCapture : public QThread
 {
@@ -49,16 +55,18 @@ signals:
     void reView(QImage img);
 
 private:
-    int open_device();
-    void close_device();
-    int init_device();
+    int open_device();    
+    void close_device();    
+    int init_device();    
     int init_read(unsigned int buffer_size);
     int init_mmap();
-    int uninit_device();
+    int uninit_device();    
     int read_frame(int index);
     int clear_frame();
     int process_image(int index, const void *p, int size);
     io_method io;    
+    CAMERA_TYPE cameraType;
+
     int fd;
     int count;
     buffer *buffers;
@@ -72,6 +80,20 @@ private:
     bool stopping;
     int internal_stop_capturing();
     void recordParam();
+#if 1
+    int dvp_open_device();
+    int dvp_close_device();
+    int dvp_init_device();
+    int dvp_uninit_device();
+    dvpHandle dvp_handle;
+    QString m_FriendlyName;
+    bool IsValidHandle(dvpHandle handle)
+    {
+        bool bValidHandle;
+        dvpIsValid(handle, &bValidHandle);
+        return bValidHandle;
+    }
+#endif
 };
 
 #endif // IMAGECAPTURE_H

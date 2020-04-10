@@ -9,6 +9,8 @@ class TestMgr : public QObject
 public:
     explicit TestMgr(QObject *parent = nullptr);
     int TestCreate(QString nSerial);
+    int LoopTestCreate(QString panelCode, int loopTestCount);
+    void LoopTestFinishCycle(int nCycle);
     int TestClose(int type);
     void InsertData(int posIndex,int Itemid,int cycle,int value);
     int Testid;

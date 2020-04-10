@@ -1,8 +1,8 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.5
 import Dx.Global 1.0
-Rectangle {
-    property string titlemsg: qsTr("历史数据")
+import Dx.Sequence 1.0
+Rectangle {    
     id: data_page
     ListView{
         id:listView
@@ -18,21 +18,24 @@ Rectangle {
                 Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:100;text:Testid}
                 Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:200;text:PanelCode}
                 Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:200;text:SerialNo}
-                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:1000;text:SampleInfo}
-                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:300;text:TestTime}
-                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:200;text:User}
-                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:100;text:ResultType}
+                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:200;text:SampleId}
+                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:600;text:SampleInfo}
+                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:400;text:TestTime}
+                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:200;text:User}                
             }
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
                     console.log("click:"+index);
                     testModel.setCurrTest(index);
-                    dataView.push("qrc:/DataUI/DataView.qml");
+                    mainView.push("qrc:/DataUI/DataView.qml");
                     ExGlobal.setDataEntry(0);
                 }
             }
         }
     }
-    onTitlemsgChanged: headerMsg.text = titlemsg;
+
+    Component.onCompleted: {
+        Sequence.changeTitle(qsTr("历史数据"));
+    }
 }

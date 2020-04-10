@@ -275,8 +275,13 @@ Page {
         onClicked: {
             Sequence.stopView();
             Sequence.actionDo("Light",1,0,0,0);
-            setupView.pop();
+            mainView.pop();
+            Sequence.changeTitle(qsTr("设置"));
         }
+    }
+
+    Component.onCompleted: {
+        Sequence.changeTitle(qsTr("摄像头测试"))
     }
 
     Connections{

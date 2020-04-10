@@ -30,7 +30,7 @@ Rectangle {
             height: itemheight
             Row{
                 anchors.verticalCenter: parent.verticalCenter
-                Text{width:100;text:Userid}
+                //Text{width:100;text:Userid}
                 Text{text:Name}
             }
             states: State {
@@ -131,7 +131,7 @@ Rectangle {
         width:300
         height: 60
         verticalAlignment: Text.AlignBottom
-        text:"123456"
+        text:""
         font.pixelSize: 40
         background: Rectangle{
             border.color: "darkgray"
@@ -198,7 +198,7 @@ Rectangle {
         anchors.right: parent.right
         anchors.rightMargin: 20
         onClicked: {
-            setupView.pop();
+            mainView.pop();
         }
     }
 }

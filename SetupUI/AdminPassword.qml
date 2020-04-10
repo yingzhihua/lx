@@ -8,7 +8,7 @@ Item {
         id:labelOldPassword
         anchors.centerIn: parent
         anchors.horizontalCenterOffset: -100
-        anchors.verticalCenterOffset: -50
+        anchors.verticalCenterOffset: -200
         width: 80
         height: 30
         text: qsTr("旧密码：")
@@ -61,17 +61,46 @@ Item {
         }
     }
 
+    Text{
+        id:labelNewPasswordCon
+        anchors.right: labelNewPassword.right
+        anchors.rightMargin: 0
+        anchors.top: labelNewPassword.bottom
+        anchors.topMargin: 60
+        width: 80
+        height: 30
+        text: qsTr("密码确认：")
+        horizontalAlignment: Text.AlignRight
+        verticalAlignment: Text.AlignVCenter
+        font.pixelSize: 40
+    }
+
+    TextField{
+        id:inputNewPasswordCon
+        anchors.verticalCenter: labelNewPasswordCon.verticalCenter
+        anchors.left: labelNewPasswordCon.right
+        anchors.leftMargin: 50
+        width:300
+        height: 60
+        verticalAlignment: Text.AlignBottom
+        font.pixelSize: 40
+        background: Rectangle{
+            border.color: "darkgray"
+            radius: 5
+        }
+    }
+
     Button{
         id: btSet
-        anchors.top: labelNewPassword.bottom
+        anchors.top: labelNewPasswordCon.bottom
         anchors.topMargin: 80
-        anchors.horizontalCenter: labelOldPassword.horizontalCenter
+        anchors.horizontalCenter: labelNewPasswordCon.horizontalCenter
         anchors.horizontalCenterOffset: 100
         width: 150
         height: 50
 
         contentItem: Text {
-                  text: qsTr("设置")
+                  text: qsTr("保存")
                   color: "white"
                   horizontalAlignment: Text.AlignHCenter
                   verticalAlignment: Text.AlignVCenter
@@ -83,8 +112,10 @@ Item {
             radius: 5
         }
         onClicked: {
-            if (userModel.updatePassword(inputOldPassword.text,inputNewPassword.text))
-            setupView.pop();
+            if (inputNewPasswordCon.text != inputNewPassword.text)
+                labelMessage.text = qsTr("密码错误！")
+            else if (userModel.updatePassword(inputOldPassword.text,inputNewPassword.text))
+                setupView.pop();
             else
                 labelMessage.text = qsTr("密码错误！")
         }
@@ -111,7 +142,7 @@ Item {
         anchors.right: parent.right
         anchors.rightMargin: 20
         onClicked: {
-            setupView.pop();
+            mainView.pop();
         }
     }
 

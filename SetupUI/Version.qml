@@ -81,7 +81,7 @@ V2.12\n1、增加自动对焦功能。\n\
         anchors.right: parent.right
         anchors.rightMargin: 20
         onClicked: {
-            setupView.pop();
+            mainView.pop();
         }
     }
 

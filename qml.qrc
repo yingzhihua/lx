@@ -51,5 +51,10 @@
         <file>SetupUI/WifiMenu.qml</file>
         <file>components/Query.qml</file>
         <file>components/TwoQuery.qml</file>
+        <file>SetupUI/LXDebug.qml</file>
+        <file>SetupUI/TestLoop.qml</file>
+        <file>image/Valid4.png</file>
+        <file>HomeUI/TestCancel.qml</file>
+        <file>components/TestExitConfirm.qml</file>
     </qresource>
 </RCC>

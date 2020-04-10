@@ -17,7 +17,8 @@ bool GlobalApplication::notify(QObject *obj, QEvent *e){
     QString clName = objMeta->className();
 
     if(e->type() == QEvent::MouseButtonRelease){
-        if (ExGlobal::projectMode() == 0 && clName == "QQuickApplicationWindow_QML_30"){
+        qDebug()<<"clName:"<<clName.mid(0,28);
+        if (clName.mid(0,28) == "QQuickApplicationWindow_QML_"){
             QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(e);
             //qDebug()<<"clName:"<<clName<<"mouse:"<<mouseEvent->x();
             if (timerid != -1)

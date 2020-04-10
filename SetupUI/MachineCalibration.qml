@@ -590,7 +590,8 @@ Rectangle {
         anchors.right: parent.right
         anchors.rightMargin: 20
         onClicked: {
-            setupView.pop();
+            mainView.pop();
+            Sequence.changeTitle(qsTr("设置"));
         }
     }
 

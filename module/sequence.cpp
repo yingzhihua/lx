@@ -3,7 +3,6 @@
 
 #include "exglobal.h"
 #include "actionparser.h"
-#include "log.h"
 #include "imageanalysis.h"
 #include "sqlitemgr.h"
 
@@ -36,6 +35,7 @@ Sequence::Sequence(QObject *parent) : QObject(parent)
 
     serialMgr = new SerialMgr();
     connect(serialMgr,&SerialMgr::finishAction,this,&Sequence::ActionFinish);
+    connect(serialMgr,&SerialMgr::errAction,this,&Sequence::errFinish);
     connect(serialMgr,&SerialMgr::errOccur,this,&Sequence::errReceive);
 
     imageCapture = new ImageCapture();
@@ -44,10 +44,15 @@ Sequence::Sequence(QObject *parent) : QObject(parent)
     connect(imageCapture,&ImageCapture::finishCapture,this,&Sequence::ActionFinish);
     connect(imageCapture,&ImageCapture::reView,this,&Sequence::CameraView);
 
+    camera = new CameraPlayer();
+
     testMgr = new TestMgr();
 
     qr = new QRcoder();
     connect(qr,&QRcoder::finishQRcode,this,&Sequence::ActionFinish);
+
+    printer = new printmgr();
+    connect(printer,&printmgr::finishPrint,this,&Sequence::PrintFinish);
 
     currSequenceId = SequenceId::Sequence_Idle;    
     bCannelSequence = false;
@@ -81,6 +86,9 @@ QStringList Sequence::getTestList(){
     QDomElement root = doc.documentElement();
     for (QDomElement e = root.firstChildElement("PanelTest"); !e.isNull(); e = e.nextSiblingElement("PanelTest"))
     {
+        QString panelCode = e.attribute("PanelCode");
+        if (panelCode.length() > 4 && panelCode.startsWith("90"))
+            continue;
         test<<e.attribute("PanelName");
     }
     return test;
@@ -108,6 +116,7 @@ QString Sequence::getCurrTestTime(){
 
 bool Sequence::sequenceDo(SequenceId id)
 {
+    qDebug()<<"sequenceDo,currSequenceId:"<<currSequenceId<<id;
     if (currSequenceId != SequenceId::Sequence_Idle)
     {
         this->nextSequenceId = id;
@@ -116,8 +125,7 @@ bool Sequence::sequenceDo(SequenceId id)
         return false;
     }
     this->currSequenceId = id;
-    QDomElement root = doc.documentElement();
-    qDebug()<<"start sequence:"<<id;
+    QDomElement root = doc.documentElement();    
     if (id == SequenceId::Sequence_Test)
     {
         for (sequenceAction = root.firstChildElement("PanelTest"); !sequenceAction.isNull(); sequenceAction = sequenceAction.nextSiblingElement("PanelTest"))
@@ -127,7 +135,8 @@ bool Sequence::sequenceDo(SequenceId id)
                 testStartTime = QDateTime::currentDateTime();
                 QString current_time_str = testStartTime.toString("yyyyMMdd_hhmmss");
                 Log::setDir(QCoreApplication::applicationDirPath()+"/"+current_time_str);
-                imageCapture->start_capturing(ImageCapture::CaptureMode::Capture);                
+                imageCapture->start_capturing(ImageCapture::CaptureMode::Capture);
+                camera->CameraStart(CameraPlayer::CaptureMode::Capture);
                 ExGlobal::setPanelName(sequenceAction.attribute("PanelName"));
 
                 //ExGlobal::setReagentBox("202");
@@ -193,9 +202,10 @@ bool Sequence::actionDo(QString device, int value, int param1, int param2, int p
 void Sequence::sequenceCancel()
 {
     qDebug()<<"sequenceCancel:"<<",currSequenceId:"<<currSequenceId<<",durationState:"<<durationState<<",bFinishAction:"<<bFinishAction;
-    if (currSequenceId != SequenceId::Sequence_Test)
+    if (!isTesting()&&!isLoopTesting())
         return;
     imageCapture->stop_capturing();
+    camera->CameraStop();
 
     if(durationState == TimeState::running)
         timer->stop();
@@ -264,6 +274,10 @@ void Sequence::ActionFinish(QByteArray data)
                     fan1SetSpeed((data[13]<<8)+data[14]);
                 else if (data[12] == '\x02')
                     fan1SetSpeed((data[13]<<8)+data[14]);
+                int fan = data[12];
+                int fanspeed = (data[13]<<8)+data[14];
+                if (isLoopTesting())
+                    Log::LogByFile("LoopTest.txt",QString("风扇:%1,转速：%2").arg(fan).arg(fanspeed));
             }
         }
         else if (data[1] == '\x01')
@@ -291,11 +305,11 @@ void Sequence::ActionFinish(QByteArray data)
                 QVector<int> posIndex = imageAna->getIndex();
                 emit callQmlRefeshData(currCameraCycle,item,value);
 
-                sqlitemgrinstance->StartTransations();
+                SqliteMgr::sqlitemgrinstance->StartTransations();
                 for(int i = 0; i < item.size(); i++){
                     testMgr->InsertData(posIndex[i],item[i],currCameraCycle,value[i]);
                 }
-                sqlitemgrinstance->EndTransations();
+                SqliteMgr::sqlitemgrinstance->EndTransations();
 
                 /*
                 QString saveStr;
@@ -317,7 +331,8 @@ void Sequence::ActionFinish(QByteArray data)
                 //*/
             }
             else if(data[7] == '\xa0' && data[10] != '\x00'){
-                errReceive(0x300 + data[10]);
+                //errReceive(0x300 + data[10]);
+                errReceive(ERROR_CODE_CAM_CONNECT);
                 return;
             }
 
@@ -368,45 +383,94 @@ void Sequence::ActionFinish(QByteArray data)
     }
 }
 
+void Sequence::errFinish(QByteArray data){
+    qDebug()<<"Sequence errFinish:"<<data.toHex(' ');
+    QString errStr;
+    if (data.length()>11 && data[0] == '\xaa' && data[data.length()-1]=='\x55'){
+        if (data[1] == '\x02'){            
+            if (data[7] == '\x89'){
+                int temp1 = (data[12]<<8)+data[13];
+                int temp2 = (data[14]<<8)+data[15];
+                int chan = data[11];
+                errStr = QString("通道%1两传感器温差过大，一传感器温度：%2，一传感器温度：%3").arg(chan).arg(temp1).arg(temp2);
+                emit errOccur(errStr+" \n\n错误码："+QString::number(ERROR_CODE_TEMP_DIFF,16));
+            }
+            else if(data[7] == '\x24')
+            {
+                errStr = QString("温度错误！");
+                emit errOccur(errStr+" \n\n错误码："+QString::number(ERROR_CODE_TEMP_ERR,16));
+            }
+
+        }
+        else {
+            emit errOccur("未知错误："+data.toHex(' '));
+        }
+        sequenceCancel();
+    }
+}
+//因为打印动作可能同步执行，所有独立接收函数
+void Sequence::PrintFinish(QByteArray data){
+    if (data[7] == '\xB1'){
+        emit sequenceFinish(SequenceResult::Result_Print_finish);
+    }
+}
 void Sequence::FinishSequence()
 {
+    SequenceResult out = SequenceResult::Result_NULL;
     qDebug()<<"FinishSequence:"<<currSequenceId;
     if (currSequenceId == SequenceId::Sequence_SelfCheck)
-    {
-        emit sequenceFinish(SequenceResult::Result_SelfCheck_ok);
+    {        
+        out = SequenceResult::Result_SelfCheck_ok;
     }
     else if(currSequenceId == SequenceId::Sequence_CloseBox)
     {
         bDoorState = false;
-        emit sequenceFinish(SequenceResult::Result_CloseBox_ok);
+        out = SequenceResult::Result_CloseBox_ok;
     }
     else if(currSequenceId == SequenceId::Sequence_OpenBox)
     {
         bDoorState = true;
-        emit sequenceFinish(SequenceResult::Result_OpenBox_ok);
+        out = SequenceResult::Result_OpenBox_ok;
     }
     else if(currSequenceId == SequenceId::Sequence_CannelTest)
-        emit sequenceFinish(SequenceResult::Result_CannelTest_ok);
+        out = SequenceResult::Result_CannelTest_ok;
     else if(currSequenceId == SequenceId::Sequence_Test)
     {
         imageCapture->stop_capturing();
+        camera->CameraStop();
+        currSequenceId = SequenceId::Sequence_Idle;
         if (imageAna->getItem().size() > 45)
         {
             int testid = testMgr->TestClose(2);
             ExGlobal::addTest();            
             ExGlobal::pTestResultModel->setTestid(testid);
-            emit sequenceFinish(SequenceResult::Result_Test_finish);
+            out = SequenceResult::Result_Test_finish;
         }
         else
         {
             testMgr->TestClose(1);
-            emit sequenceFinish(SequenceResult::Result_Test_unfinish);
+            out = SequenceResult::Result_Test_unfinish;
         }
 
         Log::setDir(QCoreApplication::applicationDirPath());
 
     }
+    else if(currSequenceId == SequenceId::Sequence_LoopTest)
+    {
+        if (continueLoopTest())
+            return;
+        else
+        {
+            imageCapture->stop_capturing();
+            camera->CameraStop();
+            currSequenceId = SequenceId::Sequence_Idle;
+            testMgr->TestClose(3);
+            out = SequenceResult::Result_LoopTest_finish;
+        }
+    }
     currSequenceId = SequenceId::Sequence_Idle;
+    if (out != SequenceResult::Result_NULL)
+        emit sequenceFinish(out);
 }
 
 bool Sequence::ReadTestProcess(QString panel)
@@ -415,7 +479,7 @@ bool Sequence::ReadTestProcess(QString panel)
     qDebug("ReadTestProcess");
     if (!xmlfile.open(QFile::ReadOnly))
     {
-        errReceive(0x401);
+        errReceive(ERROR_CODE_FILE_READ);
         qDebug()<<"file err:"<<xmlfile.error()<<",string:"<<xmlfile.errorString()<<",file:"<<xmlfile.fileName()<<",dir:"<<QDir::currentPath()<<",apppath:"<<QCoreApplication::applicationDirPath();
         return false;
     }
@@ -424,14 +488,14 @@ bool Sequence::ReadTestProcess(QString panel)
     {
         xmlfile.close();
         qDebug()<<"xml setContent err return";
-        errReceive(0x402);
+        errReceive(ERROR_CODE_FILE_FORMAT);
         return  false;
     }
     xmlfile.close();
 
     QDomElement root = doc.documentElement();    
     if (root.hasAttribute("ProjectMode")){
-        ExGlobal::ProjectMode = root.attribute("ProjectMode").toInt();
+        //ExGlobal::ProjectMode = root.attribute("ProjectMode").toInt();
     }
 
     if (root.hasAttribute("DefaultPanelCode"))
@@ -457,7 +521,7 @@ bool Sequence::ReadMask(QString mask)
     QFile maskfile(mask+".bin");
     if (!maskfile.open(QFile::ReadOnly))
     {
-        errReceive(0x403);
+        errReceive(ERROR_CODE_FILE_MODEL);
         qDebug()<<"file err:"<<maskfile.error()<<",string:"<<maskfile.errorString()<<",file:"<<maskfile.fileName()<<",dir:"<<QDir::currentPath()<<",apppath:"<<QCoreApplication::applicationDirPath();
         return false;
     }
@@ -492,6 +556,10 @@ bool Sequence::DoAction(QDomElement action,bool isChild)
     message += action.attribute("Device")+","+action.attribute("ActionValue")+","+action.attribute("ActionParam1")+","+action.attribute("ActionParam2");
     Log::LogWithTime(message);
 
+    if (isLoopTesting())
+        //Log::LogByFile("LoopTest.txt",QString("第%1/%2大循环,%3").arg(loopTestCurrCount).arg(loopTestCount).arg(message));
+        Log::LogByFile("LoopTest.txt",message);
+
     if (isChild){
         QDomElement p = action.parentNode().toElement();
         int cycle = p.attribute("currcycle").toInt();
@@ -506,40 +574,38 @@ bool Sequence::DoAction(QDomElement action,bool isChild)
     {
         currCameraCaptureType = action.attribute("ActionValue").toInt();
         currCameraCycle = 0;
+        QString captureFileName;
         if(isChild){
             QDomElement p = action.parentNode().toElement();
             int cycle = p.attribute("currcycle").toInt();
             currCameraCycle = cycle;
-            if (cycle < 10)
-            {
-                if (action.attribute("ActionValue") == "4")
-                    imageCapture->setFileName("cycleb0"+QString::number(cycle));
-                else
-                    imageCapture->setFileName("cycle0"+QString::number(cycle));
-            }
+            if (action.attribute("ActionValue") == "4")
+                captureFileName = "cycleb"+QString("%1").arg(cycle,2,10,QChar('0'));
             else
-            {
-                if (action.attribute("ActionValue") == "4")
-                    imageCapture->setFileName("cycleb"+QString::number(cycle));
-                else
-                    imageCapture->setFileName("cycle"+QString::number(cycle));
-            }
+                captureFileName = "cycle"+QString("%1").arg(cycle,2,10,QChar('0'));
         }
         else if (action.attribute("ActionValue") == "1")
         {
-            imageCapture->setFileName("Dry");
+            captureFileName = "Dry";
         }
         else if (action.attribute("ActionValue") == "2")
         {
-            imageCapture->setFileName("Black");
+            captureFileName = "Black";
         }
         else if (action.attribute("ActionValue") == "3")
-            imageCapture->setFileName("Fill");
+            captureFileName = "Fill";
+        imageCapture->setFileName(captureFileName);
+        camera->setFileName(captureFileName);
 
         currOrder = '\xA0';
         imageCapture->setImageCount(action.attribute("ActionParam1").toInt());
         if (imageCapture->waitStop())
             imageCapture->start();
+#if 1
+        camera->setImageCount(action.attribute("ActionParam1").toInt());
+        if (camera->waitStop())
+            camera->start();
+#endif
     }
     else if(action.attribute("Device")=="Door" || action.attribute("Device")=="Light" || action.attribute("Device")=="Temperature"
             ||action.attribute("Device")=="V1" || action.attribute("Device")=="V2" || action.attribute("Device")=="V3"
@@ -561,7 +627,24 @@ bool Sequence::DoAction(QDomElement action,bool isChild)
         message.sprintf("总时间：%d秒;\t完成时间：%d秒;\t第 %d 步; \t耗时：%d秒\t设备：",sequenceAction.attribute("Duration").toInt()/1000,nPreTime/1000,action.attribute("No").toInt(),action.attribute("Duration").toInt()/1000);
     message += action.attribute("Device")+","+action.attribute("ActionValue")+","+action.attribute("ActionParam1")+","+action.attribute("ActionParam2");
 
-    emit processFinish(sequenceAction.attribute("Duration").toInt(),nPreTime);
+    if (isTesting()||isLoopTesting()){
+        emit processFinish(sequenceAction.attribute("Duration").toInt(),nPreTime);
+        int remain = (sequenceAction.attribute("Duration").toInt() - nPreTime)/1000;
+        QString title = "预计剩余"+QString::number(remain)+"秒";
+        if (isLoopTesting()){
+            int oneloop = sequenceAction.attribute("Duration").toInt()/1000;
+            remain += (loopTestCount-loopTestCurrCount)*oneloop;
+            title = "耐力测试，正在测试第"+QString::number(loopTestCurrCount)+"/"+QString::number(loopTestCount)+"循环，预计剩余"+QString::number(remain)+"秒";
+            nPreTime = nPreTime + (loopTestCurrCount-1)*oneloop*1000;
+            emit titleNotify(nPreTime/(oneloop*loopTestCount)+100,title);
+            Log::LogByFile("LoopTest.txt",QString("total time=%1,completion time=%2").arg(oneloop*loopTestCount).arg(nPreTime));
+        }
+        else
+        {
+            emit titleNotify(nPreTime/(sequenceAction.attribute("Duration").toInt()/1000)+100,title);
+            Log::LogWithTime(QString("total time=%1,completion time=%2").arg(sequenceAction.attribute("Duration")).arg(nPreTime));
+        }
+    }
 
     Log::LogTime(QString("start timer,duration=%1,type=%2").arg(nDuration).arg(action.attribute("DurationType")));
     durationState = TimeState::running;
@@ -590,7 +673,7 @@ bool Sequence::FindAction(bool bFinishAction)
 {    
     int totalStep = sequenceAction.attribute("steps").toInt();
     int currStep = sequenceAction.attribute("currstep").toInt();
-    int nTotalTime = sequenceAction.attribute("Duration").toInt();
+    //int nTotalTime = sequenceAction.attribute("Duration").toInt();
 
     QDomElement e = sequenceAction.firstChildElement();
     while (!e.isNull()) {
@@ -600,7 +683,7 @@ bool Sequence::FindAction(bool bFinishAction)
                     return DoAction(e,false);
                 else if(currStep == totalStep)
                 {
-                    emit processFinish(nTotalTime,nTotalTime);
+                    //emit processFinish(nTotalTime,nTotalTime);
                     FinishSequence();
                     return true;
                 }
@@ -627,7 +710,7 @@ bool Sequence::FindAction(bool bFinishAction)
                             else if(nChildCurrStep == nChildTotalStep){
                                 if (nCurrCycle == nCycle){
                                     if (currStep == totalStep){
-                                        emit processFinish(nTotalTime,nTotalTime);
+                                        //emit processFinish(nTotalTime,nTotalTime);
                                         FinishSequence();
                                         return true;
                                     }
@@ -732,6 +815,7 @@ bool Sequence::FormatAction(){
     return true;
 }
 
+static bool FirstCheckSensor = true;
 void Sequence::setSenorState(char char1, char char2)
 {
     bool sensor;
@@ -741,7 +825,7 @@ void Sequence::setSenorState(char char1, char char2)
         sensor = true;
     else
         sensor = false;
-    if (sensor != bBoxState)
+    if (FirstCheckSensor == true || sensor != bBoxState)
     {
         bBoxState = sensor;
         emit boxStateChanged();
@@ -755,6 +839,7 @@ void Sequence::setSenorState(char char1, char char2)
         bDoorState = sensor;
         emit doorStateChanged();
     }
+    FirstCheckSensor = false;
     //qDebug()<<"bDoorState:"<<bDoorState<<"bBoxState:"<<bBoxState;
 }
 
@@ -829,6 +914,7 @@ bool Sequence::startView(int id){
 
 bool Sequence::stopView(){
     imageCapture->stop_capturing();
+    camera->CameraStop();
     return true;
 }
 
@@ -844,23 +930,22 @@ bool Sequence::saveView(){
     return true;
 }
 
-void Sequence::errReceive(int code){
+void Sequence::errReceive(ERROR_CODE code){
     QString errStr;
-    if (code == 0x101){
-        errStr = "温控板通讯出错！";
-        //return;
+    if (code == ERROR_CODE_TEMP_CONNECT){
+        errStr = "温控板通讯出错！";        
     }
-    else if(code == 0x201)
+    else if(code == ERROR_CODE_CTRL_CONNECT)
         errStr = "驱动板通讯出错！";
-    else if(code >= 0x301 && code <= 0x3FF)
+    else if(code >= ERROR_CODE_CAM_CONNECT && code < ERROR_CODE_FILE_READ)
         errStr = "摄像头通讯出错！";
-    else if(code == 0x401)
+    else if(code == ERROR_CODE_FILE_READ)
         errStr = "配置文件读取出错！";
-    else if(code == 0x402)
+    else if(code == ERROR_CODE_FILE_FORMAT)
         errStr = "配置文件格式出错！";
-    else if(code == 0x403)
+    else if(code == ERROR_CODE_FILE_MODEL)
         errStr = "模板文件读取出错！";
-    emit errOccur(errStr+" 错误代码："+QString::number(code,16));
+    emit errOccur(errStr+" \n\n错误码："+QString::number(code,16));
 }
 
 int Sequence::getAbs(){
@@ -890,13 +975,6 @@ bool Sequence::setWhiteBalance(int value){
 
 void Sequence::lxDebug(){
     qDebug()<<"lxDebug";
-    //ImageAnalysis::QRDecode(QCoreApplication::applicationDirPath()+"/codebar/Cycle00.tif");
-
-    //QRcoder::QRDecode();
-    //emit callQmlRefeshData(data);
-    //qr->saveFrame();
-    //ExGlobal::addTest();
-
     return;
     serialMgr->serialWrite(ActionParser::ParamToByte("Light",4,0,0,0));
     cvcap->setCurrCamera(0);
@@ -979,4 +1057,91 @@ void Sequence::autoFocus(){
         autoFocus_JumpStep = 0;
         autoFocus_dec = false;
     }
+}
+
+bool Sequence::printTest(){
+    if (printer->isRunning())
+        return false;
+    printer->testTime = ExGlobal::pTestModel->getCurrTestDateTime();
+    printer->sampCode = ExGlobal::pTestModel->getCurrTestCode();
+    printer->sampInfo = ExGlobal::pTestModel->getCurrTestInfo();
+    printer->user = ExGlobal::pTestModel->getCurrTestUser();
+    printer->itemMap.clear();
+    QList<int> item = ExGlobal::getBoxItemList();
+    int testID = ExGlobal::pTestResultModel->getTestid();
+    //qDebug()<<"printTest:"<<item.length()<<","<<testID;
+    for(int i = 0; i < item.length(); i++){
+        printer->itemMap[ExGlobal::getPosName(item[i])] = ExGlobal::getItemResult(testID,item[i]);
+        //qDebug()<<ExGlobal::getPosName(item[i])<<","<<ExGlobal::getItemResult(testID,item[i]);
+    }
+    printer->start();
+    return true;
+}
+
+void Sequence::changeTitle(QString title){
+    if (!isTesting() && !isLoopTesting())
+        emit titleNotify(0, title);
+}
+
+bool Sequence::loopTest(QString testName, int count){
+    qDebug()<<"Loop Test"<<loopTestName<<count;
+    if (currSequenceId != SequenceId::Sequence_Idle)
+        return false;
+    currSequenceId = SequenceId::Sequence_LoopTest;
+    QDomElement root = doc.documentElement();
+    loopTestCount = count;
+    loopTestCurrCount = 1;
+    loopTestName = testName;
+    for (sequenceAction = root.firstChildElement("PanelTest"); !sequenceAction.isNull(); sequenceAction = sequenceAction.nextSiblingElement("PanelTest"))
+    {
+        if (sequenceAction.attribute("PanelName")==testName)
+        {
+            testStartTime = QDateTime::currentDateTime();
+            QString current_time_str = testStartTime.toString("yyyyMMdd_hhmmss");
+            Log::setDir(QCoreApplication::applicationDirPath()+"/"+current_time_str);
+            imageCapture->start_capturing(ImageCapture::CaptureMode::Capture);
+            camera->CameraStart(CameraPlayer::CaptureMode::Capture);
+            ExGlobal::setPanelName(sequenceAction.attribute("PanelName"));
+            //ExGlobal::setReagentBox("202");
+            imageAna->SetMask(ExGlobal::getReagentBox(ExGlobal::reagentBox()),0);
+
+            if (!FormatAction())
+                return false;
+            testMgr->LoopTestCreate(sequenceAction.attribute("PanelCode"),loopTestCount);
+            bFinishAction = false;
+            durationState = TimeState::idle;
+            bCannelSequence = false;
+            Log::LogByFile("LoopTest.txt",QString("开始 %1，循环数：%2").arg(sequenceAction.attribute("PanelName")).arg(count));
+            FindAction(false);            
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Sequence::continueLoopTest(){
+    Log::LogByFile("LoopTest.txt",QString("完成循环数：%1").arg(loopTestCurrCount));
+    testMgr->LoopTestFinishCycle(loopTestCurrCount);
+    if (loopTestCurrCount >= loopTestCount)
+        return false;
+    FormatAction();
+    bFinishAction = false;
+    durationState = TimeState::idle;
+    bCannelSequence = false;
+    FindAction(false);
+    loopTestCurrCount++;
+    return true;
+}
+
+QStringList Sequence::getLoopTestList(){
+    QStringList test;
+    QDomElement root = doc.documentElement();
+    for (QDomElement e = root.firstChildElement("PanelTest"); !e.isNull(); e = e.nextSiblingElement("PanelTest"))
+    {
+        QString panelCode = e.attribute("PanelCode");
+        if (panelCode.length() > 4 && panelCode.startsWith("90"))
+            test<<e.attribute("PanelName");
+    }
+    return test;
 }

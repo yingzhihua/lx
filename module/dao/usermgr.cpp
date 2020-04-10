@@ -4,7 +4,7 @@
 QList<QString> UserMgr::getAll()
 {
     QString sql = "SELECT * FROM User";
-    QSqlQuery query = sqlitemgrinstance->select(sql);
+    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(sql);
     QList<QString> ql;
     QString result = "";
     while(query.next())
@@ -16,8 +16,8 @@ QList<QString> UserMgr::getAll()
 
 bool UserMgr::logon(QString name, QString password)
 {
-    QString sql = "SELECT * FROM User WHERE Name = '"+name+"' AND Password = '"+password+"'";
-    QSqlQuery query = sqlitemgrinstance->select(sql);
+    QString sql = "SELECT * FROM User WHERE Name = '"+name+"' AND Password = '"+password+"' COLLATE NOCASE";
+    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(sql);
 
     while(query.next())
     {
@@ -29,15 +29,15 @@ bool UserMgr::logon(QString name, QString password)
 
 bool UserMgr::update(QString name, QString password){
     QString sql = "UPDATE User SET Password = '"+ password+"' WHERE Name = '"+ name +"'";
-    return sqlitemgrinstance->execute(sql);
+    return SqliteMgr::sqlitemgrinstance->execute(sql);
 }
 
 bool UserMgr::remove(int userid){
     QString sql = "DELETE FROM User WHERE Userid = "+QString::number(userid);
-    return sqlitemgrinstance->execute(sql);
+    return SqliteMgr::sqlitemgrinstance->execute(sql);
 }
 
 bool UserMgr::insert(User* user){
     QString sql = "INSERT INTO User (Name, Password, UserType) VALUES ('"+user->Name+"', '"+ user->Password+"', "+ QString::number(user->UserType)+")";
-    return sqlitemgrinstance->execute(sql);
+    return SqliteMgr::sqlitemgrinstance->execute(sql);
 }

@@ -10,20 +10,21 @@ Page {
     id: login_page
     Rectangle{
         width: 400
-        height: 400
+        height: 600
         anchors.centerIn: parent
 
         Image {
             id:login_logo
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
+            scale: 3
             source: "qrc:/image/LOGO.png"
         }
 //*
         Text{
             x:47
             anchors.top: login_logo.bottom
-            anchors.topMargin: 50
+            anchors.topMargin: 120
             width: 80
             height: 30
             text: qsTr("用户名：")
@@ -36,7 +37,7 @@ Page {
             id:login_name
             x:137
             anchors.top: login_logo.bottom
-            anchors.topMargin: 50
+            anchors.topMargin: 120
             width:300
             height: 50
             verticalAlignment: Text.AlignVCenter
@@ -51,7 +52,7 @@ Page {
         Text {
             x:47
             anchors.top: login_name.bottom
-            anchors.topMargin: 20
+            anchors.topMargin: 50
             width:80
             height:30
             text: qsTr("密码：")
@@ -64,7 +65,7 @@ Page {
             id:login_password
             x:137
             anchors.top: login_name.bottom
-            anchors.topMargin: 20
+            anchors.topMargin: 50
             width: 300
             height: 50
             echoMode: TextInput.Password
@@ -102,9 +103,9 @@ Page {
         Text{
             id:labelMessage
             anchors.left: login_btlogin.right
-            anchors.leftMargin: 100
-            anchors.top: login_btlogin.bottom
-            anchors.topMargin: 60
+            anchors.leftMargin: 200
+            anchors.bottom: login_btlogin.bottom
+            anchors.bottomMargin: 0
             width: 80
             height: 30
             text: ""
@@ -115,8 +116,10 @@ Page {
     }
 
     Component.onCompleted: {
-        home_page.titlemsg=qsTr("登录");
-        home_page.enableTabBar = false;
+        //home_page.titlemsg=qsTr("登录");
+        //home_page.enableTabBar = false;
+        headerMsg.text = qsTr("登录");
+        tabBar.enabled = false;
         labelMessage.text = "";
         console.log("Login Completed");
     }
@@ -125,7 +128,7 @@ Page {
         target: Sequence
         onSequenceFinish:{
             console.log("result:"+result);
-            login_name.text = "result:"+result;
+            //login_name.text = "result:"+result;
         }
     }
 
@@ -138,8 +141,8 @@ Page {
             else
                 ExGlobal.user = login_name.text;
             console.log("login:",login_name.text,ExGlobal.user);
-            stackView.pop();
-            stackView.push("qrc:/HomeUI/Idle.qml");
+            mainView.pop();
+            mainView.push("qrc:/HomeUI/Idle.qml");
         }
         else
             labelMessage.text = qsTr("密码错误！")

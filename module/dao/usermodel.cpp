@@ -19,7 +19,7 @@ bool UserModel::Exist(int id){
 }
 
 void UserModel::LoadUser(){
-    QSqlQuery query = sqlitemgrinstance->select("select * from User");
+    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select("select * from User");
     while(query.next())
     {
         MUser user;
@@ -66,7 +66,7 @@ QHash<int, QByteArray> UserModel::roleNames() const
 
 bool UserModel::addUser(QString name, QString password){
     QString sql = "INSERT INTO User (Name, Password, UserType) VALUES ('"+name+"', '"+ password+"', 1)";
-    bool result = sqlitemgrinstance->execute(sql);
+    bool result = SqliteMgr::sqlitemgrinstance->execute(sql);
 
     if (result){
         beginInsertRows(QModelIndex(),rowCount(),rowCount());
@@ -79,7 +79,7 @@ bool UserModel::addUser(QString name, QString password){
 bool UserModel::deleteUser(int row){
     if (row < 0 || row >= m_display_list.count())
         return false;
-    bool result = sqlitemgrinstance->execute("delete from User where Userid = "+QString::number(m_display_list[row].Userid));
+    bool result = SqliteMgr::sqlitemgrinstance->execute("delete from User where Userid = "+QString::number(m_display_list[row].Userid));
     if (result){
         beginRemoveRows(QModelIndex(),row,row);
         m_display_list.removeAt(row);
@@ -89,18 +89,21 @@ bool UserModel::deleteUser(int row){
 }
 
 bool UserModel::login(QString name, QString password){
-    QString sql = "SELECT * FROM User WHERE Name = '"+name+"' AND Password = '"+password+"'";
-    QSqlQuery query = sqlitemgrinstance->select(sql);
-
+    QString sql = "SELECT * FROM User WHERE Name = '"+name+"' COLLATE NOCASE AND Password = '"+password+"'";
+    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(sql);
+    qDebug()<<"login:"<<sql;
     while(query.next())
     {
         return true;
     }
 
-    if (name == "admin" && password == ExGlobal::AdminPassword)
+    if (name.toLower() == "admin" && password == ExGlobal::AdminPassword)
         return true;
 
-    return true;
+    if (ExGlobal::projectMode() == 0)
+        return true;
+
+    return false;
 }
 
 bool UserModel::updatePassword(QString oldpassword, QString newpassword){
@@ -114,11 +117,11 @@ bool UserModel::updatePassword(QString oldpassword, QString newpassword){
     }
     else{
         QString sql = "SELECT * FROM User WHERE Name = '"+ExGlobal::User+"' AND Password = '"+oldpassword+"'";
-        QSqlQuery query = sqlitemgrinstance->select(sql);
+        QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(sql);
 
         while(query.next())
         {
-            if (sqlitemgrinstance->execute("update User set Password = '"+newpassword+"' where Name = '"+ExGlobal::User+"'"))
+            if (SqliteMgr::sqlitemgrinstance->execute("update User set Password = '"+newpassword+"' where Name = '"+ExGlobal::User+"'"))
                 return true;
             else
                 return false;

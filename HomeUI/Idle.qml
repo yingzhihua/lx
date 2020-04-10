@@ -53,6 +53,38 @@ Page {
         anchors.horizontalCenter: openDoor.horizontalCenter
     }
 
+    Image {
+        id: editsample
+        anchors.left: openDoor.right
+        anchors.leftMargin: 200
+        anchors.bottom: openDoor.bottom
+        anchors.bottomMargin: 30
+        scale: 2
+        source: "qrc:/image/editInfo.png"
+
+        MouseArea{
+            anchors.fill: parent
+            onClicked: {
+                queryDlg.show()
+            }
+        }
+    }
+
+    TwoQuery{
+        id: queryDlg
+        qtitle: qsTr("输入样本信息")
+        qlable1: qsTr("样本号：")
+        qlable2: qsTr("样本信息：")
+        qtext1: ExGlobal.sampleCode
+        qtext2: ExGlobal.sampleInfo
+        anchors.fill: parent
+        onQueryAck: {
+            console.log(res1,res2);
+            ExGlobal.sampleCode = res1;
+            ExGlobal.sampleInfo = res2;
+        }
+    }
+
     Text{
         id: userName
 
@@ -86,8 +118,8 @@ Page {
         anchors.right: parent.right
         anchors.rightMargin: 20
         onClicked: {
-            stackView.pop();
-            stackView.push("qrc:/HomeUI/Login.qml");
+            mainView.pop();
+            mainView.push("qrc:/HomeUI/Login.qml");
         }
     }
 
@@ -103,8 +135,8 @@ Page {
         anchors.rightMargin: 20
         onClicked: {
             ExGlobal.panelBoxIndexAddOne();
-            stackView.pop();
-            stackView.push("qrc:/HomeUI/BoxReady.qml");
+            mainView.pop();
+            mainView.push("qrc:/HomeUI/BoxReady.qml");
         }
     }
 
@@ -131,8 +163,13 @@ Page {
     }
 
     Component.onCompleted: {
-        home_page.titlemsg=qsTr("待机");
-        home_page.enableTabBar = true;
+        //home_page.titlemsg=qsTr("待机");
+        //home_page.enableTabBar = true;
+
+        //headerMsg.text = qsTr("待机");
+        Sequence.changeTitle(qsTr("待机"));
+        tabBar.enabled = true;
+
         Sequence.actionDo("Query",3,0,0,0);
         bDoorIsOpen = Sequence.door;
         //*
@@ -148,8 +185,7 @@ Page {
 
         if (ExGlobal.projectMode() === 1){
             btReady.visible = false;
-            btExit.visible = false;
-            userName.visible = false;
+            //btExit.visible = false;
         }
 
         console.log("idle onCompleted,box:"+Sequence.box+",door:"+Sequence.door);
@@ -164,21 +200,22 @@ Page {
                 busyIndicator.running = false;
                 busyDes.visible = false;
                 updateState.start();
-            }
+            }            
             else if(result == Sequence.Result_CloseBox_ok)
             {
-                bDoorIsOpen = false;
-                updateState.stop();
+                bDoorIsOpen = false;                
                 busyIndicator.running = false;
-                busyDes.visible = false;
+                busyDes.visible = false;                
+                updateState.stop();
                 if (Sequence.box)
                 {
                     if (!Sequence.validBox())
                         ExGlobal.panelBoxIndexAddOne();
-                    stackView.pop();
-                    stackView.push("qrc:/HomeUI/BoxReady.qml");
-                }
+                    mainView.pop();
+                    mainView.push("qrc:/HomeUI/BoxReady.qml");
+                }                
             }
+
 
             console.log("idle.qml,result:"+result);
         }
@@ -201,7 +238,7 @@ Page {
     Timer{
         id: updateState
         repeat: true
-        interval: 2000
+        interval: 500
         running: false
         onTriggered: {
             console.log("idle query sensor state");

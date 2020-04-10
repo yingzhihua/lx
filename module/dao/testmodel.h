@@ -20,6 +20,7 @@ public:
     QString SerialNo;
     QString TestTime;
     QString SampleInfo;
+    QString SampleId;
     QString User;
     int ResultType;
 };
@@ -34,6 +35,7 @@ public:
         RolesSerialNo,
         RoleTestTime,
         RoleSampleInfo,
+        RoleSampleId,
         RoleUser,
         RoleResultType
     };
@@ -43,6 +45,11 @@ public:
     QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
     void AddTest(const Test &test);
     bool ExistTest(int Testid);
+    QString getCurrTestDateTime(){return m_display_list[currTestIndex].TestTime;}
+    QString getCurrTestCode(){return m_display_list[currTestIndex].SampleId;}
+    QString getCurrTestSerial(){return m_display_list[currTestIndex].SerialNo;}
+    QString getCurrTestInfo(){return m_display_list[currTestIndex].SampleInfo;}
+    QString getCurrTestUser(){return m_display_list[currTestIndex].User;}
     Q_INVOKABLE void setCurrTest(int TestIndex);
 
 protected:
@@ -52,6 +59,7 @@ private:
     QList<Test> m_display_list;
     QHash<int, QByteArray> roles;
     int currTestid;
+    int currTestIndex;
 };
 
 #endif // TESTMODEL_H

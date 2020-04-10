@@ -1,9 +1,12 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.5
 import Dx.Global 1.0
+import Dx.Sequence 1.0
+
 Rectangle {
-    property string titlemsg: qsTr("设置")    
+    //property string titlemsg: qsTr("设置")
     id: setup_menu
+    //anchors.fill: parent
     color: "darkgrey"
     ListModel{
         id:setModel
@@ -19,6 +22,8 @@ Rectangle {
         //ListElement{name:qsTr("帕尔贴校准");info:"";qrc_res:"qrc:/SetupUI/TempCali.qml"}
         ListElement{Eid: "Camera"; name:qsTr("摄像头参数设置");info:"";qrc_res:"qrc:/SetupUI/CameraSetup.qml"}
         ListElement{Eid: "TestSetup"; name:qsTr("测试设置");info:"";qrc_res:"qrc:/SetupUI/TestSetup.qml"}
+        ListElement{Eid: "TestLoop"; name:qsTr("循环测试");info:"";qrc_res:"qrc:/SetupUI/TestLoop.qml"}
+        ListElement{Eid: "SystemParam"; name:qsTr("系统参数");info:"";qrc_res:"qrc:/SetupUI/SystemParam.qml"}
         ListElement{Eid: "Version"; name:qsTr("版本号");info:"";qrc_res:"qrc:/SetupUI/Version.qml"}
     }
 
@@ -31,7 +36,7 @@ Rectangle {
 
                 Rectangle{
                     height: 80
-                    width: dataPage.width
+                    width: setup_menu.width
                     //color: (model.index%2 == 1)?"#ffffff":"lightgrey"
                     color: "darkseagreen"
                     Rectangle{
@@ -71,7 +76,7 @@ Rectangle {
                         anchors.fill: parent
                         onClicked: {
                             if (qrc_res != "")
-                                setupView.push(qrc_res);
+                                mainView.push(qrc_res);
                         }
                     }
                 }
@@ -79,8 +84,6 @@ Rectangle {
 
         }
     }
-
-    onTitlemsgChanged: headerMsg.text = titlemsg;
 
     Component.onCompleted: {
         setInfo("SystemName",ExGlobal.sysName);
@@ -94,12 +97,15 @@ Rectangle {
         }
 
         if (ExGlobal.projectMode() === 1){
-            removeItem("LockTime");
+            //removeItem("LockTime");
             removeItem("Language");
-            removeItem("AdminPassword");
-            removeItem("Wlan");
+            //removeItem("AdminPassword");
+            //removeItem("Wlan");
             removeItem("TestSetup");
         }
+
+        //headerMsg.text = qsTr("设置");
+        Sequence.changeTitle(qsTr("设置"));
     }
 
     Connections{
@@ -114,6 +120,7 @@ Rectangle {
             console.log("onUserChanged")
             if (ExGlobal.user != "admin"){
                 removeItem("User");
+                removeItem("SystemParam");
                 setName("AdminPassword",qsTr("设置密码"))
             }
             else{

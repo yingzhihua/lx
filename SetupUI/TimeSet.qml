@@ -74,7 +74,7 @@ Item {
         anchors.horizontalCenter: calendar.horizontalCenter
         anchors.top: rowData.bottom
         anchors.topMargin: 50
-        text: qsTr("设置")
+        text: qsTr("保存")
 
         onClicked: {
             var setStr = calendar.selectedDate.toLocaleDateString(Qt.locale("en_US"),"yyyy-MM-dd")+" "+spHour.value+":"+spMinute.value+":"+spSecond.value
@@ -90,7 +90,7 @@ Item {
         anchors.right: parent.right
         anchors.rightMargin: 20
         onClicked: {
-            setupView.pop();
+            mainView.pop();
         }
     }
     Component.onCompleted: {

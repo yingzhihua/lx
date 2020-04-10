@@ -81,7 +81,7 @@ Item {
         height: 50
 
         contentItem: Text {
-            text: qsTr("设置")
+            text: qsTr("保存")
             color: "white"
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
@@ -96,7 +96,7 @@ Item {
         //onClicked: {
             console.log(spinLock.value);
             ExGlobal.lockTime = spinLock.value;
-            setupView.pop();
+            mainView.pop();
         }
     }
 
@@ -107,7 +107,7 @@ Item {
         anchors.right: parent.right
         anchors.rightMargin: 20
         onClicked: {
-            setupView.pop();
+            mainView.pop();
         }
     }
 

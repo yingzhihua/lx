@@ -18,11 +18,12 @@ Page {
         MouseArea{
             anchors.fill: parent
             onClicked: {
-                stackView.pop();
-                if (ExGlobal.projectMode() === 1)
-                    stackView.push("qrc:/HomeUI/TestProcess.qml");
+                //Sequence.sequenceDo(Sequence.Sequence_Test);
+                mainView.pop();
+                if (ExGlobal.projectMode() === 0)
+                    mainView.push("qrc:/HomeUI/TestProcessT.qml");
                 else
-                    stackView.push("qrc:/HomeUI/TestProcessT.qml");
+                    mainView.push("qrc:/HomeUI/TestProcess.qml");
             }
         }
     }
@@ -75,9 +76,10 @@ Page {
         Image {
             id: editsample
             anchors.left: sampleNo.right
-            anchors.leftMargin: 50
+            anchors.leftMargin: 70
             anchors.top: sampleNo.top
             anchors.topMargin: 30
+            scale: 2
             source: "qrc:/image/editInfo.png"
         }
         MouseArea{
@@ -124,13 +126,27 @@ Page {
         anchors.right: parent.right
         anchors.rightMargin: 20
         onClicked: {
-            stackView.pop();
-            stackView.push("qrc:/HomeUI/Idle.qml");
+            //mainView.pop();
+            //mainView.push("qrc:/HomeUI/Idle.qml");
+            //mainView.push("qrc:/HomeUI/TestCancel.qml");
+            testcancelDialog.show()
+        }
+    }
+
+    TestExitConfirm{
+        id: testcancelDialog
+        prompt:qsTr("取消测试后，试剂盒将不再可用！")
+        anchors.fill: parent
+        onQueryAck: {
+            if (res == true){
+                mainView.pop();
+                mainView.push("qrc:/HomeUI/Idle.qml");
+            }
         }
     }
 
     Component.onCompleted: {
-        home_page.titlemsg=qsTr("试剂盒就绪");
+        headerMsg.text=qsTr("试剂盒就绪");
     }
 
     Connections{

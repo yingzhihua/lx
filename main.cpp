@@ -16,6 +16,7 @@
 #include "module/dao/usermodel.h"
 #include "module/dao/wifimodel.h"
 
+
 int main(int argc, char *argv[])
 {
     qputenv("QT_IM_MODULE", QByteArray("qtvirtualkeyboard"));
@@ -32,13 +33,13 @@ int main(int argc, char *argv[])
     exGlobal = new ExGlobal();
     app.global = exGlobal;
 
-    sqlitemgrinstance = new SqliteMgr();
+    SqliteMgr::sqlitemgrinstance = new SqliteMgr();
     ExGlobal::pTestModel = new TestModel();
     ExGlobal::pTestResultModel = new TestResultModel();
     ExGlobal::pUserModel = new UserModel();
     ExGlobal::pWifiModel = new WifiModel();
 
-    sqlitemgrinstance->conn(Log::getDir()+"/data.db","sa","123456");
+    SqliteMgr::sqlitemgrinstance->conn(Log::getDir()+"/data.db","sa","123456");
     //init dao manager
     //sqlitemgrinstance->init();
     ExGlobal::exInit();

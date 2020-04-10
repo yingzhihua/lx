@@ -1,6 +1,5 @@
 #include "serialmgr.h"
 #include <QDebug>
-#include "log.h"
 
 static QSerialPort serialTemp;
 static QSerialPort serialCtrl;
@@ -96,6 +95,14 @@ void SerialMgr::handleReadTemp()
                     ackReceive(byteReadData.mid(pos,byteReadData[pos+2]));
                     sendNext = true;
                 }
+                /*
+                else if(byteReadData[pos+10] == '\x55') {
+                    errReceive(byteReadData.mid(pos,byteReadData[pos+2]));
+                    byteReadData.clear();
+                    return;
+                }
+                //*/
+
                 if (byteReadData[pos+2] == '\x0')
                     break;
                 pos += byteReadData[pos+2];
@@ -136,9 +143,14 @@ void SerialMgr::handleReadCtrl()
         bool sendNext = false;
         while(pos+11<byteCtrlReadData.length()){
             clearTime(byteCtrlReadData.mid(pos,byteCtrlReadData[pos+2]));
-            if (byteCtrlReadData[pos+10] == '\x33' || byteCtrlReadData[pos+10] == '\x55'){
+            if (byteCtrlReadData[pos+10] == '\x33'){
                 ackReceive(byteCtrlReadData.mid(pos,byteCtrlReadData[pos+2]));
                 sendNext = true;
+            }
+            else if(byteCtrlReadData[pos+10] == '\x55') {
+                errReceive(byteCtrlReadData.mid(pos,byteCtrlReadData[pos+2]));
+                byteCtrlReadData.clear();
+                return;
             }
             pos += byteCtrlReadData[pos+2];
         }
@@ -184,7 +196,7 @@ void SerialMgr::clearTime(QByteArray wData)
     {
         QByteArray data = sendList.first();
         if (wData[1] == data[1] && wData[7] == data[7])
-            writeTimer.start(60000);
+            writeTimer.start(120000);
     }
 }
 
@@ -220,6 +232,25 @@ void SerialMgr::ackReceive(QByteArray wData)
     qDebug()<<"ackReceive end";
 }
 
+void SerialMgr::errReceive(QByteArray wData)
+{
+    qDebug()<<"errReceive start";
+    mutex.lock();
+    if (sending && sendList.count()>0)
+    {
+        QByteArray data = sendList.first();
+        if (wData[1] == data[1] && wData[7] == data[7])
+        {
+            sendList.removeFirst();
+            writeTimer.stop();
+            sending = false;
+        }
+    }
+    mutex.unlock();
+    emit errAction(wData);
+    qDebug()<<"errReceive end";
+}
+
 void SerialMgr::handleErrorTemp(QSerialPort::SerialPortError error)
 {
     qDebug()<<serialTemp.portName()<<",error:"<<serialTemp.errorString()<<",errorcode:"<<error;
@@ -244,10 +275,12 @@ void SerialMgr::handleWriteTimeout(){
         if (sendList.count() > 0)
         {
             QByteArray data = sendList.first();
-            if (data[1] == '\1')
-                emit errOccur(0x201);
+            char devicetype = data[1];
+            sendList.clear();
+            if (devicetype == '\1')
+                emit errOccur(ERROR_CODE_CTRL_CONNECT);
             else
-                emit errOccur(0x101);
+                emit errOccur(ERROR_CODE_TEMP_CONNECT);
         }
     }
 }

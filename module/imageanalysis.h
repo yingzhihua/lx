@@ -32,13 +32,13 @@ public:
 
     int thrsh = 170;
 private:
-    int subsize = 160;
+    int subsize = 110;
     size_t debugx = 9;
     size_t debugy = 8;
     int imageCount = 0;
-    int mpp = 100;
+    int mpp = 80;
     int md1 = 10;
-    int md2 = 20;
+    int md2 = 12;
     int gridRows = 11;
     int gridCols = 11;
     int topPointx = 0;

@@ -147,6 +147,10 @@ static int convert_yuv_to_2y_buffer(unsigned char *yuv, unsigned short *rgb, uns
 
 ImageCapture::ImageCapture(QObject *parent) : QThread(parent),io(IO_METHOD_MMAP),count(1)
 {    
+    cameraType = CAMERA_V4L2;
+    //cameraType = CAMERA_DVP;
+    dvp_handle = 0;
+
     filename = "undefine";
 
     resultData.resize(12);
@@ -164,18 +168,31 @@ ImageCapture::ImageCapture(QObject *parent) : QThread(parent),io(IO_METHOD_MMAP)
     buf2y = (unsigned short *)malloc(2592 * 1944 * 2);
     sum = (unsigned int *)malloc(2592 * 1944 * 8);
 
-    if (open_device() == 0 && init_device() == 0)
-        camerainited = true;
+    if (cameraType == CAMERA_DVP){
+        if (dvp_open_device() == 0 && dvp_init_device() == 0)
+            camerainited = true;
+    }
+    else{
+        if (open_device() == 0 && init_device() == 0)
+            camerainited = true;
+    }
 
     if (begin_inited == false && camerainited == true){
-        uninit_device();
-        close_device();
+        if (cameraType == CAMERA_DVP){
+            dvp_uninit_device();
+            dvp_close_device();
+        }
+        else{
+            uninit_device();
+            close_device();
+        }
         camerainited = false;
     }
 
     captureMode = CaptureMode::Idle;
     imagetype = 0;
 }
+
 
 int ImageCapture::open_device(){
     struct stat st;
@@ -231,7 +248,10 @@ int ImageCapture::init_device(){
         return -1;
     }
     if (!(cap.capabilities&V4L2_CAP_READWRITE))
+    {
+        io = IO_METHOD_MMAP;
         qDebug()<<"dev does not support read io";
+    }
     else
         io = IO_METHOD_READ;
 
@@ -775,10 +795,14 @@ int ImageCapture::stop_capturing()
     if (captureMode == CaptureMode::Idle)
         return 0;
 
-    if (this->isRunning())
+    while (this->isRunning())
+    {
         stopping = true;
-    else
-        internal_stop_capturing();
+        qDebug()<<"stop capturing:isRunning...";
+        QThread::msleep(100);
+    }
+
+    internal_stop_capturing();
 
     return 0;
 }
@@ -828,7 +852,7 @@ int ImageCapture::read_frame(int index){
                 return 0;
             else
             {
-                qDebug()<<"VIDIOC_DQBUF return -1,error="<<errno;
+                qDebug()<<"read_frame,VIDIOC_DQBUF return -1,error="<<errno;
                 Log::LogCam(QString("read_frame,VIDIOC_DQBUF errno:%1,return -1").arg(errno));
                 return -1;
             }
@@ -871,7 +895,7 @@ int ImageCapture::clear_frame(){
             if (-1 == xioctl(fd, VIDIOC_DQBUF, &buf)){
                 if (errno == EAGAIN)
                 {
-                    qDebug()<<"VIDIOC_DQBUF error==EAGAIN,return";
+                    qDebug()<<"clear_frame,VIDIOC_DQBUF error==EAGAIN,return";
                     Log::LogCam("clear_frame,VIDIOC_DQBUF error==EAGAIN,return 0");
                     return 0;
                 }
@@ -1000,6 +1024,7 @@ int ImageCapture::process_image(int i, const void *p, int size){
     return 0;
 }
 
+
 void ImageCapture::run()
 {
     if (camerainited == false)
@@ -1019,8 +1044,8 @@ void ImageCapture::run()
         int r;
 
         if (stopping == true){
-            internal_stop_capturing();
-            return;
+            qDebug()<<"stop Capture";
+            break;
         }
 
         qDebug()<<"Capture:"<<i;
@@ -1336,3 +1361,246 @@ double ImageCapture::getDefinition(){
 double ImageCapture::getDefinition2(){
     return ImageAnalysis::GetDefinition2(bufy,imagetype);
 }
+
+/*************************
+ * DVP CAMERA
+ * ***********************/
+#if 1
+int ImageCapture::dvp_open_device(){
+    dvpStatus status;
+    dvpUint32 i,n = 0;
+    dvpCameraInfo info[16];
+    QStringList port;
+    dvpStreamState state;
+
+    status = dvpRefresh(&n);
+    if (status != DVP_STATUS_OK)
+    {
+        return -1;
+    }
+    if (n > 16)
+    {
+        n = 16;
+    }
+
+    for (i = 0; i < n; i++)
+    {
+        // 逐个枚举出每个相机的信息
+        status = dvpEnum(i, &info[i]);
+        if (status != DVP_STATUS_OK)
+        {
+            return -1;
+        }
+        else
+        {
+             port<<(tr(info[i].FriendlyName));
+        }
+    }
+    qDebug()<<port.length()<<port;
+
+    if (port.length()<1)
+        return -1;
+
+    QString strName = port[0];
+    if (strName != "")
+    {
+        // 通过枚举到并选择的FriendlyName打开指定设备
+        status = dvpOpenByName(strName.toLatin1().data(),OPEN_NORMAL,&dvp_handle);
+        qDebug()<<"open:"<<strName<<"status"<<status;
+        if (status != DVP_STATUS_OK)
+        {
+            return -1;
+        }
+
+        m_FriendlyName = strName;
+        status = dvpGetStreamState(dvp_handle,&state);
+        if (status != DVP_STATUS_OK)
+        {
+            return -1;
+        }
+
+        if (state == STATE_STARTED)
+        {
+            status = dvpStop(dvp_handle);
+        }
+    }
+
+    return 0;
+}
+
+int ImageCapture::dvp_close_device(){
+    dvpStatus status;
+    dvpStreamState state;
+    if (IsValidHandle(dvp_handle))
+    {
+        status = dvpGetStreamState(dvp_handle,&state);
+        status = dvpSaveConfig(dvp_handle, 0);
+        status = dvpClose(dvp_handle);
+        dvp_handle = 0;
+        qDebug()<<"dvp_close"<<status;
+    }
+    return 0;
+}
+
+int ImageCapture::dvp_init_device(){
+    // 初始化曝光模式，曝光时间，模拟增益，消频闪，分辨率
+    //InitAEMode();
+    //InitAETarget();
+    //InitSpinExpoTime();
+    //InitSpinGain();
+    //InitAntiFlickMode();
+    //InitROIMode();
+    //InitColorSolution();
+    dvpStatus status;
+    QString strValue;
+    dvpInt32  iAETarget;
+    dvpIntDescr sAeTargetDescr;
+
+    if (IsValidHandle(dvp_handle))
+    {
+        status = dvpGetAeTargetDescr(dvp_handle, &sAeTargetDescr);
+        if (status != DVP_STATUS_OK)
+        {
+            qDebug("Get AE target description fails!");
+            return -1;
+        }
+        else
+        {
+            qDebug()<<"Ae min"<<sAeTargetDescr.iMin<<"max:"<<sAeTargetDescr.iMax;
+        }
+
+        status = dvpGetAeTarget(dvp_handle,&iAETarget);
+        if (status != DVP_STATUS_OK)
+        {
+            qDebug("Get AE target fail!");
+            return -1;
+        }
+        else
+        {
+            qDebug()<<"Ae="<<iAETarget;
+        }
+
+        // 获取曝光时间的描述信息
+        double fExpoTime;
+        dvpDoubleDescr ExpoTimeDescr;
+        status = dvpGetExposureDescr(dvp_handle, &ExpoTimeDescr);
+        if (status != DVP_STATUS_OK)
+        {
+            qDebug("Get exposure time description fail!");
+            return -1;
+        }
+        else
+        {
+            qDebug()<<"ExpoTime,min:"<<ExpoTimeDescr.fMin<<"max:"<<ExpoTimeDescr.fMax;
+        }
+
+        // 获取曝光时间的初值
+        status = dvpGetExposure(dvp_handle, &fExpoTime);
+        if (status != DVP_STATUS_OK)
+        {
+            qDebug("Get exposure time fail!");
+            return -1;
+        }
+        else
+        {
+            // 设置曝光时间拖动条初始值
+            qDebug()<<"ExpoTime="<<fExpoTime;
+        }
+
+        float           fAnalogGain;
+        dvpFloatDescr   AnalogGainDescr;
+        status = dvpGetAnalogGainDescr(dvp_handle,&AnalogGainDescr);
+        if (status != DVP_STATUS_OK)
+        {
+            qDebug("Get analog gain description fail!");
+            return -1;
+        }
+        else
+        {
+            qDebug()<<"AnalogGainDescr,min:"<<AnalogGainDescr.fMin<<"max:"<<AnalogGainDescr.fMax;
+        }
+
+        // 获取模拟增益并设置模拟增益的初始值
+        status = dvpGetAnalogGain(dvp_handle, &fAnalogGain);
+        if (status != DVP_STATUS_OK)
+        {
+            qDebug("Get analog gain fail!");
+            return -1;
+        }
+        else
+        {
+            qDebug()<<"AnalogGain="<<fAnalogGain;
+        }
+
+        dvpUint32 QuickRoiSel = 0;
+        dvpQuickRoi QuickRoiDetail;
+        dvpSelectionDescr QuickRoiDescr;
+        status = dvpGetQuickRoiSelDescr(dvp_handle, &QuickRoiDescr);
+        if (status != DVP_STATUS_OK)
+        {
+            qDebug("Get quick roi sel description fail!");
+            return -1;
+        }
+        else
+        {
+            for (unsigned int iNum = 0; iNum<QuickRoiDescr.uCount; iNum++)
+            {
+                status = dvpGetQuickRoiSelDetail(dvp_handle,iNum, &QuickRoiDetail);
+                if (status == DVP_STATUS_OK)
+                {
+                    qDebug()<<iNum<<QuickRoiDetail.selection.string;
+                }
+            }
+        }
+
+        // 获取分辨率模式索引
+        status = dvpGetResolutionModeSel(dvp_handle,&QuickRoiSel);
+        if (status != DVP_STATUS_OK)
+        {
+            qDebug("Get roi sel fail!");
+            return -1;
+        }
+        else
+        {
+            qDebug()<<"ResolutionModeSel="<<QuickRoiSel;
+        }
+
+        dvpUint32 iNum;
+        dvpUint32 iColorSolutionSel;
+        dvpSelectionDescr sColorSolutionSelDescr;
+        dvpSelection sColorSolutionSelDetail;
+        status = dvpGetColorSolutionSelDescr(dvp_handle, &sColorSolutionSelDescr);
+        if (status != DVP_STATUS_OK)
+        {
+            qDebug("Get color solution description fail!");
+            return -1;
+        }
+
+        for (iNum = 0; iNum < sColorSolutionSelDescr.uCount; iNum ++)
+        {
+            status = dvpGetColorSolutionSelDetail(dvp_handle, iNum, &sColorSolutionSelDetail);
+            if (status == DVP_STATUS_OK)
+            {
+                qDebug()<<iNum<<sColorSolutionSelDetail.string;
+            }
+        }
+
+        status = dvpGetColorSolutionSel(dvp_handle, &iColorSolutionSel);
+        if (status != DVP_STATUS_OK)
+        {
+            qDebug("Get color solution sel fail!");
+            return -1;
+        }
+        else
+        {
+            qDebug()<<"ColorSolutionSel="<<iColorSolutionSel;
+        }
+        return 0;
+    }
+    return -1;
+}
+
+int ImageCapture::dvp_uninit_device(){
+    return 0;
+}
+#endif

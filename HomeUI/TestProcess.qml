@@ -4,6 +4,7 @@ import QtQuick.Controls 2.5
 import Dx.Sequence 1.0
 import Dx.Global 1.0
 
+import "../components"
 Page {
     id: boxready_page
     Image {
@@ -86,14 +87,23 @@ Page {
         anchors.right: parent.right
         anchors.rightMargin: 20
         onClicked: {
-            Sequence.sequenceCancel();            
+            testcancelDialog.show()
+        }
+    }
+
+    TestExitConfirm{
+        id: testcancelDialog
+        prompt:qsTr("取消测试后，试剂盒将不再可用！")
+        anchors.fill: parent
+        onQueryAck: {
+            if (res == true){
+                Sequence.sequenceCancel();
+            }
         }
     }
 
     Component.onCompleted: {
         message.visible = false;
-        if (ExGlobal.projectMode() === 1)
-            userName.visible = false;
         Sequence.sequenceDo(Sequence.Sequence_Test);
     }
 
@@ -101,9 +111,21 @@ Page {
         target: Sequence
         onProcessFinish:{
             console.log("TestProcess.qml,total:"+total+",finish:"+finish);
+            /*
             var ffinish = finish*1000/total;
-            //if (ffinish == 0) ffinish = 1;
-            home_page.testprocess = ffinish;
+
+            if (ffinish >= 1000)
+            {
+                testCompleted.width = 0;
+                testunCompleted.width = 0;
+            }
+            else
+            {
+                testCompleted.width = ffinish*headerRec.width/1000;
+                testunCompleted.x = testCompleted.width;
+                testunCompleted.width = (1000-ffinish)*headerRec.width/1000;
+            }
+
             if (total == finish)
             {
                 //headerMsg.text = "测试完成！";
@@ -112,30 +134,31 @@ Page {
             }
             else
                 headerMsg.text = "预计剩余"+((total-finish)/1000)+"秒";
+                */
             message.text = Sequence.sequenceMessage();
         }
 
         onSequenceFinish:{
             if (result == Sequence.Result_SelfCheck_ok)
             {
-                stackView.pop();
-                stackView.push("qrc:/HomeUI/Login.qml");
+                mainView.pop();
+                mainView.push("qrc:/HomeUI/Login.qml");
             }
             else if(result == Sequence.Result_CannelTest_ok)
             {
-                stackView.pop();
-                stackView.push("qrc:/HomeUI/Idle.qml");
+                mainView.pop();
+                mainView.push("qrc:/HomeUI/Idle.qml");
             }
             else if(result == Sequence.Result_Test_finish){
                 headerMsg.text = "测试完成！";
-                stackView.pop();
-                stackView.push("qrc:/DataUI/DataView.qml");
+                mainView.pop();
+                mainView.push("qrc:/DataUI/DataView.qml");
                 ExGlobal.setDataEntry(1);
             }
             else if(result == Sequence.Result_Test_unfinish){
                 headerMsg.text = "测试完成！";
-                stackView.pop();
-                stackView.push("qrc:/HomeUI/Idle.qml");
+                mainView.pop();
+                mainView.push("qrc:/HomeUI/Idle.qml");
             }
 
             console.log("TestProcess.qml,result:"+result);

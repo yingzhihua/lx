@@ -6,6 +6,8 @@
 #include <QTimer>
 #include <QMutex>
 
+#include "log.h"
+
 class SerialMgr : public QObject
 {
     Q_OBJECT
@@ -17,7 +19,8 @@ public:
 
 signals:
     void finishAction(QByteArray result);
-    void errOccur(int errCode);
+    void errAction(QByteArray result);
+    void errOccur(ERROR_CODE errCode);
 
 private slots:
     void handleReadTemp();
@@ -29,6 +32,7 @@ private slots:
 
 private:    
     void ackReceive(QByteArray wData);
+    void errReceive(QByteArray wData);
     void clearTime(QByteArray wData);
     static void serialSend(bool clearCount);
 };

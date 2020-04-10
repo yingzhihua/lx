@@ -9,6 +9,7 @@ TestModel::TestModel(QObject *parent):QAbstractListModel (parent)
     roles[RolesSerialNo] = "SerialNo";
     roles[RoleResultType] = "ResultType";
     roles[RoleSampleInfo] = "SampleInfo";
+    roles[RoleSampleId] = "SampleId";
     roles[RolesPanelCode] = "PanelCode";
 }
 
@@ -37,6 +38,8 @@ QVariant TestModel::data(const QModelIndex &index, int role) const
         return test.ResultType;
     else if(role == RoleSampleInfo)
         return test.SampleInfo;
+    else if(role == RoleSampleId)
+        return test.SampleId;
     else if(role == RolesPanelCode)
         return test.PanelCode;
 
@@ -64,7 +67,9 @@ bool TestModel::ExistTest(int Testid){
 }
 
 void TestModel::setCurrTest(int TestIndex){
+    currTestIndex = TestIndex;
     currTestid = m_display_list[TestIndex].Testid;
+    ExGlobal::setBoxSerial(m_display_list[TestIndex].SerialNo);
     ExGlobal::pTestResultModel->setTestid(currTestid);
     qDebug()<<"setCurrTest:"<<currTestid;
 }

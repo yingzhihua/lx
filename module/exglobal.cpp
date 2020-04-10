@@ -1,7 +1,7 @@
+#include "sqlitemgr.h"
 #include "exglobal.h"
 #include "sequence.h"
 #include <QDebug>
-#include "sqlitemgr.h"
 #include <QCoreApplication>
 #include "serialmgr.h"
 #include <QNetworkInterface>
@@ -20,7 +20,7 @@ QString ExGlobal::AdminPassword = "123456";
 int ExGlobal::LanguageCode = 1;
 int ExGlobal::PanelBoxIndex = 1;
 
-QString ExGlobal::t_version = "V2.12";
+QString ExGlobal::t_version = "V2.23";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
@@ -84,6 +84,7 @@ int ExGlobal::QrY4 = 715;
 int ExGlobal::ProjectMode = 0;
 int ExGlobal::DataEntry = 0;
 
+
 static uchar ReagentBox[121];
 TestModel * ExGlobal::pTestModel = nullptr;
 TestResultModel * ExGlobal::pTestResultModel = nullptr;
@@ -134,7 +135,7 @@ void ExGlobal::exInit()
     SerialMgr::SerialInit();    
     //Sequence::sequenceInit();
 
-    if(sqlitemgrinstance == nullptr)
+    if(SqliteMgr::sqlitemgrinstance == nullptr)
     {
         qDebug()<<"global sqlitemgrinstance is nullptr";
     }
@@ -147,7 +148,7 @@ void ExGlobal::exInit()
 void ExGlobal::CaliParamInit()
 {
     QString sql = "SELECT * FROM CaliParam";
-    QSqlQuery query = sqlitemgrinstance->select(sql);
+    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(sql);
 
     while(query.next())
     {
@@ -155,13 +156,13 @@ void ExGlobal::CaliParamInit()
     }
 
     sql = "select * from TextParam";
-    query = sqlitemgrinstance->select(sql);
+    query = SqliteMgr::sqlitemgrinstance->select(sql);
     while(query.next()){
         SetTextParam(query.value(0).toString(),query.value(1).toString());
     }
 
     sql = "select * from AssayItem order by Itemid";
-    query = sqlitemgrinstance->select(sql);
+    query = SqliteMgr::sqlitemgrinstance->select(sql);
     while(query.next()){
         //qDebug()<<"Itemid:"<<query.value(0).toInt()<<"ItemName:"<<query.value(1).toString()<<"ItemCT:"<<query.value(2).toInt();
         AssayItem[query.value(0).toInt()] = query.value(1).toString().toLatin1();
@@ -175,7 +176,7 @@ void ExGlobal::CaliParamInit()
 
 uchar* ExGlobal::getReagentBox(QString BoxCode){
     QString sql = "SELECT * FROM ReagentPos where BoxCode='"+BoxCode+"'";
-    QSqlQuery query = sqlitemgrinstance->select(sql);
+    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(sql);
     memset(ReagentBox,0,sizeof(ReagentBox));
     while(query.next()){
         if (query.value(1).toInt() < 121)
@@ -275,6 +276,8 @@ void ExGlobal::SetCaliParam(const QString &name, int caliValue)
         QrX4 = caliValue;
     else if(name == "QrY4")
         QrY4 = caliValue;
+    else if(name == "ProjectMode")
+        ProjectMode = caliValue;
     //qDebug()<<"setCaliParam,"<<name<<",result="<<caliValue;
 }
 
@@ -366,7 +369,8 @@ int ExGlobal::getCaliParam(const QString &caliName)
         result = QrX4;
     else if(caliName == "QrY4")
         result = QrY4;
-
+    else if(caliName == "ProjectMode")
+        result = ProjectMode;
     qDebug()<<"getCaliParam,"<<caliName<<",result="<<result;
     return result;
 }
@@ -374,12 +378,12 @@ int ExGlobal::getCaliParam(const QString &caliName)
 void ExGlobal::updateCaliParam(const QString &caliName, int caliValue)
 {
     QString sql = "SELECT * FROM CaliParam WHERE ParamName = '"+caliName+"'";
-    QSqlQuery query = sqlitemgrinstance->select(sql);
+    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(sql);
     if (query.next())
         sql = "UPDATE CaliParam SET ParamValue = "+ QString::number(caliValue)+" WHERE ParamName = '"+ caliName +"'";
     else
         sql = "INSERT INTO CaliParam (ParamName, ParamValue) VALUES ('"+caliName+"', "+ QString::number(caliValue)+")";
-    sqlitemgrinstance->execute(sql);
+    SqliteMgr::sqlitemgrinstance->execute(sql);
     SetCaliParam(caliName,caliValue);
 }
 
@@ -401,7 +405,7 @@ QString ExGlobal::getTextParam(const QString &caliName){
 
 void ExGlobal::updateTextParam(const QString &textName, QString textValue){
     QString sql = QString("replace into TextParam(ParamName,ParamValue) values('%1','%2')").arg(textName).arg(textValue);
-    sqlitemgrinstance->execute(sql);
+    SqliteMgr::sqlitemgrinstance->execute(sql);
     SetTextParam(textName,textValue);
 }
 
@@ -425,6 +429,7 @@ QString ExGlobal::getPosName(int pos){
 }
 
 int ExGlobal::getItemCT(int Itemid){
+    qDebug()<<"getItemCT,Itemid="<<Itemid<<",CT="<<ItemCT[Itemid];
     return ItemCT[Itemid];
 }
 
@@ -432,7 +437,7 @@ int ExGlobal::getItemResult(int Testid, int Itemid){
     int result = 0;
     int resultLength = 0;
     QString sql = "select cycle from AnalysisResult where Testid="+QString::number(Testid)+" and Itemid="+QString::number(Itemid);
-    QSqlQuery query = sqlitemgrinstance->select(sql);
+    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(sql);
     while(query.next()){
         resultLength++;
         if (query.value(0).toInt() > result)
@@ -441,7 +446,7 @@ int ExGlobal::getItemResult(int Testid, int Itemid){
 
     if(resultLength == 0) {
         sql = "select * from TestResult where Testid="+QString::number(Testid)+" and Itemid="+QString::number(Itemid);
-        query = sqlitemgrinstance->select(sql);        
+        query = SqliteMgr::sqlitemgrinstance->select(sql);
         QHash<int, vector<Point>> dataPos;
         while(query.next()){
             dataPos[query.value(2).toInt()].push_back(Point(query.value(4).toInt()*10,query.value(5).toInt()));
@@ -449,7 +454,7 @@ int ExGlobal::getItemResult(int Testid, int Itemid){
 
         foreach(int dataKey, dataPos.keys()){
             qDebug()<<"key="<<dataKey<<",length="<<dataPos[dataKey].size();
-            if (dataPos[dataKey].size()>30){
+            if (dataPos[dataKey].size()>22){
                 vector<Point> points = dataPos[dataKey];
                 vector<Point> tempPoint;
                 int linebaseStart = 3;
@@ -495,7 +500,7 @@ int ExGlobal::getItemResult(int Testid, int Itemid){
                     }
                 }
                 sql = QString("insert into AnalysisResult(Testid,PosIndex,cycle,Itemid) values(%1,%2,%3,%4)").arg(Testid).arg(dataKey).arg(t_result).arg(Itemid);
-                sqlitemgrinstance->execute(sql);
+                SqliteMgr::sqlitemgrinstance->execute(sql);
                 if (t_result > result)
                     result = t_result;
             }
@@ -509,7 +514,7 @@ QList<int> ExGlobal::getCurrItemResult(){
     int Testid = pTestResultModel->getTestid();
     int Itemid = pTestResultModel->getCurrItemId();
     QString sql = "select cycle,PosIndex from AnalysisResult where Testid="+QString::number(Testid)+" and Itemid="+QString::number(Itemid);
-    QSqlQuery query = sqlitemgrinstance->select(sql);
+    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(sql);
     while(query.next()){
         result<<(query.value(1).toInt()*1000+query.value(0).toInt());
     }
@@ -541,7 +546,7 @@ QList<int> ExGlobal::getBoxItemList(){
 void ExGlobal::addTest(){
     //QString sql = "select * from PanelTest";
     QString sql = "select * from PanelTest where ResultType = 2 order by Testid DESC";
-    QSqlQuery query = sqlitemgrinstance->select(sql);
+    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(sql);
     while(query.next()){
         Test test;
         test.Testid = query.value(0).toInt();
@@ -549,8 +554,9 @@ void ExGlobal::addTest(){
         test.SerialNo = query.value(2).toString();
         test.TestTime = query.value(4).toString();
         test.SampleInfo = query.value(5).toString();
-        test.User = query.value(6).toString();
-        test.ResultType = query.value(7).toInt();
+        test.SampleId = query.value(6).toString();
+        test.User = query.value(7).toString();
+        test.ResultType = query.value(8).toInt();
         if (!pTestModel->ExistTest(test.Testid))
             pTestModel->AddTest(test);
     }
@@ -559,5 +565,5 @@ void ExGlobal::addTest(){
 void ExGlobal::panelBoxIndexAddOne(){
     updateCaliParam("PanelBoxIndex",PanelBoxIndex + 1);
     t_BoxSerial = QString("Lot# %1").arg(PanelBoxIndex, 6, 10, QChar('0'));
-    t_sampleCode = QString("SLX %1").arg(PanelBoxIndex, 6, 10, QChar('0'));
+    //t_sampleCode = QString("SLX %1").arg(PanelBoxIndex, 6, 10, QChar('0'));
 }

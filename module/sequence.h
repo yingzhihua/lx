@@ -11,8 +11,12 @@
 #include "imageanalysis.h"
 #include "entity.h"
 #include "qrcoder.h"
+#include "printmgr.h"
+
+#include "log.h"
 #include "dao/testmgr.h"
 #include "cvcapture.h"
+#include "cameraplayer.h"
 
 class Sequence : public QObject
 {
@@ -26,6 +30,7 @@ public:
         Sequence_CloseBox,
         Sequence_CannelTest,
         Sequence_Test,
+        Sequence_LoopTest,
         Sequence_SimpleAction,
         Sequence_QrDecode,
         Sequence_camView
@@ -46,8 +51,12 @@ public:
         Result_CannelTest_ok,
         Result_Test_finish,
         Result_Test_unfinish,
+        Result_LoopTest_finish,
+        Result_CannelLoopTest_ok,
+        Result_Print_finish,
         Result_Test_DataErr,
-        Result_Test_ProcessErr
+        Result_Test_ProcessErr,
+        Result_NULL
     };
     Q_ENUM(SequenceResult)
 
@@ -68,10 +77,11 @@ public:
     Q_INVOKABLE QString sequenceMessage();
     Q_INVOKABLE void sequenceSetPanel(QString PanelName);
     Q_PROPERTY(QStringList TestList READ getTestList NOTIFY testListChanged)
-
+    Q_PROPERTY(QStringList LoopTestList READ getLoopTestList NOTIFY testListChanged)
     Q_INVOKABLE bool sequenceInit();
     Q_INVOKABLE void openErr(QString err){emit errOccur(err);}
     QStringList getTestList();
+    QStringList getLoopTestList();
     bool readBoxState(){return bBoxState;}
     bool readDoorState(){return bDoorState;}
 
@@ -97,7 +107,15 @@ public:
     Q_PROPERTY(int fan2Speed READ fan2Speed NOTIFY fan2SpeedChanged)
     Q_PROPERTY(int fan3Speed READ fan3Speed NOTIFY fan3SpeedChanged)
     Q_INVOKABLE void autoFocus();
+
+    Q_INVOKABLE bool printTest();
     ImageProvider *imageProvider;
+
+    Q_INVOKABLE bool isTesting(){return currSequenceId == SequenceId::Sequence_Test;}
+    Q_INVOKABLE void changeTitle(QString title);
+
+    Q_INVOKABLE bool loopTest(QString testName, int count);
+    Q_INVOKABLE bool isLoopTesting(){return currSequenceId == SequenceId::Sequence_LoopTest;}
 
 signals:
     void sequenceFinish(SequenceResult result);
@@ -116,13 +134,16 @@ signals:
     void fan2SpeedChanged();
     void fan3SpeedChanged();
     void autoFocusNotify(int status, int value);
+    void titleNotify(int titleparam, QString title);
 
 public slots:
     void SequenceTimeout();
     void WaitSequenceTimeout();
     void ActionFinish(QByteArray data);
+    void PrintFinish(QByteArray data);
+    void errFinish(QByteArray data);
     void CameraView(QImage img);    
-    void errReceive(int code);
+    void errReceive(ERROR_CODE code);
 
 private:
     bool ReadTestProcess(QString panel);
@@ -146,6 +167,9 @@ private:
     ImageCapture *imageCapture;
     cvCapture *cvcap;
     TestMgr *testMgr;
+    printmgr *printer;
+    CameraPlayer *camera;
+
     bool bFinishAction;
     TimeState durationState;
     int nDuration;
@@ -173,6 +197,14 @@ private:
     void fan1SetSpeed(int speed);
     void fan2SetSpeed(int speed){t_fan2Speed = speed;emit fan2SpeedChanged();}
     void fan3SetSpeed(int speed){t_fan3Speed = speed;emit fan3SpeedChanged();}
+
+    QString title;
+    int titleparam;
+
+    int loopTestCount;
+    int loopTestCurrCount;
+    QString loopTestName;
+    bool continueLoopTest();
 };
 
 static Sequence *sequence;

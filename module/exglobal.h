@@ -157,6 +157,7 @@ public:
     static unsigned char *bufrgb;
     static unsigned char *hbufrgb;
 
+    static QString SysName;
 signals:
     void userChanged();
     void panelNameChanged();
@@ -187,7 +188,6 @@ private:
 
     static bool test;
 
-    static QString SysName;    
     static QString t_version;
     static QString temp_version;
     static QString ctrl_version;
