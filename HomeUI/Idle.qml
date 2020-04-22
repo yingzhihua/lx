@@ -19,7 +19,7 @@ Page {
         MouseArea{
             anchors.fill: parent
             onClicked: {
-                console.log("openDoor,status:"+bDoorIsOpen);
+                console.log("openDoor,status:"+Sequence.door+"box,"+Sequence.box);
                 //if (bDoorIsOpen == false)
                 if (Sequence.door == false)
                 {
@@ -29,7 +29,10 @@ Page {
                         busyDes.text = qsTr("正在开仓");
                         busyDes.visible = true;
                     }
-                }
+                }                
+                else if (Sequence.box == true){
+                    Sequence.sequenceDo(Sequence.Sequence_Pierce);
+                }                
                 else
                 {
                     if (Sequence.sequenceDo(Sequence.Sequence_CloseBox))
@@ -214,6 +217,22 @@ Page {
                     mainView.pop();
                     mainView.push("qrc:/HomeUI/BoxReady.qml");
                 }                
+            }
+            else if(result == Sequence.Result_Pierce_Yes)
+            {
+                Sequence.sequenceDo(Sequence.Sequence_CloseBox);
+                busyIndicator.running = true;
+                busyDes.text = qsTr("正在合仓");
+                busyDes.visible = true;
+                console.log("close box after Pierce Yes");
+            }
+            else if(result == Sequence.Result_Pierce_No)
+            {
+                Sequence.sequenceDo(Sequence.Sequence_CloseBox);
+                busyIndicator.running = true;
+                busyDes.text = qsTr("正在合仓");
+                busyDes.visible = true;
+                console.log("close box after Pierce No");
             }
 
 

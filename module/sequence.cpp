@@ -172,6 +172,11 @@ bool Sequence::sequenceDo(SequenceId id)
         qrDect();
         return true;
     }
+    else if(id == SequenceId::Sequence_Pierce)
+    {
+        PierceDect();
+        return true;
+    }
 
     if (sequenceAction.isNull())
         return false;
@@ -246,7 +251,8 @@ void Sequence::ActionFinish(QByteArray data)
     qDebug()<<"Sequence ActionFinish:"<<data.toHex(' ');
 
     if (data[7] == '\x72'){
-        if (currSequenceId != SequenceId::Sequence_Test){
+        //if (currSequenceId != SequenceId::Sequence_Test){
+        if (currSequenceId == SequenceId::Sequence_Idle){
             if (bDoorState == false)//close
                 sequenceDo(SequenceId::Sequence_OpenBox);
             else
@@ -340,12 +346,19 @@ void Sequence::ActionFinish(QByteArray data)
         }        
     }
     else if (data[1] == '\x04'){
-        if (data[2] == '\x01')
-            emit callQmlRefeshQrImg();
-        data.remove(0,10);
-        emit qrDecode(data.data());
+        if (data[7] == '\xB0'){     //二维码识别
+            if (data[2] == '\x01')
+                emit callQmlRefeshQrImg();
+            data.remove(0,10);
+            emit qrDecode(data.data());
+        }
+        else if(data[7] == '\xB1'){ //刺穿识别
+            if (data[2] == '\x01')
+                emit sequenceFinish(SequenceResult::Result_Pierce_Yes);
+            else
+                emit sequenceFinish(SequenceResult::Result_Pierce_No);
+        }
     }
-
 
     if (bCannelSequence)
     {
@@ -359,7 +372,7 @@ void Sequence::ActionFinish(QByteArray data)
         currSequenceId = SequenceId::Sequence_Idle;
         emit sequenceFinish(SequenceResult::Result_Simple_ok);
     }
-    else if (currSequenceId == SequenceId::Sequence_QrDecode){
+    else if (currSequenceId == SequenceId::Sequence_QrDecode || currSequenceId == SequenceId::Sequence_Pierce){
         if (!listNextAction(false))
         {
             currSequenceId = SequenceId::Sequence_Idle;
@@ -996,9 +1009,13 @@ bool Sequence::listNextAction(bool first){
         action act = actList.first();
         if (act.device == "Qrcode"){
             currOrder = '\xB0';
-            while (qr->isRunning());
-            qr->start();
-        }else {
+            qr->Qr();
+        }
+        else if(act.device == "Pierce"){
+            currOrder = '\xB1';
+            qr->Pierce();
+        }
+        else {
             QByteArray send = ActionParser::ParamToByte(act.device,act.value,act.param1,act.param2,act.param3);
             currOrder = send[7];
             serialMgr->serialWrite(send);
@@ -1039,6 +1056,16 @@ void Sequence::qrSet(bool bopenlight, bool scale, bool handlimage, int bin, int 
     qr->poxValue = pox;
     qr->handleimage = handlimage;
     qr->scale = scale;
+}
+
+void Sequence::PierceDect(){
+    actList.clear();
+    action act;
+
+    act.device = "Pierce";
+    actList.append(act);
+
+    listNextAction(true);
 }
 
 void Sequence::fan1SetSpeed(int speed)

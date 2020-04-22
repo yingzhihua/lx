@@ -15,6 +15,10 @@ using namespace cv;
 using namespace std;
 //using namespace zbar;
 
+typedef enum{
+    DECODE_MODE_QR,DECODE_MODE_PIERCE,
+} DECODE_MODE;
+
 class QRcoder : public QThread
 {
     Q_OBJECT
@@ -27,6 +31,9 @@ public:
     int binValue = 120;
     int poxValue = 200;
 
+    void Qr();
+    void Pierce();
+
 protected:
     void run();
 
@@ -34,6 +41,12 @@ signals:
     void finishQRcode(QByteArray result);
 
 public slots:
+
+private:
+    DECODE_MODE mode;
+    void handleImage(Mat &image);
+    QString pierce(Mat &image);
+    QString QrDecode(Mat &image);
 
 };
 

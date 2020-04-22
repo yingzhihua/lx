@@ -25,10 +25,10 @@ Page {
         Sequence.sequenceInit();
         if (ExGlobal.projectMode() === 0)
         {
-            //Sequence.sequenceDo(Sequence.Sequence_SelfCheck);
-            //changeTimer.start();
+            Sequence.sequenceDo(Sequence.Sequence_SelfCheck);
+            changeTimer.start();
         }
-        //else
+        else
             Sequence.actionDo("Query",3,0,0,0);
     }
 

@@ -33,6 +33,7 @@ public:
         Sequence_LoopTest,
         Sequence_SimpleAction,
         Sequence_QrDecode,
+        Sequence_Pierce,
         Sequence_camView
     };
     Q_ENUM(SequenceId)
@@ -56,6 +57,8 @@ public:
         Result_Print_finish,
         Result_Test_DataErr,
         Result_Test_ProcessErr,
+        Result_Pierce_Yes,
+        Result_Pierce_No,
         Result_NULL
     };
     Q_ENUM(SequenceResult)
@@ -185,6 +188,7 @@ private:
     QList<action> actList;
     bool listNextAction(bool first);
     void qrDect();
+    void PierceDect();
     bool bQrOpenLight = true;
     bool bAutoFocus = false;
 
