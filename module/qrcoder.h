@@ -29,7 +29,7 @@ public:
     bool handleimage;
     bool scale;
     int binValue = 120;
-    int poxValue = 200;
+    int poxValue = 1000;
 
     void Qr();
     void Pierce();
@@ -45,7 +45,7 @@ public slots:
 private:
     DECODE_MODE mode;
     void handleImage(Mat &image);
-    QString pierce(Mat &image);
+    int pierce(Mat &image, QString &qrStr);
     QString QrDecode(Mat &image);
 
 };

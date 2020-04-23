@@ -3,10 +3,12 @@
 #include <QCoreApplication>
 #include <QPrinter>
 #include <QPainter>
+#include <QPrinterInfo>
 #include <QVector>
 #include <QLine>
 #include <QDir>
 #include <QDateTime>
+#include <QDebug>
 
 printmgr::printmgr(QObject *parent) : QThread(parent)
 {
@@ -15,17 +17,40 @@ printmgr::printmgr(QObject *parent) : QThread(parent)
 
 void printmgr::run(){
     QPrinter printer;
+    QByteArray res;
+    res.resize(10);
+    res[0] = '\xaa';
+    res[1] = '\x04';
+    res[2] = '\x01';
+    res[7] = '\xB1';
+
     QDir dir(QCoreApplication::applicationDirPath()+"/../report");
 
     if (!dir.exists())
         dir.mkpath(QCoreApplication::applicationDirPath()+"/../report");
 
+    QList<QPrinterInfo> list = QPrinterInfo::availablePrinters();
+    qDebug()<<"print size="<<list.size();
+    for (int i = 0; i < list.size(); i++)
+        qDebug()<<list.at(i).printerName();
+
     //printer.setOrientation(QPrinter::Landscape);
-    printer.setPageSize(QPrinter::Custom);
-    printer.setPageSizeMM(QSize(220,800));
+    //printer.setPageSize(QPrinter::Custom);
+    //printer.setPageSizeMM(QSize(220,800));
+    printer.setPageSize(QPrinter::A4);
+#if 0
     printer.setOutputFormat(QPrinter::PdfFormat);    
     printer.setOutputFileName(QCoreApplication::applicationDirPath()+"/../report/"+sampCode.remove(QRegExp("\\s"))+QDateTime::currentDateTime().toString("-yyyyMMdd-hhmmss")+".pdf");
+#else
+    if (list.size()==0)
+    {
+        emit finishPrint(res);
+        return;
+    }
 
+    printer.setOutputFormat(QPrinter::NativeFormat);
+    printer.setPrinterName(list.at(0).printerName());
+#endif
     QPainter *painter = new QPainter();
     painter->begin(&printer);
     painter->setRenderHint(QPainter::Antialiasing,true);
@@ -127,13 +152,6 @@ void printmgr::run(){
         prenumber = currnumber;
     }
     painter->end();
-
-    QByteArray res;
-    res.resize(10);
-    res[0] = '\xaa';
-    res[1] = '\x04';
-    res[2] = '\x01';
-    res[7] = '\xB1';
 
     msleep(1000);
     emit finishPrint(res);

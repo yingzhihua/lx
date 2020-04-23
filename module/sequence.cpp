@@ -347,13 +347,13 @@ void Sequence::ActionFinish(QByteArray data)
     }
     else if (data[1] == '\x04'){
         if (data[7] == '\xB0'){     //二维码识别
-            if (data[2] == '\x01')
+            if (data[2] == '\x01' || data[2] == '\x03')
                 emit callQmlRefeshQrImg();
             data.remove(0,10);
             emit qrDecode(data.data());
         }
         else if(data[7] == '\xB1'){ //刺穿识别
-            if (data[2] == '\x01')
+            if (data[2] & 0x02)
                 emit sequenceFinish(SequenceResult::Result_Pierce_Yes);
             else
                 emit sequenceFinish(SequenceResult::Result_Pierce_No);
@@ -1062,8 +1062,16 @@ void Sequence::PierceDect(){
     actList.clear();
     action act;
 
+    act.device = "Led";
+    act.value = 62;
+    //actList.append(act);
+
     act.device = "Pierce";
     actList.append(act);
+
+    act.device = "Led";
+    act.value = 63;
+    //actList.append(act);
 
     listNextAction(true);
 }

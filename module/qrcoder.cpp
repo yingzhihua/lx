@@ -29,6 +29,7 @@ QRcoder::QRcoder(QObject *parent) : QThread(parent)
 void QRcoder::run(){
     int count = 0;
     QString result;
+    int nresult = 0;
     VideoCapture cap;
 
     QByteArray res;
@@ -63,7 +64,7 @@ void QRcoder::run(){
 
 
     for (;;) {
-        Mat Frame;QString result;
+        Mat Frame;
         cap>>Frame;
         if (Frame.empty())
             break;
@@ -75,16 +76,18 @@ void QRcoder::run(){
         cvtColor(Frame, sourceFrame, COLOR_BGR2RGB);
         img = QImage((const uchar*)sourceFrame.data,sourceFrame.cols,sourceFrame.rows,QImage::Format_RGB888);
 
-        Mat handleFrame = Mat(Frame.rows,Frame.cols,Frame.type(),ExGlobal::hbufrgb);
-        cvtColor(sourceFrame, handleFrame, COLOR_RGB2GRAY);
+        //Mat handleFrame = Mat(Frame.rows,Frame.cols,Frame.type(),ExGlobal::hbufrgb);
+        //cvtColor(sourceFrame, handleFrame, COLOR_RGB2GRAY);
 
         if (mode == DECODE_MODE_PIERCE)
-            result = pierce(handleFrame);
-        else if (mode == DECODE_MODE_QR)
-            result = QrDecode(handleFrame);
+            nresult = pierce(sourceFrame,result);
+        else if (mode == DECODE_MODE_QR)            
+            //result = QrDecode(sourceFrame);
+        nresult = pierce(sourceFrame,result);
 
         if (!result.isEmpty()||++count > 10)
-        {            
+        {
+            qDebug()<<"result="<<result<<",count="<<count;
             break;
         }
     }
@@ -96,12 +99,17 @@ void QRcoder::run(){
     if (result.isEmpty())
     {
         res.append("Cannot identify");
+        qDebug()<<"result is empty";
     }
     else
     {
         res[2] = '\x01';
+        nresult |= 0x01;
         res.append(result);
+        qDebug()<<"result="<<result;
     }
+
+    res[2] = static_cast<char>(nresult);
     emit finishQRcode(res);
 }
 
@@ -114,8 +122,8 @@ void QRcoder::handleImage(Mat &image){
     #endif
     //threshold(image,image,70,255,THRESH_BINARY);
     vector<Vec3f> circles;
-    //HoughCircles(image,circles,HOUGH_GRADIENT,1.3,500,230,40,50,100);
-    HoughCircles(image,circles,HOUGH_GRADIENT,1.3,500,230,100);
+    HoughCircles(image,circles,HOUGH_GRADIENT,1.3,500,230,40,50,100);
+    //HoughCircles(image,circles,HOUGH_GRADIENT,1.3,500,230,100);
     qDebug()<<"circles num = "<<circles.size();
     for (size_t i = 0; i < circles.size(); i++){
         Point center(cvRound(circles[i][0]),cvRound(circles[i][1]));
@@ -139,8 +147,7 @@ QString QRcoder::QrDecode(Mat &image){
 #else
     //QRCodeDetector qrcode;
 #endif
-    Mat sourceFrame = Mat(image.rows, image.cols, image.type(), ExGlobal::bufrgb);
-    image.copyTo(sourceFrame);
+
     Mat handleFrame;
     vector<Point2f> spos;
     spos.push_back(Point2f(ExGlobal::QrX1,ExGlobal::QrY1));
@@ -156,14 +163,14 @@ QString QRcoder::QrDecode(Mat &image){
         obj.push_back(Point2f(scalewide,scalewide));
         obj.push_back(Point2f(0,scalewide));
         Mat H = findHomography(spos,obj,RANSAC);
-        warpPerspective(sourceFrame,handleFrame,H,handleFrame.size());
+        warpPerspective(image,handleFrame,H,handleFrame.size());
     }else{
         handleFrame = Mat(image.rows,image.cols,image.type(),ExGlobal::hbufrgb);
         image.copyTo(handleFrame);
+        //cvtColor(image, handleFrame, COLOR_RGB2GRAY);
     }
 
-    cvtColor(sourceFrame, sourceFrame, COLOR_BGR2RGB);
-    cvtColor(handleFrame, handleFrame, COLOR_BGR2GRAY);
+    cvtColor(handleFrame, handleFrame, COLOR_RGB2GRAY);
 
     bool result_detection = qrcode.detect(handleFrame,transform);
     qDebug()<<"handleFrame.type="<<handleFrame.type()<<",Frame.type="<<image.type()<<",result_detection="<<result_detection;
@@ -197,19 +204,19 @@ QString QRcoder::QrDecode(Mat &image){
             string decode_info = qrcode.decode(subFrame2,transform,straight_barcode);
             if (!decode_info.empty()){
                 result = QString::fromStdString(decode_info);
-            }
+            }image
         }
 
 #endif
 #if 1
-        circle(sourceFrame,spos[0],10,Scalar(0,0,255),3);
-        circle(sourceFrame,spos[1],10,Scalar(0,0,255),3);
-        circle(sourceFrame,spos[2],10,Scalar(0,0,255),3);
-        circle(sourceFrame,spos[3],10,Scalar(0,0,255),3);
-        line(sourceFrame,spos[0],spos[1],Scalar(0,255,0));
-        line(sourceFrame,spos[1],spos[2],Scalar(0,255,0));
-        line(sourceFrame,spos[2],spos[3],Scalar(0,255,0));
-        line(sourceFrame,spos[3],spos[0],Scalar(0,255,0));
+        circle(image,spos[0],10,Scalar(0,0,255),3);
+        circle(image,spos[1],10,Scalar(0,0,255),3);
+        circle(image,spos[2],10,Scalar(0,0,255),3);
+        circle(image,spos[3],10,Scalar(0,0,255),3);
+        line(image,spos[0],spos[1],Scalar(0,255,0));
+        line(image,spos[1],spos[2],Scalar(0,255,0));
+        line(image,spos[2],spos[3],Scalar(0,255,0));
+        line(image,spos[3],spos[0],Scalar(0,255,0));
 #endif
 
         handleImage(handleFrame);
@@ -222,19 +229,63 @@ QString QRcoder::QrDecode(Mat &image){
 }
 
 
-QString QRcoder::pierce(Mat &image){
-    QString result;
-    result = "lengxing";
+int QRcoder::pierce(Mat &image, QString &qrStr){
+    int result = 0;
+    //result = "lengxing";
 
+    Mat handleFrame = Mat(image.rows,image.cols,image.type(),ExGlobal::hbufrgb);
+    cvtColor(image, handleFrame, COLOR_RGB2GRAY);
+
+#if defined(USE_ZBAR)
+    zbar::ImageScanner scanner;
+    scanner.set_config(zbar::ZBAR_NONE,zbar::ZBAR_CFG_ENABLE,1);
+
+    zbar::Image imageZbar(handleFrame.cols,handleFrame.rows,"Y800",handleFrame.data,handleFrame.cols*handleFrame.rows);
+    scanner.scan(imageZbar);
+    zbar::Image::SymbolIterator symbol = imageZbar.symbol_begin();
+    if (imageZbar.symbol_begin()==imageZbar.symbol_end()){
+        qDebug()<<"zbar scan fail";
+    }
+    else {
+        qrStr = QString::fromStdString(imageZbar.symbol_begin()->get_data());
+        result = 1;
+        qDebug()<<"decode_info:"<<qrStr;
+    }
+    /*
+    for(;symbol != imageZbar.symbol_end(); ++symbol){
+        qDebug()<<"zbar type:"<<QString::fromStdString(symbol->get_type_name())<<endl<<"code:"<<QString::fromStdString(symbol->get_data());
+    }
+    */
+#endif
+
+#if 1
     vector<Vec3f> circles;
-    HoughCircles(image,circles,HOUGH_GRADIENT,1.3,500,230,100);
+    double meanValue = 0.0;
+    HoughCircles(handleFrame,circles,HOUGH_GRADIENT,1.3,5000,230,30,50,100);
     qDebug()<<"circles num = "<<circles.size();
     for (size_t i = 0; i < circles.size(); i++){
         Point center(cvRound(circles[i][0]),cvRound(circles[i][1]));
         int radius = cvRound(circles[i][2]);
+        int length = cvRound(circles[i][2]/1.5f);
         circle(image, center,radius-10,Scalar(0),3);
-        qDebug()<<"x="<<center.x<<",y="<<center.y<<",r="<<radius;
+        rectangle(image,Point(center.x-length,center.y-length),Point(center.x+length,center.y+length),Scalar(0),3);
+        Mat imageSobel;
+        Sobel(handleFrame(Rect(center.x-length,center.y-length,length*2,length*2)),imageSobel,CV_8U,1,1);
+        meanValue = mean(imageSobel)[0];
+
+        qDebug()<<"x="<<center.x<<",y="<<center.y<<",r="<<radius<<",meanValue="<<meanValue;
     }
+
+    if (circles.size()==1)
+    {
+        result += 2;
+        if (meanValue > 1)
+            result += 4;
+    }
+#else
+    handleImage(handleFrame);
+#endif
+    img2 = QImage((const uchar*)handleFrame.data,handleFrame.cols,handleFrame.rows,QImage::Format_Grayscale8);
 
     return result;
 }
