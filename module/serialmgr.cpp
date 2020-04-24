@@ -95,7 +95,7 @@ void SerialMgr::handleReadTemp()
                     ackReceive(byteReadData.mid(pos,byteReadData[pos+2]));
                     sendNext = true;
                 }
-                /*
+                //*
                 else if(byteReadData[pos+10] == '\x55') {
                     errReceive(byteReadData.mid(pos,byteReadData[pos+2]));
                     byteReadData.clear();

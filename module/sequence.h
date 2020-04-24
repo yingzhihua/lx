@@ -56,9 +56,11 @@ public:
         Result_CannelLoopTest_ok,
         Result_Print_finish,
         Result_Test_DataErr,
-        Result_Test_ProcessErr,
-        Result_Pierce_Yes,
+        Result_Test_ProcessErr,        
         Result_Pierce_No,
+        Result_Pierce_Yes,
+        Result_Pierce_Damage,
+        Result_Pierce_Yes_NoQr,
         Result_NULL
     };
     Q_ENUM(SequenceResult)

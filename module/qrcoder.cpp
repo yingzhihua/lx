@@ -59,6 +59,7 @@ void QRcoder::run(){
     cap.set(CAP_PROP_FRAME_HEIGHT,1080);
     cap.set(CAP_PROP_AUTO_EXPOSURE,1);
     cap.set(CAP_PROP_EXPOSURE,poxValue);
+    //cap.set(CAP_PROP_EXPOSURE,2000);
 
     qDebug()<<"width:"<<cap.get(CAP_PROP_FRAME_WIDTH)<<" height:"<<cap.get(CAP_PROP_FRAME_HEIGHT)<<" Frame:"<<cap.get(CAP_PROP_FPS)<<" auto_expoure:"<<cap.get(CAP_PROP_AUTO_EXPOSURE)<<" exp:"<<cap.get(CAP_PROP_EXPOSURE);
 
@@ -85,7 +86,7 @@ void QRcoder::run(){
             //result = QrDecode(sourceFrame);
         nresult = pierce(sourceFrame,result);
 
-        if (!result.isEmpty()||++count > 10)
+        if (!result.isEmpty()||++count > 5)
         {
             qDebug()<<"result="<<result<<",count="<<count;
             break;
@@ -235,7 +236,7 @@ int QRcoder::pierce(Mat &image, QString &qrStr){
 
     Mat handleFrame = Mat(image.rows,image.cols,image.type(),ExGlobal::hbufrgb);
     cvtColor(image, handleFrame, COLOR_RGB2GRAY);
-
+    qDebug()<<"pierce start:"<<QDateTime::currentDateTime().toString("hh:mm:ss.zzz");
 #if defined(USE_ZBAR)
     zbar::ImageScanner scanner;
     scanner.set_config(zbar::ZBAR_NONE,zbar::ZBAR_CFG_ENABLE,1);
@@ -257,11 +258,11 @@ int QRcoder::pierce(Mat &image, QString &qrStr){
     }
     */
 #endif
-
+    qDebug()<<"pierce zbar:"<<QDateTime::currentDateTime().toString("hh:mm:ss.zzz");
 #if 1
     vector<Vec3f> circles;
     double meanValue = 0.0;
-    HoughCircles(handleFrame,circles,HOUGH_GRADIENT,1.3,5000,230,30,50,100);
+    HoughCircles(handleFrame,circles,HOUGH_GRADIENT,1.3,5000,230,30,20,200);
     qDebug()<<"circles num = "<<circles.size();
     for (size_t i = 0; i < circles.size(); i++){
         Point center(cvRound(circles[i][0]),cvRound(circles[i][1]));
@@ -286,7 +287,7 @@ int QRcoder::pierce(Mat &image, QString &qrStr){
     handleImage(handleFrame);
 #endif
     img2 = QImage((const uchar*)handleFrame.data,handleFrame.cols,handleFrame.rows,QImage::Format_Grayscale8);
-
+    qDebug()<<"pierce end:"<<QDateTime::currentDateTime().toString("hh:mm:ss.zzz");
     return result;
 }
 

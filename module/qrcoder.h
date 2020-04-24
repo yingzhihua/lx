@@ -29,7 +29,7 @@ public:
     bool handleimage;
     bool scale;
     int binValue = 120;
-    int poxValue = 1000;
+    int poxValue = 2000;
 
     void Qr();
     void Pierce();

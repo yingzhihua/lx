@@ -32,6 +32,9 @@ Page {
                 }                
                 else if (Sequence.box == true){
                     Sequence.sequenceDo(Sequence.Sequence_Pierce);
+                    busyIndicator.running = true;
+                    busyDes.text = qsTr("正在检测试剂盒");
+                    busyDes.visible = true;
                 }                
                 else
                 {
@@ -160,7 +163,8 @@ Page {
         id: busyDes
         anchors.horizontalCenter: busyIndicator.horizontalCenter
         anchors.top: busyIndicator.bottom
-        anchors.topMargin: 20
+        anchors.topMargin: 40
+        font.pixelSize: 30
         visible: false
         text: qsTr("text")
     }
@@ -226,12 +230,16 @@ Page {
                 busyDes.visible = true;
                 console.log("close box after Pierce Yes");
             }
-            else if(result == Sequence.Result_Pierce_No)
-            {
-                Sequence.sequenceDo(Sequence.Sequence_CloseBox);
-                busyIndicator.running = true;
-                busyDes.text = qsTr("正在合仓");
+            else if(result == Sequence.Result_Pierce_No || result == Sequence.Result_Pierce_Damage || result == Sequence.Result_Pierce_Yes_NoQr)
+            {                
+                busyIndicator.running = false;
                 busyDes.visible = true;
+                if (result == Sequence.Result_Pierce_No)
+                    busyDes.text = qsTr("检测试剂盒失败");
+                else if (result == Sequence.Result_Pierce_Yes_NoQr)
+                    busyDes.text = qsTr("二维码识别识别");
+                else if (result == Sequence.Result_Pierce_Damage)
+                    busyDes.text = qsTr("试剂盒已使用");
                 console.log("close box after Pierce No");
             }
 
