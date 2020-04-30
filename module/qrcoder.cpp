@@ -86,7 +86,7 @@ void QRcoder::run(){
             //result = QrDecode(sourceFrame);
         nresult = pierce(sourceFrame,result);
 
-        if (!result.isEmpty()||++count > 5)
+        if (!result.isEmpty()||++count > 3)
         {
             qDebug()<<"result="<<result<<",count="<<count;
             break;
@@ -220,7 +220,7 @@ QString QRcoder::QrDecode(Mat &image){
         line(image,spos[3],spos[0],Scalar(0,255,0));
 #endif
 
-        handleImage(handleFrame);
+        //handleImage(handleFrame);
 
         img2 = QImage((const uchar*)handleFrame.data,handleFrame.cols,handleFrame.rows,QImage::Format_Grayscale8);
 
@@ -259,10 +259,30 @@ int QRcoder::pierce(Mat &image, QString &qrStr){
     */
 #endif
     qDebug()<<"pierce zbar:"<<QDateTime::currentDateTime().toString("hh:mm:ss.zzz");
+    //imclose
+    bitwise_not(handleFrame,handleFrame);
+    Mat element = getStructuringElement(MORPH_ELLIPSE,Size(30,30));
+    morphologyEx(handleFrame,handleFrame,MORPH_CLOSE,element);
+
+    vector<Vec2f> lines;
+    HoughLines(handleFrame,lines,1,CV_PI/150,250,0,0);
+    qDebug()<<"lines num="<<lines.size();
+    for (size_t i = 0; i < lines.size();i++){
+        float rho = lines[i][0];
+        float theta = lines[i][1];
+        Point pt1,pt2;
+        double a = cos(theta),b=sin(theta);
+        double x0 = a*rho,y0=b*rho;
+        pt1.x = cvRound(x0+1000*(-b));
+        pt1.y = cvRound(y0+1000*a);
+        pt2.x = cvRound(x0-1000*(-b));
+        pt2.y = cvRound(y0-1000*a);
+        line(image,pt1,pt2,Scalar(0),3);
+    }
 #if 1
     vector<Vec3f> circles;
     double meanValue = 0.0;
-    HoughCircles(handleFrame,circles,HOUGH_GRADIENT,1.3,5000,230,30,20,200);
+    HoughCircles(handleFrame,circles,HOUGH_GRADIENT,1.5,50,200,50,50,200);
     qDebug()<<"circles num = "<<circles.size();
     for (size_t i = 0; i < circles.size(); i++){
         Point center(cvRound(circles[i][0]),cvRound(circles[i][1]));

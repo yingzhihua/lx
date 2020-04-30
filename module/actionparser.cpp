@@ -158,8 +158,8 @@ QByteArray ActionParser::ParamToByte(const QString &action, int value, int param
             data[9] = 0x04;
             data[10] = 0x01;    //保留
             data[11] = 0x02;    //时序编号 02：出仓；03：进仓；0x48：正方向移动；0x49：负方向移动（包含速度）
-            data[12] = 0;
-            data[13] = 0;
+            data[12] = (param1>>8)&0xFF;
+            data[13] = param1&0xFF;
         }
         else if(value == 2)
         {
@@ -440,6 +440,52 @@ QByteArray ActionParser::ParamToByte(const QString &action, int value, int param
                 data[12] = (param1>>8)&0xFF;
                 data[13] = param1&0xFF;
             }
+        }
+
+        data[6] = 0x00;
+        data[7] = 0x70;
+        data[8] = 0x00;
+        data[10] = 0x01;
+
+        FormatBytes(0x01,data);
+    }
+    else if(action=="V123")
+    {
+        if (value == 1)
+        {
+            data.resize(13);
+            data[9] = 2;
+            data[11] = 0x09;
+        }
+        else if(value == 2)
+        {
+            data.resize(21);
+            data[9] = 8;
+            data[11] = 0x08;
+
+            data[12] = 0x00;
+            data[13] = 0x08;
+            data[14] = (ExGlobal::V1SoftHomeX>>8)&0xFF;
+            data[15] = ExGlobal::V1SoftHomeX&0xFF;
+            data[16] = (ExGlobal::V2SoftHomeX>>8)&0xFF;
+            data[17] = ExGlobal::V2SoftHomeX&0xFF;
+            data[18] = (ExGlobal::V3SoftHomeX>>8)&0xFF;
+            data[19] = ExGlobal::V3SoftHomeX&0xFF;
+        }
+        else if(value == 3)
+        {
+            data.resize(21);
+            data[9] = 8;
+            data[11] = 0x08;
+
+            data[12] = 0x00;
+            data[13] = 0x08;
+            data[14] = (ExGlobal::V1WorkX>>8)&0xFF;
+            data[15] = ExGlobal::V1WorkX&0xFF;
+            data[16] = (ExGlobal::V2WorkX>>8)&0xFF;
+            data[17] = ExGlobal::V2WorkX&0xFF;
+            data[18] = (ExGlobal::V3WorkX>>8)&0xFF;
+            data[19] = ExGlobal::V3WorkX&0xFF;
         }
 
         data[6] = 0x00;

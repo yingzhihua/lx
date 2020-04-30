@@ -9,6 +9,8 @@
 #include <QDir>
 #include <QDateTime>
 #include <QDebug>
+#include <QTextCodec>
+#include "PrinterLibs.h"
 
 printmgr::printmgr(QObject *parent) : QThread(parent)
 {
@@ -16,7 +18,7 @@ printmgr::printmgr(QObject *parent) : QThread(parent)
 }
 
 void printmgr::run(){
-    QPrinter printer;
+
     QByteArray res;
     res.resize(10);
     res[0] = '\xaa';
@@ -24,28 +26,33 @@ void printmgr::run(){
     res[2] = '\x01';
     res[7] = '\xB1';
 
+    printPTP();
+    msleep(1000);
+    emit finishPrint(res);
+}
+
+bool printmgr::printPDF(){
+    QPrinter printer;
     QDir dir(QCoreApplication::applicationDirPath()+"/../report");
-
-    if (!dir.exists())
-        dir.mkpath(QCoreApplication::applicationDirPath()+"/../report");
-
     QList<QPrinterInfo> list = QPrinterInfo::availablePrinters();
     qDebug()<<"print size="<<list.size();
     for (int i = 0; i < list.size(); i++)
         qDebug()<<list.at(i).printerName();
+
+    if (!dir.exists())
+        dir.mkpath(QCoreApplication::applicationDirPath()+"/../report");
 
     //printer.setOrientation(QPrinter::Landscape);
     //printer.setPageSize(QPrinter::Custom);
     //printer.setPageSizeMM(QSize(220,800));
     printer.setPageSize(QPrinter::A4);
 #if 0
-    printer.setOutputFormat(QPrinter::PdfFormat);    
+    printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setOutputFileName(QCoreApplication::applicationDirPath()+"/../report/"+sampCode.remove(QRegExp("\\s"))+QDateTime::currentDateTime().toString("-yyyyMMdd-hhmmss")+".pdf");
 #else
     if (list.size()==0)
     {
-        emit finishPrint(res);
-        return;
+        return false;
     }
 
     printer.setOutputFormat(QPrinter::NativeFormat);
@@ -72,7 +79,7 @@ void printmgr::run(){
     lines.append(QLine(QPoint(50,490),QPoint(750,490)));
     lines.append(QLine(QPoint(120,180),QPoint(120,200)));
     lines.append(QLine(QPoint(220,180),QPoint(220,200)));
-    lines.append(QLine(QPoint(300,180),QPoint(300,200)));    
+    lines.append(QLine(QPoint(300,180),QPoint(300,200)));
     lines.append(QLine(QPoint(400,180),QPoint(400,490)));
     painter->drawLines(lines);
 
@@ -153,6 +160,73 @@ void printmgr::run(){
     }
     painter->end();
 
-    msleep(1000);
-    emit finishPrint(res);
+    return true;
+}
+
+bool printmgr::printPTP(){
+    void *handle = Port_OpenUSBIO("/dev/usb/lp0");
+    if (handle == nullptr)
+    {
+        qDebug()<<"Can not open printer";
+        return false;
+    }
+    else
+    {
+        QString printStr;
+        Port_SetPort(handle);
+        Pos_Reset();
+        Pos_PrintNVLogo(1);
+        Pos_FeedLine();
+        QString testName = ExGlobal::panelName()+"\n";
+        Pos_Text(testName.toStdString().c_str(),0,-2,1,1,0,0);
+        Pos_FeedLine();
+
+        printStr = QString("仪器： ")+ExGlobal::SysName+"\n";
+        Pos_Text(printStr.toStdString().c_str(),0,-1,0,0,0,0);
+        printStr = QString("样本ID： ")+sampCode+"\n";
+        Pos_Text(printStr.toStdString().c_str(),0,-1,0,0,0,0);
+        printStr = QString("样本信息： ")+sampInfo+"\n";
+        Pos_Text(printStr.toStdString().c_str(),0,-1,0,0,0,0);
+
+        Pos_FeedLine();
+
+        QMapIterator<QString,int> it(itemMap);
+        int itemIndex = 1;
+        while(it.hasNext()){
+            it.next();
+            printStr = QString::number(itemIndex)+" "+it.key();
+            int n = printStr.length();
+            while (n<26) {
+                printStr+=" ";
+                n++;
+            }
+            if (it.value() != 0){
+                printStr += "阳性\n";
+                Pos_Text(printStr.toStdString().c_str(),0,-1,0,0,0,8);
+            }
+            else
+            {
+                printStr += "阴性\n";
+                Pos_Text(printStr.toStdString().c_str(),0,-1,0,0,0,0);
+            }
+            itemIndex++;
+        }
+
+        Pos_FeedLine();
+        printStr = QString("检验者： ")+user+"\n";
+        Pos_Text(printStr.toStdString().c_str(),0,-1,0,0,0,0);
+        printStr = QString("检测日期： ")+testTime+"\n";
+        Pos_Text(printStr.toStdString().c_str(),0,-1,0,0,0,0);
+        printStr = QString("报告日期： ")+QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")+"\n";
+        Pos_Text(printStr.toStdString().c_str(),0,-1,0,0,0,0);
+
+        Pos_FeedLine();
+        Pos_Reset();
+        Pos_Align(1);
+        Pos_Qrcode("https://www.ubaike.cn/show_10459701.html\n",4);
+        Pos_Feed_N_Line(3);
+
+        Port_ClosePort(handle);
+    }
+    return true;
 }

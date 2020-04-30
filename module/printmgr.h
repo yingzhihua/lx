@@ -20,6 +20,10 @@ protected:
 signals:
     void finishPrint(QByteArray result);
 
+private:
+    bool printPDF();
+    bool printPTP();
+
 };
 
 #endif // PRINTMGR_H

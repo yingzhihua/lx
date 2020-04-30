@@ -19,8 +19,7 @@ Page {
         MouseArea{
             anchors.fill: parent
             onClicked: {
-                console.log("openDoor,status:"+Sequence.door+"box,"+Sequence.box);
-                //if (bDoorIsOpen == false)
+                console.log("openDoor,status:"+Sequence.door+"box,"+Sequence.box);                
                 if (Sequence.door == false)
                 {
                     if (Sequence.sequenceDo(Sequence.Sequence_OpenBox))
@@ -30,7 +29,7 @@ Page {
                         busyDes.visible = true;
                     }
                 }                
-                else if (Sequence.box == true){
+                else if (ExGlobal.projectMode() === 1 && Sequence.box == true){
                     Sequence.sequenceDo(Sequence.Sequence_Pierce);
                     busyIndicator.running = true;
                     busyDes.text = qsTr("正在检测试剂盒");

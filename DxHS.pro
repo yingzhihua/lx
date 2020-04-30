@@ -105,6 +105,9 @@ LIBS += /opt/DVPCamera/libdvp.so
 
 INCLUDEPATH += /opt/CKCameraL/include
 LIBS += /opt/CKCamera/libCKCameraSDK_aarch64.so
+
+INCLUDEPATH += /opt/KPOS/include_zh
+LIBS += /opt/KPOS/libCsnPrinterLibs.so
 }else{
 INCLUDEPATH += /opt/opencv-4.1.1L/include \
                 /opt/opencv-4.1.1L/include/opencv4 \

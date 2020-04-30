@@ -149,17 +149,11 @@ bool Sequence::sequenceDo(SequenceId id)
     else if(id == SequenceId::Sequence_OpenBox)
     {
         //sequenceAction = root.firstChildElement("OpenDoor");
-        if (bDoorState == false)//close
-            sequenceAction = root.firstChildElement("OpenDoor");
-        else
-            sequenceAction = root.firstChildElement("CloseDoor");
+        SwitchDoor();
     }
     else if(id == SequenceId::Sequence_CloseBox){
         //sequenceAction = root.firstChildElement("CloseDoor");
-        if (bDoorState == false)//close
-            sequenceAction = root.firstChildElement("OpenDoor");
-        else
-            sequenceAction = root.firstChildElement("CloseDoor");
+        SwitchDoor();
     }
     else if(id == SequenceId::Sequence_SelfCheck){
         sequenceAction = root.firstChildElement("SelfCheck");
@@ -376,10 +370,11 @@ void Sequence::ActionFinish(QByteArray data)
         currSequenceId = SequenceId::Sequence_Idle;
         emit sequenceFinish(SequenceResult::Result_Simple_ok);
     }
-    else if (currSequenceId == SequenceId::Sequence_QrDecode || currSequenceId == SequenceId::Sequence_Pierce){
+    else if (currSequenceId == SequenceId::Sequence_QrDecode || currSequenceId == SequenceId::Sequence_Pierce
+             ||currSequenceId == SequenceId::Sequence_OpenBox || currSequenceId == SequenceId::Sequence_CloseBox){
         if (!listNextAction(false))
         {
-            currSequenceId = SequenceId::Sequence_Idle;
+            FinishSequence();
         }
     }
     else{
@@ -625,7 +620,7 @@ bool Sequence::DoAction(QDomElement action,bool isChild)
 #endif
     }
     else if(action.attribute("Device")=="Door" || action.attribute("Device")=="Light" || action.attribute("Device")=="Temperature"
-            ||action.attribute("Device")=="V1" || action.attribute("Device")=="V2" || action.attribute("Device")=="V3"
+            ||action.attribute("Device")=="V1" || action.attribute("Device")=="V2" || action.attribute("Device")=="V3" || action.attribute("Device")=="V123"
             ||action.attribute("Device")=="VP" || action.attribute("Device")=="Pump" || action.attribute("Device")=="Query"
             ||action.attribute("Device")=="SetPID" || action.attribute("Device")=="Fan")
     {
@@ -989,9 +984,16 @@ bool Sequence::setWhiteBalance(int value){
     return imageCapture->setWhite(value);
 }
 
+void test(const char *str){
+    qDebug()<<QString::number(str[0],16)<<QString::number(str[1],16)<<QString::number(str[2],16)<<QString::number(str[3],16)<<QString::number(str[4],16)<<QString::number(str[5],16);
+}
 
 void Sequence::lxDebug(){
     qDebug()<<"lxDebug";
+    test("上呼吸");
+    QByteArray ba = ExGlobal::panelName().toLatin1();
+    test(ba.data());
+    test(ExGlobal::panelName().toStdString().c_str());
     return;
     serialMgr->serialWrite(ActionParser::ParamToByte("Light",4,0,0,0));
     cvcap->setCurrCamera(0);
@@ -1018,6 +1020,23 @@ bool Sequence::listNextAction(bool first){
         else if(act.device == "Pierce"){
             currOrder = '\xB1';
             qr->Pierce();
+        }
+        else if(act.device == "SwitchDoor"){
+            act.device = "Door";
+            if (bDoorState)
+            {
+                if (bBoxState)
+                    //act.value = 2;
+                    act.value = 5;
+                else
+                    act.value = 5;
+            }
+            else {
+                act.value = 1;
+            }
+            QByteArray send = ActionParser::ParamToByte(act.device,act.value,act.param1,act.param2,act.param3);
+            currOrder = send[7];
+            serialMgr->serialWrite(send);
         }
         else {
             QByteArray send = ActionParser::ParamToByte(act.device,act.value,act.param1,act.param2,act.param3);
@@ -1066,6 +1085,10 @@ void Sequence::PierceDect(){
     actList.clear();
     action act;
 
+    act.device = "Door";
+    act.value = 5;
+    actList.append(act);
+
     act.device = "Led";
     act.value = 62;
     actList.append(act);
@@ -1075,6 +1098,20 @@ void Sequence::PierceDect(){
 
     act.device = "Led";
     act.value = 63;
+    actList.append(act);
+
+    listNextAction(true);
+}
+
+void Sequence::SwitchDoor(){
+    actList.clear();
+    action act;
+
+    act.device = "Query";
+    act.value = 3;
+    actList.append(act);
+
+    act.device = "SwitchDoor";
     actList.append(act);
 
     listNextAction(true);

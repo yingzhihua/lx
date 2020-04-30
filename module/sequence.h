@@ -191,6 +191,7 @@ private:
     bool listNextAction(bool first);
     void qrDect();
     void PierceDect();
+    void SwitchDoor();
     bool bQrOpenLight = true;
     bool bAutoFocus = false;
 
