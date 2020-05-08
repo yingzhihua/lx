@@ -398,6 +398,7 @@ void Sequence::ActionFinish(QByteArray data)
 void Sequence::errFinish(QByteArray data){
     qDebug()<<"Sequence errFinish:"<<data.toHex(' ');
     QString errStr;
+    bool errHandle = false;
     if (data.length()>11 && data[0] == '\xaa' && data[data.length()-1]=='\x55'){
         if (data[1] == '\x02'){            
             if (data[7] == '\x89'){
@@ -406,15 +407,26 @@ void Sequence::errFinish(QByteArray data){
                 int chan = data[11];
                 errStr = QString("通道%1两传感器温差过大，一传感器温度：%2，一传感器温度：%3").arg(chan).arg(temp1).arg(temp2);
                 emit errOccur(errStr+" \n\n错误码："+QString::number(ERROR_CODE_TEMP_DIFF,16));
+                errHandle = true;
             }
             else if(data[7] == '\x24')
             {
                 errStr = QString("温度错误！");
                 emit errOccur(errStr+" \n\n错误码："+QString::number(ERROR_CODE_TEMP_ERR,16));
+                errHandle = true;
             }
 
         }
-        else {
+        else if(data[1] == '\x01' && data.length() > 15){
+            if (data[13] == '\x79' && data[14] == '\x27'){
+                errStr = QString("刺破电机运动超时！");
+                emit errOccur(errStr+" \n\n错误码："+QString::number(0x7927,16));
+                errHandle = true;
+            }
+        }
+
+
+        if (errHandle == false) {
             emit errOccur("未知错误："+data.toHex(' '));
         }
         sequenceCancel();
@@ -842,10 +854,16 @@ void Sequence::setSenorState(char char1, char char2)
         bBoxState = sensor;
         emit boxStateChanged();
     }
+    /*
     if (char2&0x80)
         sensor = true;
     else
         sensor = false;
+        */
+    if (char1&0x02)
+        sensor = false;
+    else
+        sensor = true;
     if (sensor != bDoorState)
     {
         bDoorState = sensor;
@@ -1026,13 +1044,14 @@ bool Sequence::listNextAction(bool first){
             if (bDoorState)
             {
                 if (bBoxState)
-                    //act.value = 2;
                     act.value = 5;
+                    //act.value = 2;
                 else
                     act.value = 5;
             }
             else {
                 act.value = 1;
+                //act.param1 = 300;
             }
             QByteArray send = ActionParser::ParamToByte(act.device,act.value,act.param1,act.param2,act.param3);
             currOrder = send[7];

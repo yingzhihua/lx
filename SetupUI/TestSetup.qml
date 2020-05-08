@@ -115,7 +115,7 @@ Item {
         anchors.left: openlight.right
         anchors.leftMargin: 30
         anchors.verticalCenter: openlight.verticalCenter
-        checked: true
+        checked: false
         text: qsTr("识别前处理图像")
     }
 
@@ -124,7 +124,7 @@ Item {
         anchors.left: handleimage.right
         anchors.leftMargin: 30
         anchors.verticalCenter: openlight.verticalCenter
-        checked: true
+        checked: false
         text: qsTr("剪切图像")
     }
 

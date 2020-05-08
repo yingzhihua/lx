@@ -29,12 +29,14 @@ Page {
                         busyDes.visible = true;
                     }
                 }                
+                /*
                 else if (ExGlobal.projectMode() === 1 && Sequence.box == true){
                     Sequence.sequenceDo(Sequence.Sequence_Pierce);
                     busyIndicator.running = true;
                     busyDes.text = qsTr("正在检测试剂盒");
                     busyDes.visible = true;
                 }                
+                */
                 else
                 {
                     if (Sequence.sequenceDo(Sequence.Sequence_CloseBox))

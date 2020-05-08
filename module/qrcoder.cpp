@@ -83,8 +83,8 @@ void QRcoder::run(){
         if (mode == DECODE_MODE_PIERCE)
             nresult = pierce(sourceFrame,result);
         else if (mode == DECODE_MODE_QR)            
-            //result = QrDecode(sourceFrame);
-        nresult = pierce(sourceFrame,result);
+            result = QrDecode(sourceFrame);
+        //nresult = pierce(sourceFrame,result);
 
         if (!result.isEmpty()||++count > 3)
         {
@@ -172,7 +172,7 @@ QString QRcoder::QrDecode(Mat &image){
     }
 
     cvtColor(handleFrame, handleFrame, COLOR_RGB2GRAY);
-
+    //equalizeHist(handleFrame,handleFrame);
     bool result_detection = qrcode.detect(handleFrame,transform);
     qDebug()<<"handleFrame.type="<<handleFrame.type()<<",Frame.type="<<image.type()<<",result_detection="<<result_detection;
     //threshold(subFrame2,subFrame2,binValue,255,THRESH_BINARY);
@@ -263,7 +263,21 @@ int QRcoder::pierce(Mat &image, QString &qrStr){
     bitwise_not(handleFrame,handleFrame);
     Mat element = getStructuringElement(MORPH_ELLIPSE,Size(30,30));
     morphologyEx(handleFrame,handleFrame,MORPH_CLOSE,element);
+    bitwise_not(handleFrame,handleFrame);
+    //threshold(handleFrame,handleFrame,binValue,255,THRESH_BINARY);
+    //threshold(handleFrame,handleFrame,0,255,THRESH_OTSU);
+    //Canny(handleFrame,handleFrame,50,100);
+//Canny(handleFrame,handleFrame,50,100);
+#if 0
+    vector<vector<Point>> contours;
+    vector<Vec4i> hi;
+    findContours(handleFrame,contours,hi,RETR_LIST,CHAIN_APPROX_NONE);
+    qDebug()<<"contorus.size="<<contours.size();
+    for (size_t i = 0; i < contours.size(); i++)
+        qDebug()<<"s="<<contourArea(contours[i])<<"L="<<arcLength(contours[i],true);
+#endif
 
+#if 0
     vector<Vec2f> lines;
     HoughLines(handleFrame,lines,1,CV_PI/150,250,0,0);
     qDebug()<<"lines num="<<lines.size();
@@ -279,6 +293,8 @@ int QRcoder::pierce(Mat &image, QString &qrStr){
         pt2.y = cvRound(y0-1000*a);
         line(image,pt1,pt2,Scalar(0),3);
     }
+#endif
+
 #if 1
     vector<Vec3f> circles;
     double meanValue = 0.0;
