@@ -56,5 +56,6 @@
         <file>image/Valid4.png</file>
         <file>HomeUI/TestCancel.qml</file>
         <file>components/TestExitConfirm.qml</file>
+        <file>HomeUI/E04.qml</file>
     </qresource>
 </RCC>

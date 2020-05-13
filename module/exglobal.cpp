@@ -55,7 +55,7 @@ int ExGlobal::CamWhiteBlance = 0;
 
 int ExGlobal::PumpSoftHomeX = 0;
 int ExGlobal::PumpToolHomeX = 0;
-int ExGlobal::PumpSoftHomeOffset = 0;
+int ExGlobal::PumpSoftHomeOffset = 460;
 
 int ExGlobal::LockScreenTime = 30;
 bool ExGlobal::bChildImage = false;

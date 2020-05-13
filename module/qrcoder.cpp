@@ -83,8 +83,8 @@ void QRcoder::run(){
         if (mode == DECODE_MODE_PIERCE)
             nresult = pierce(sourceFrame,result);
         else if (mode == DECODE_MODE_QR)            
-            result = QrDecode(sourceFrame);
-        //nresult = pierce(sourceFrame,result);
+            //result = QrDecode(sourceFrame);
+        nresult = pierce(sourceFrame,result);
 
         if (!result.isEmpty()||++count > 3)
         {
@@ -260,14 +260,14 @@ int QRcoder::pierce(Mat &image, QString &qrStr){
 #endif
     qDebug()<<"pierce zbar:"<<QDateTime::currentDateTime().toString("hh:mm:ss.zzz");
     //imclose
+    //*
     bitwise_not(handleFrame,handleFrame);
     Mat element = getStructuringElement(MORPH_ELLIPSE,Size(30,30));
     morphologyEx(handleFrame,handleFrame,MORPH_CLOSE,element);
     bitwise_not(handleFrame,handleFrame);
-    //threshold(handleFrame,handleFrame,binValue,255,THRESH_BINARY);
-    //threshold(handleFrame,handleFrame,0,255,THRESH_OTSU);
-    //Canny(handleFrame,handleFrame,50,100);
-//Canny(handleFrame,handleFrame,50,100);
+    //*/
+
+    //adaptiveThreshold(handleFrame,handleFrame,255,ADAPTIVE_THRESH_GAUSSIAN_C,THRESH_BINARY,11,-2);
 #if 0
     vector<vector<Point>> contours;
     vector<Vec4i> hi;
@@ -298,7 +298,7 @@ int QRcoder::pierce(Mat &image, QString &qrStr){
 #if 1
     vector<Vec3f> circles;
     double meanValue = 0.0;
-    HoughCircles(handleFrame,circles,HOUGH_GRADIENT,1.5,50,200,50,50,200);
+    HoughCircles(handleFrame,circles,HOUGH_GRADIENT,1.5,50,100,50,50,150);
     qDebug()<<"circles num = "<<circles.size();
     for (size_t i = 0; i < circles.size(); i++){
         Point center(cvRound(circles[i][0]),cvRound(circles[i][1]));
@@ -316,14 +316,78 @@ int QRcoder::pierce(Mat &image, QString &qrStr){
     if (circles.size()==1)
     {
         result += 2;
-        if (meanValue > 1)
+        if (meanValue > 0.14)
             result += 4;
+        handleFrame = Mat(500,100,image.type(),ExGlobal::hbufrgb);
+        Point left_top(cvRound(circles[0][0]) + 490,cvRound(circles[0][1]) - 580);
+        rectangle(image,left_top,Point(left_top.x+100,left_top.y+500),Scalar(255),3);
+        cvtColor(image(Rect(left_top.x,left_top.y,100,500)), handleFrame, COLOR_RGB2GRAY);
+
+        if (haveliquids(handleFrame))
+            result += 8;
     }
-#else
-    handleImage(handleFrame);
+
 #endif
     img2 = QImage((const uchar*)handleFrame.data,handleFrame.cols,handleFrame.rows,QImage::Format_Grayscale8);
     qDebug()<<"pierce end:"<<QDateTime::currentDateTime().toString("hh:mm:ss.zzz");
+    return result;
+}
+
+bool QRcoder::haveliquids(Mat &image)
+{
+    bool result = false;
+    GaussianBlur(image, image, Size(25,25),0);
+    threshold(image,image,0,255,THRESH_BINARY|THRESH_OTSU);
+
+    vector<vector<Point>> contours;
+    vector<Vec4i> hi;
+    findContours(image,contours,hi,RETR_LIST,CHAIN_APPROX_NONE);
+    qDebug()<<"contorus.size="<<contours.size();
+    if (contours.size() < 2)
+        return result;
+
+    vector<int> maxminvalue;
+    for (size_t i = 0; i < contours.size(); i++)
+    {
+        qDebug()<<"s="<<contourArea(contours[i])<<"L="<<arcLength(contours[i],true);
+        if (contourArea(contours[i]) < 800)
+            continue;
+        int maxValue = contours[i][0].y;
+        int minValue = contours[i][0].y;
+        for (size_t j = 0; j < contours[i].size(); j++)
+        {
+            if (maxValue < contours[i][j].y)
+                maxValue = contours[i][j].y;
+            if (minValue > contours[i][j].y)
+                minValue = contours[i][j].y;
+        }
+        maxminvalue.push_back(maxValue);
+        maxminvalue.push_back(minValue);
+    }
+
+    qDebug()<<maxminvalue;
+    if (maxminvalue.size()<4)
+        return false;
+
+    for (size_t i = 0; i < maxminvalue.size()/2; i++){
+        size_t j;
+        int minDistance = 1000;
+        int minValue = maxminvalue[i*2+1];
+        for (j = 0; j < maxminvalue.size()/2; j++)
+        {
+            if (i != j)
+            {
+                int tempValue = minValue - maxminvalue[j*2];
+                if (tempValue < 0)
+                    break;
+                else if(tempValue < minDistance)
+                    minDistance = tempValue;
+            }
+        }
+        qDebug()<<"i="<<i<<"j="<<j<<"minValue="<<minDistance;
+        if (j == maxminvalue.size()/2)
+            return minDistance > 80;
+    }
     return result;
 }
 

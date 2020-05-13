@@ -346,15 +346,30 @@ void Sequence::ActionFinish(QByteArray data)
             data.remove(0,10);
             emit qrDecode(data.data());
         }
-        else if(data[7] == '\xB1'){ //刺穿识别
-            if (data[2] == '\x03')
-                emit sequenceFinish(SequenceResult::Result_Pierce_Yes);
+        else if(data[7] == '\xB1'){ //刺穿识别 1:识别出二维码;2:检查出刺穿孔;4:已刺穿;8:有试剂液体
+            if (ExGlobal::projectMode() == 0 || data[2] == '\x0B')
+                emit sequenceFinish(SequenceResult::Result_Box_Valid);
+            else {
+                if (data[2]&0x04)
+                    boxparam = 1;
+                else if((data[2]&0x08) == 0)
+                    boxparam = 2;
+                else if ((data[2]&0x02) == 0)
+                    boxparam = 3;
+                else
+                    boxparam = 4;
+                emit sequenceFinish(SequenceResult::Result_Box_Invalid);
+            }
+            /*
             else if (data[2]&0x04)
                 emit sequenceFinish(SequenceResult::Result_Pierce_Damage);
+            else if ((data[2]&0x08) == 0)
+                emit sequenceFinish(SequenceResult::Result_Pierce_Empty);
             else if ((data[2]&0x02) == 0)
                 emit sequenceFinish(SequenceResult::Result_Pierce_No);
             else
                 emit sequenceFinish(SequenceResult::Result_Pierce_Yes_NoQr);
+                */
         }
     }
 
@@ -1048,8 +1063,15 @@ bool Sequence::listNextAction(bool first){
                     //act.value = 2;
                 else
                     act.value = 5;
+                actList.append(act);
+                act.device = "Pump";
+                act.value = 3;
+                actList.append(act);
+                act.device = "Pump";
+                act.value = 9;
+                act.param1 = 25000;
             }
-            else {
+            else {                
                 act.value = 1;
                 //act.param1 = 300;
             }
@@ -1103,10 +1125,6 @@ void Sequence::qrSet(bool bopenlight, bool scale, bool handlimage, int bin, int 
 void Sequence::PierceDect(){
     actList.clear();
     action act;
-
-    act.device = "Door";
-    act.value = 5;
-    actList.append(act);
 
     act.device = "Led";
     act.value = 62;

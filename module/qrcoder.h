@@ -47,6 +47,7 @@ private:
     void handleImage(Mat &image);
     int pierce(Mat &image, QString &qrStr);
     QString QrDecode(Mat &image);
+    bool haveliquids(Mat &image);
 
 };
 

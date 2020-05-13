@@ -211,7 +211,7 @@ Item {
         anchors.top: messageTest.bottom
         anchors.topMargin: 20
         width: 440
-        height: 440
+        height: 440        
         cache: false
         source: ""
     }
@@ -223,6 +223,7 @@ Item {
         anchors.topMargin: 20
         width: 440
         height: 440
+        fillMode: Image.Pad
         cache: false
         source: ""
     }

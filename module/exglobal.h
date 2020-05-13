@@ -88,7 +88,7 @@ public:
 
     Q_INVOKABLE void qmlGlobalMessage(int code){GlobalMessage(code);}
 
-    Q_INVOKABLE static int projectMode(){return ProjectMode;} //0:正式版本；1：临时版本
+    Q_INVOKABLE static int projectMode(){return ProjectMode;} //0:临时版本；1：正式版本
     Q_INVOKABLE void panelBoxIndexAddOne();
     Q_INVOKABLE int dataEntry(){return DataEntry;}
     Q_INVOKABLE void setDataEntry(int entry){DataEntry = entry;}

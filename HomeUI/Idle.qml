@@ -6,6 +6,7 @@ import Dx.Global 1.0
 
 Page {
     property bool bDoorIsOpen: false
+    property bool bErrorOpenDoor: false
     id: idle_page
 
     Image {
@@ -28,15 +29,7 @@ Page {
                         busyDes.text = qsTr("正在开仓");
                         busyDes.visible = true;
                     }
-                }                
-                /*
-                else if (ExGlobal.projectMode() === 1 && Sequence.box == true){
-                    Sequence.sequenceDo(Sequence.Sequence_Pierce);
-                    busyIndicator.running = true;
-                    busyDes.text = qsTr("正在检测试剂盒");
-                    busyDes.visible = true;
-                }                
-                */
+                }
                 else
                 {
                     if (Sequence.sequenceDo(Sequence.Sequence_CloseBox))
@@ -204,43 +197,53 @@ Page {
         onSequenceFinish:{
             if (result == Sequence.Result_OpenBox_ok)
             {
-                bDoorIsOpen = true;
-                busyIndicator.running = false;
-                busyDes.visible = false;
-                updateState.start();
+                if (bErrorOpenDoor)
+                {
+                    mainView.pop();
+                    mainView.push("qrc:/HomeUI/E04.qml");
+                }
+                else
+                {
+                    bDoorIsOpen = true;
+                    busyIndicator.running = false;
+                    busyDes.visible = false;
+                    updateState.start();
+                }
             }            
             else if(result == Sequence.Result_CloseBox_ok)
             {
-                bDoorIsOpen = false;                
-                busyIndicator.running = false;
-                busyDes.visible = false;                
+                bDoorIsOpen = false;
                 updateState.stop();
-                if (Sequence.box)
-                {
-                    if (!Sequence.validBox())
-                        ExGlobal.panelBoxIndexAddOne();
-                    mainView.pop();
-                    mainView.push("qrc:/HomeUI/BoxReady.qml");
-                }                
+
+                if (Sequence.box){
+                    Sequence.sequenceDo(Sequence.Sequence_Pierce);
+                    busyIndicator.running = true;
+                    busyDes.text = qsTr("正在检测试剂盒");
+                    busyDes.visible = true;
+                }
+                else{
+                    busyIndicator.running = false;
+                    busyDes.visible = false;
+                }
             }
-            else if(result == Sequence.Result_Pierce_Yes)
+            else if(result == Sequence.Result_Box_Valid)
             {
-                Sequence.sequenceDo(Sequence.Sequence_CloseBox);
-                busyIndicator.running = true;
-                busyDes.text = qsTr("正在合仓");
-                busyDes.visible = true;
-                console.log("close box after Pierce Yes");
+                mainView.pop();
+                mainView.push("qrc:/HomeUI/BoxReady.qml");
             }
-            else if(result == Sequence.Result_Pierce_No || result == Sequence.Result_Pierce_Damage || result == Sequence.Result_Pierce_Yes_NoQr)
+            else if(result == Sequence.Result_Box_Invalid)
             {                
-                busyIndicator.running = false;
-                busyDes.visible = true;
+                bErrorOpenDoor = true;
+                busyDes.text = qsTr("试剂盒错误，正在开仓");
+                Sequence.sequenceDo(Sequence.Sequence_OpenBox);
+                /*
                 if (result == Sequence.Result_Pierce_No)
                     busyDes.text = qsTr("检测试剂盒失败");
                 else if (result == Sequence.Result_Pierce_Yes_NoQr)
                     busyDes.text = qsTr("二维码识别识别");
                 else if (result == Sequence.Result_Pierce_Damage)
                     busyDes.text = qsTr("试剂盒已使用");
+                    */
                 console.log("close box after Pierce No");
             }
 

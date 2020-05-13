@@ -56,11 +56,9 @@ public:
         Result_CannelLoopTest_ok,
         Result_Print_finish,
         Result_Test_DataErr,
-        Result_Test_ProcessErr,        
-        Result_Pierce_No,
-        Result_Pierce_Yes,
-        Result_Pierce_Damage,
-        Result_Pierce_Yes_NoQr,
+        Result_Test_ProcessErr,
+        Result_Box_Valid,
+        Result_Box_Invalid,
         Result_NULL
     };
     Q_ENUM(SequenceResult)
@@ -121,6 +119,8 @@ public:
 
     Q_INVOKABLE bool loopTest(QString testName, int count);
     Q_INVOKABLE bool isLoopTesting(){return currSequenceId == SequenceId::Sequence_LoopTest;}
+
+    Q_INVOKABLE int boxParam(){return boxparam;}
 
 signals:
     void sequenceFinish(SequenceResult result);
@@ -207,6 +207,7 @@ private:
 
     QString title;
     int titleparam;
+    int boxparam;
 
     int loopTestCount;
     int loopTestCurrCount;
