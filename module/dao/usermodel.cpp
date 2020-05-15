@@ -7,6 +7,7 @@ UserModel::UserModel(QObject *parent):QAbstractListModel (parent)
     roles[RolesUserid] = "Userid";
     roles[RolesName] = "Name";
     roles[RolesPassword] = "Password";
+    roles[RolesDisplayName] = "DisplayName";
     roles[RoleUserType] = "UserType";    
 }
 
@@ -53,6 +54,8 @@ QVariant UserModel::data(const QModelIndex &index, int role) const
         return user.Name;
     else if(role == RolesPassword)
         return user.Password;
+    else if(role == RolesDisplayName)
+        return user.DisplayName;
     else if(role == RoleUserType)
         return user.UserType;
 

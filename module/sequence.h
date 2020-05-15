@@ -23,7 +23,7 @@ class Sequence : public QObject
     Q_OBJECT
 public:
     explicit Sequence(QObject *parent = nullptr);
-    enum class SequenceId{
+    enum SequenceId{
         Sequence_Idle,
         Sequence_SelfCheck,
         Sequence_OpenBox,

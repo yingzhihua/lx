@@ -573,10 +573,10 @@ QByteArray ActionParser::ParamToByte(const QString &action, int value, int param
 
             if (param1 >= 0)
             {
-                data[11] = 26;
+                data[11] = 0x1a;
             }
             else {
-                data[11] = 25;
+                data[11] = 0x19;
                 param1 = -param1;
             }
             data[12] = (param1>>8)&0xFF;

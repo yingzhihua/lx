@@ -20,7 +20,7 @@ QString ExGlobal::AdminPassword = "123456";
 int ExGlobal::LanguageCode = 1;
 int ExGlobal::PanelBoxIndex = 1;
 
-QString ExGlobal::t_version = "V2.23";
+QString ExGlobal::t_version = "V2.30";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 

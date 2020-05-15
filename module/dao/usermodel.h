@@ -7,15 +7,17 @@
 class MUser{
 public:
     MUser(){}
-    MUser(int Userid_, QString Name_, QString Password_, int UserType_){
+    MUser(int Userid_, QString Name_, QString Password_, QString DisplayName_, int UserType_){
         Userid = Userid_;
         Name = Name_;
         Password = Password_;
+        DisplayName = DisplayName_;
         UserType = UserType_;
     }
     int Userid;
     QString Name;
     QString Password;
+    QString DisplayName;
     int UserType;
 };
 
@@ -27,6 +29,7 @@ public:
         RolesUserid = Qt::UserRole + 1,
         RolesName,
         RolesPassword,
+        RolesDisplayName,
         RoleUserType
     };
 public:

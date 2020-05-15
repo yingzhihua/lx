@@ -22,6 +22,7 @@ static char currOrder = 0;
 static int currCameraCaptureType = 0;
 static int currCameraCycle = 0;
 static QDateTime testStartTime;
+static QMetaEnum metaEnum = QMetaEnum::fromType<Sequence::SequenceId>();
 Sequence::Sequence(QObject *parent) : QObject(parent)
 {    
     imageAna = new ImageAnalysis();
@@ -116,12 +117,14 @@ QString Sequence::getCurrTestTime(){
 
 bool Sequence::sequenceDo(SequenceId id)
 {
+    //QMetaEnum metaEnum = QMetaEnum::fromType<SequenceId>();
     qDebug()<<"sequenceDo,currSequenceId:"<<currSequenceId<<id;
+    Log::LogWithTime(QString("sequenceDo:%1,currSequenceId:%2").arg(metaEnum.valueToKey(id)).arg(metaEnum.valueToKey(currSequenceId)));
     if (currSequenceId != SequenceId::Sequence_Idle)
     {
         this->nextSequenceId = id;
         waitCount = 0;
-        waitNextSequence->start(1000);
+        waitNextSequence->start(200);
         return false;
     }
     this->currSequenceId = id;
@@ -150,10 +153,12 @@ bool Sequence::sequenceDo(SequenceId id)
     {
         //sequenceAction = root.firstChildElement("OpenDoor");
         SwitchDoor();
+        return true;
     }
     else if(id == SequenceId::Sequence_CloseBox){
         //sequenceAction = root.firstChildElement("CloseDoor");
         SwitchDoor();
+        return true;
     }
     else if(id == SequenceId::Sequence_SelfCheck){
         sequenceAction = root.firstChildElement("SelfCheck");
@@ -189,6 +194,7 @@ bool Sequence::sequenceDo(SequenceId id)
 bool Sequence::actionDo(QString device, int value, int param1, int param2, int param3)
 {
     qDebug()<<"actionDo:"<<device<<",currSequenceId:"<<currSequenceId;
+    Log::LogWithTime(QString("actionDo,currSequenceId:%1,device:%2").arg(metaEnum.valueToKey(currSequenceId)).arg(device));
     if (currSequenceId != SequenceId::Sequence_Idle)
         return false;
     currSequenceId = SequenceId::Sequence_SimpleAction;
@@ -231,10 +237,10 @@ void Sequence::WaitSequenceTimeout()
 {
     qDebug()<<"WaitSequenceTimeout,count:"<<waitCount;
     waitCount++;
-    if (waitCount < 10)
+    if (waitCount < 50)
     {
         if (currSequenceId != SequenceId::Sequence_Idle)
-            waitNextSequence->start(1000);
+            waitNextSequence->start(200);
         else
             sequenceDo(nextSequenceId);
     }
@@ -1127,14 +1133,14 @@ void Sequence::PierceDect(){
     action act;
 
     act.device = "Led";
-    act.value = 62;
+    act.value = 0x3e;
     actList.append(act);
 
     act.device = "Pierce";
     actList.append(act);
 
     act.device = "Led";
-    act.value = 63;
+    act.value = 0x3f;
     actList.append(act);
 
     listNextAction(true);

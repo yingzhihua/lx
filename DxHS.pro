@@ -131,4 +131,7 @@ LIBS += /opt/DVPCameraL/libdvp.so
 
 INCLUDEPATH += /opt/CKCameraL/include
 LIBS += /opt/CKCameraL/libCKCameraSDK_x64.so
+
+INCLUDEPATH += /opt/KPOSL/include_zh
+LIBS += /opt/KPOSL/libCsnPrinterLibs.so
 }

@@ -48,7 +48,7 @@ private:
     int pierce(Mat &image, QString &qrStr);
     QString QrDecode(Mat &image);
     bool haveliquids(Mat &image);
-
+    bool havehole(Mat &image);
 };
 
 #endif // QRCODER_H

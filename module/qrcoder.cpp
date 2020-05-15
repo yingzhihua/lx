@@ -77,9 +77,6 @@ void QRcoder::run(){
         cvtColor(Frame, sourceFrame, COLOR_BGR2RGB);
         img = QImage((const uchar*)sourceFrame.data,sourceFrame.cols,sourceFrame.rows,QImage::Format_RGB888);
 
-        //Mat handleFrame = Mat(Frame.rows,Frame.cols,Frame.type(),ExGlobal::hbufrgb);
-        //cvtColor(sourceFrame, handleFrame, COLOR_RGB2GRAY);
-
         if (mode == DECODE_MODE_PIERCE)
             nresult = pierce(sourceFrame,result);
         else if (mode == DECODE_MODE_QR)            
@@ -231,12 +228,11 @@ QString QRcoder::QrDecode(Mat &image){
 
 
 int QRcoder::pierce(Mat &image, QString &qrStr){
-    int result = 0;
-    //result = "lengxing";
-
+    int result = 0;    
     Mat handleFrame = Mat(image.rows,image.cols,image.type(),ExGlobal::hbufrgb);
     cvtColor(image, handleFrame, COLOR_RGB2GRAY);
     qDebug()<<"pierce start:"<<QDateTime::currentDateTime().toString("hh:mm:ss.zzz");
+
 #if defined(USE_ZBAR)
     zbar::ImageScanner scanner;
     scanner.set_config(zbar::ZBAR_NONE,zbar::ZBAR_CFG_ENABLE,1);
@@ -246,11 +242,13 @@ int QRcoder::pierce(Mat &image, QString &qrStr){
     zbar::Image::SymbolIterator symbol = imageZbar.symbol_begin();
     if (imageZbar.symbol_begin()==imageZbar.symbol_end()){
         qDebug()<<"zbar scan fail";
+        Log::LogCam("zbar scan fail");
     }
     else {
         qrStr = QString::fromStdString(imageZbar.symbol_begin()->get_data());
         result = 1;
         qDebug()<<"decode_info:"<<qrStr;
+        Log::LogCam("decode_info:"+qrStr);
     }
     /*
     for(;symbol != imageZbar.symbol_end(); ++symbol){
@@ -298,37 +296,52 @@ int QRcoder::pierce(Mat &image, QString &qrStr){
 #if 1
     vector<Vec3f> circles;
     double meanValue = 0.0;
-    HoughCircles(handleFrame,circles,HOUGH_GRADIENT,1.5,50,100,50,50,150);
+    //HoughCircles(handleFrame,circles,HOUGH_GRADIENT,1.5,50,100,40,50,150);
+    HoughCircles(handleFrame,circles,HOUGH_GRADIENT,1.5,50,150,50,50,150);
     qDebug()<<"circles num = "<<circles.size();
+    Log::LogCam(QString("circles num=%1").arg(circles.size()));
     for (size_t i = 0; i < circles.size(); i++){
         Point center(cvRound(circles[i][0]),cvRound(circles[i][1]));
         int radius = cvRound(circles[i][2]);
         int length = cvRound(circles[i][2]/1.5f);
+        if (length%2) length--;
         circle(image, center,radius-10,Scalar(0),3);
         rectangle(image,Point(center.x-length,center.y-length),Point(center.x+length,center.y+length),Scalar(0),3);
-        Mat imageSobel;
+        Mat imageSobel;        
         Sobel(handleFrame(Rect(center.x-length,center.y-length,length*2,length*2)),imageSobel,CV_8U,1,1);
         meanValue = mean(imageSobel)[0];
-
         qDebug()<<"x="<<center.x<<",y="<<center.y<<",r="<<radius<<",meanValue="<<meanValue;
     }
 
     if (circles.size()==1)
     {
         result += 2;
-        if (meanValue > 0.14)
+        //if (meanValue > 0.14)
+        //    result += 4;
+
+        Point center(cvRound(circles[0][0]),cvRound(circles[0][1]));
+
+        int length = cvRound(circles[0][2]/1.6f);
+        if (length%2) length--;
+        handleFrame = Mat(length*2,length*2,image.type(),ExGlobal::hbufrgb);
+        cvtColor(image(Rect(center.x-length,center.y-length,length*2,length*2)), handleFrame, COLOR_RGB2GRAY);
+        if (havehole(handleFrame))
             result += 4;
+
+        //*
         handleFrame = Mat(500,100,image.type(),ExGlobal::hbufrgb);
-        Point left_top(cvRound(circles[0][0]) + 490,cvRound(circles[0][1]) - 580);
+        Point left_top(center.x + 490,center.y - 580);
         rectangle(image,left_top,Point(left_top.x+100,left_top.y+500),Scalar(255),3);
         cvtColor(image(Rect(left_top.x,left_top.y,100,500)), handleFrame, COLOR_RGB2GRAY);
 
         if (haveliquids(handleFrame))
             result += 8;
+            //*/
     }
 
 #endif
     img2 = QImage((const uchar*)handleFrame.data,handleFrame.cols,handleFrame.rows,QImage::Format_Grayscale8);
+
     qDebug()<<"pierce end:"<<QDateTime::currentDateTime().toString("hh:mm:ss.zzz");
     return result;
 }
@@ -384,10 +397,46 @@ bool QRcoder::haveliquids(Mat &image)
                     minDistance = tempValue;
             }
         }
-        qDebug()<<"i="<<i<<"j="<<j<<"minValue="<<minDistance;
+        qDebug()<<"i="<<i<<"j="<<j<<"minValue="<<minDistance;        
         if (j == maxminvalue.size()/2)
+        {
+            Log::LogCam(QString("minDistance:%1,ref:>80").arg(minDistance));
             return minDistance > 80;
+        }
     }
+    return result;
+}
+
+bool QRcoder::havehole(Mat &image){
+    bool result = false;
+    //image = image*3;
+    //GaussianBlur(image, image, Size(25,25),0);
+
+    //normalize(image,image,0,255,NORM_MINMAX);
+    //threshold(image,image,150,255,THRESH_BINARY);
+
+    Mat imageSobel;
+    double meanValue = 0.0;
+
+    Sobel(image,imageSobel,CV_8U,1,1);
+    meanValue = mean(imageSobel)[0];
+    qDebug()<<"meanValue="<<meanValue;
+    Log::LogCam(QString("meanValue:%1,ref:<0.90").arg(meanValue));
+    if (meanValue > 0.90)
+        result = true;
+/*
+    vector<vector<Point>> contours;
+    vector<Vec4i> hi;
+    findContours(image,contours,hi,RETR_LIST,CHAIN_APPROX_NONE);
+    qDebug()<<"contorus.size="<<contours.size();
+    if (contours.size() < 2)
+        return result;
+
+    for (size_t i = 0; i < contours.size(); i++)
+    {
+        qDebug()<<"s="<<contourArea(contours[i])<<"L="<<arcLength(contours[i],true);
+    }
+    */
     return result;
 }
 

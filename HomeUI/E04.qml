@@ -47,6 +47,14 @@ Page {
     }
 
     Component.onCompleted: {
+        if (Sequence.boxParam() === 1)
+            errorDesp.text = qsTr("试剂盒已使用");
+        else if (Sequence.boxParam() === 3)
+            errorDesp.text = qsTr("试剂盒不能识别");
+        else if (Sequence.boxParam() === 4)
+            errorDesp.text = qsTr("试剂盒未检测到二维码");
+        else if (Sequence.boxParam() === 2)
+            errorDesp.text = qsTr("空试剂盒");
         updateState.start()
     }
 }

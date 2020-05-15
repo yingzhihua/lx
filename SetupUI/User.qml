@@ -6,7 +6,7 @@ import "../components"
 Rectangle {
     id: user_page
 
-    property int widthx: 400
+    property int widthx: 500
     property int itemheight: 60
 
     Component{
@@ -32,6 +32,7 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 //Text{width:100;text:Userid}
                 Text{text:Name}
+                Text{text:DisplayName}
             }
             states: State {
                 name: "Current"
@@ -83,9 +84,9 @@ Rectangle {
     Text{
         id:labelName
         anchors.left: listView.right
-        anchors.leftMargin: 450
+        anchors.leftMargin: 300
         anchors.top: parent.top
-        anchors.topMargin: 300
+        anchors.topMargin: 200
         width: 80
         height: 30
         text: qsTr("用户名：")
@@ -109,11 +110,49 @@ Rectangle {
         }
     }
 
+    CheckBox{
+        id: auditor
+        anchors.left: inputName.right
+        anchors.leftMargin: 60
+        anchors.verticalCenter: inputName.verticalCenter
+        font.pixelSize: 40
+        text: qsTr("审核权限")
+    }
+
     Text{
-        id:labelPassword
+        id:labelDisplayName
         anchors.right: labelName.right
         anchors.rightMargin: 0
         anchors.top: labelName.bottom
+        anchors.topMargin: 60
+        width: 80
+        height: 30
+        text: qsTr("显示名：")
+        horizontalAlignment: Text.AlignRight
+        verticalAlignment: Text.AlignVCenter
+        font.pixelSize: 40
+    }
+
+    TextField{
+        id:inputDisplayName
+        anchors.verticalCenter: labelDisplayName.verticalCenter
+        anchors.left: labelDisplayName.right
+        anchors.leftMargin: 50
+        width:300
+        height: 60
+        verticalAlignment: Text.AlignBottom
+        font.pixelSize: 40
+        background: Rectangle{
+            border.color: "darkgray"
+            radius: 5
+        }
+    }
+
+    Text{
+        id:labelPassword
+        anchors.right: labelDisplayName.right
+        anchors.rightMargin: 0
+        anchors.top: labelDisplayName.bottom
         anchors.topMargin: 60
         width: 80
         height: 30
