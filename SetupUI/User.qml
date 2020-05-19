@@ -29,9 +29,9 @@ Rectangle {
             width: widthx
             height: itemheight
             Row{
-                anchors.verticalCenter: parent.verticalCenter
+                anchors.verticalCenter: parent.verticalCenter                
                 //Text{width:100;text:Userid}
-                Text{text:Name}
+                Text{horizontalAlignment: Text.AlignHCenter;width:200;text:Name}
                 Text{text:DisplayName}
             }
             states: State {
@@ -49,6 +49,8 @@ Rectangle {
                 onClicked: {
                    delegateitem.ListView.view.currentIndex = index
                    inputName.text = userModel.data(userModel.index(index,0),258)
+                   inputDisplayName.text = userModel.data(userModel.index(index,0),260)
+                   auditor.checked = userModel.data(userModel.index(index,0),261)&2;
                 }
             }
         }
@@ -201,7 +203,7 @@ Rectangle {
         }
 
         onClicked: {
-            userModel.addUser(inputName.text,inputPassword.text)
+            userModel.addUser(inputName.text,inputPassword.text,inputDisplayName.text,auditor.checked?3:1);
         }
     }
 

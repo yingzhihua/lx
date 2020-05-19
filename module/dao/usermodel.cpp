@@ -27,7 +27,8 @@ void UserModel::LoadUser(){
         user.Userid = query.value(0).toInt();
         user.Name = query.value(1).toString();
         user.Password = query.value(2).toString();
-        user.UserType = query.value(3).toInt();
+        user.DisplayName = query.value(3).toString();
+        user.UserType = query.value(4).toInt();
         if (!Exist(user.Userid))
             m_display_list<<user;
         qDebug()<<"load user:"<<user.Name<<","<<user.Password<<","<<user.UserType;
@@ -67,8 +68,10 @@ QHash<int, QByteArray> UserModel::roleNames() const
     return roles;
 }
 
-bool UserModel::addUser(QString name, QString password){
-    QString sql = "INSERT INTO User (Name, Password, UserType) VALUES ('"+name+"', '"+ password+"', 1)";
+bool UserModel::addUser(QString name, QString password, QString displayName, int type){
+    //QString sql = "INSERT INTO User (Name, Password, UserType) VALUES ('"+name+"', '"+ password+"', 1)";
+    QString sql = QString("INSERT INTO User (Name, Password, DisplayName, UserType) VALUES ('%1', '%2', '%3', %4)").arg(name).arg(password).arg(displayName).arg(type);
+    qDebug()<<"addUser:"<<sql;
     bool result = SqliteMgr::sqlitemgrinstance->execute(sql);
 
     if (result){
@@ -95,16 +98,27 @@ bool UserModel::login(QString name, QString password){
     QString sql = "SELECT * FROM User WHERE Name = '"+name+"' COLLATE NOCASE AND Password = '"+password+"'";
     QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(sql);
     qDebug()<<"login:"<<sql;
+
+    ExGlobal::User = name;
     while(query.next())
-    {
+    {        
+        ExGlobal::UserType = query.value(4).toInt();
         return true;
     }
 
     if (name.toLower() == "admin" && password == ExGlobal::AdminPassword)
+    {
+        ExGlobal::UserType = 3;
         return true;
+    }
 
     if (ExGlobal::projectMode() == 0)
+    {
+        if (name.length() == 0)
+            ExGlobal::User = "user";
+        ExGlobal::UserType = 1;
         return true;
+    }
 
     return false;
 }

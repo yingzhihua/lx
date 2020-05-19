@@ -134,6 +134,21 @@ Page {
         }
     }
 
+    Button {
+        id: btCheck
+        font.pixelSize: 30
+        width: 200
+        text: qsTr("审核")
+        anchors.bottom: btCannel.top
+        anchors.bottomMargin: 50
+        anchors.right: parent.right
+        anchors.rightMargin: 20
+        onClicked: {
+            testModel.checkTest();
+            mainView.pop();
+        }
+    }
+
     BusyIndicator{
         id:busyIndicator
         anchors.centerIn: parent
@@ -145,6 +160,10 @@ Page {
 
     Component.onCompleted: {
         itemList = ExGlobal.getBoxItemList();
+        if (testModel.mayCheck())
+            btCheck.visible = true;
+        else
+            btCheck.visible = false;
         console.debug(itemList)
     }
 

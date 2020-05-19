@@ -19,9 +19,10 @@ Rectangle {
                 Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:200;text:PanelCode}
                 Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:200;text:SerialNo}
                 Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:200;text:SampleId}
-                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:600;text:SampleInfo}
-                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:400;text:TestTime}
-                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:200;text:User}                
+                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:500;text:SampleInfo}
+                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:300;text:TestTime}
+                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:200;text:User}
+                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:200;text:Checker}
             }
             MouseArea{
                 anchors.fill: parent

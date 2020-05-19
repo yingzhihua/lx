@@ -6,13 +6,14 @@
 class Test{
 public:
     Test(){}
-    Test(int Testid_, QString PanelCode_, QString SerialNo_, QString TestTime_, QString SampleInfo_, QString User_, int ResultType_){
+    Test(int Testid_, QString PanelCode_, QString SerialNo_, QString TestTime_, QString SampleInfo_, QString User_, QString Checker_, int ResultType_){
         Testid = Testid_;
         PanelCode = PanelCode_;
         SerialNo = SerialNo_;
         TestTime = TestTime_;
         SampleInfo = SampleInfo_;
         User = User_;
+        Checker = Checker_;
         ResultType = ResultType_;
     }
     int Testid;
@@ -22,6 +23,7 @@ public:
     QString SampleInfo;
     QString SampleId;
     QString User;
+    QString Checker;
     int ResultType;
 };
 
@@ -37,6 +39,7 @@ public:
         RoleSampleInfo,
         RoleSampleId,
         RoleUser,
+        RoleChecker,
         RoleResultType
     };
 public:
@@ -50,7 +53,10 @@ public:
     QString getCurrTestSerial(){return m_display_list[currTestIndex].SerialNo;}
     QString getCurrTestInfo(){return m_display_list[currTestIndex].SampleInfo;}
     QString getCurrTestUser(){return m_display_list[currTestIndex].User;}
+    QString getCurrTestChecker(){return m_display_list[currTestIndex].Checker;}
     Q_INVOKABLE void setCurrTest(int TestIndex);
+    Q_INVOKABLE bool mayCheck();
+    Q_INVOKABLE void checkTest();
 
 protected:
     QHash<int, QByteArray> roleNames() const;

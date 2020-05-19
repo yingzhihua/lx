@@ -149,6 +149,7 @@ public:
 
     static QString AdminPassword;
     static QString User;
+    static int UserType;
     static bool bChildImage;
     static int AutoFocus;
     static int QrCode;

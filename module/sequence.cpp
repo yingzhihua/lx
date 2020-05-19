@@ -237,10 +237,10 @@ void Sequence::WaitSequenceTimeout()
 {
     qDebug()<<"WaitSequenceTimeout,count:"<<waitCount;
     waitCount++;
-    if (waitCount < 50)
+    if (waitCount < 30)
     {
         if (currSequenceId != SequenceId::Sequence_Idle)
-            waitNextSequence->start(200);
+            waitNextSequence->start(400);
         else
             sequenceDo(nextSequenceId);
     }
@@ -1027,12 +1027,15 @@ void test(const char *str){
     qDebug()<<QString::number(str[0],16)<<QString::number(str[1],16)<<QString::number(str[2],16)<<QString::number(str[3],16)<<QString::number(str[4],16)<<QString::number(str[5],16);
 }
 
+static int tempInt = 0;
 void Sequence::lxDebug(){
-    qDebug()<<"lxDebug";
-    test("上呼吸");
-    QByteArray ba = ExGlobal::panelName().toLatin1();
-    test(ba.data());
-    test(ExGlobal::panelName().toStdString().c_str());
+    qDebug()<<"lxDebug";    
+    tempInt++;
+    if (tempInt > 69 || tempInt < 64)
+        tempInt = 64;
+
+    //serialMgr->serialWrite(ActionParser::ParamToByte("Led",tempInt,0,0,0));
+    serialMgr->serialWrite(ActionParser::ParamToByte("Door",2,0,0,0));
     return;
     serialMgr->serialWrite(ActionParser::ParamToByte("Light",4,0,0,0));
     cvcap->setCurrCamera(0);
@@ -1064,18 +1067,21 @@ bool Sequence::listNextAction(bool first){
             act.device = "Door";
             if (bDoorState)
             {
-                if (bBoxState)
-                    act.value = 5;
-                    //act.value = 2;
-                else
-                    act.value = 5;
-                actList.append(act);
-                act.device = "Pump";
-                act.value = 3;
-                actList.append(act);
                 act.device = "Pump";
                 act.value = 9;
                 act.param1 = 25000;
+                actList.append(act);
+
+                act.device = "Door";
+                act.value = 5;
+                actList.append(act);
+
+                act.device = "Pump";
+                act.value = 3;
+                actList.append(act);
+
+                act.device = "Pump";
+                act.value = 1;
             }
             else {                
                 act.value = 1;
@@ -1185,6 +1191,7 @@ bool Sequence::printTest(){
     printer->sampCode = ExGlobal::pTestModel->getCurrTestCode();
     printer->sampInfo = ExGlobal::pTestModel->getCurrTestInfo();
     printer->user = ExGlobal::pTestModel->getCurrTestUser();
+    printer->checker = ExGlobal::pTestModel->getCurrTestChecker();
     printer->itemMap.clear();
     QList<int> item = ExGlobal::getBoxItemList();
     int testID = ExGlobal::pTestResultModel->getTestid();

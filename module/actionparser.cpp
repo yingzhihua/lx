@@ -97,7 +97,7 @@ QByteArray ActionParser::DrvParamToByte(const QString &action, int value, int pa
         data[10] = 0x01;
         FormatBytes(0x01,data);
     }
-    else if(action == "Led"){
+    else if(action == "Led"){   //data[11] = 62;open sample led, 63:close sample led, 64:open green led, 65:close green led,66-67:red led,68-69:blue led
         data.resize(13);
         data[6] = 0x00;
         data[7] = 0x70;
@@ -106,7 +106,7 @@ QByteArray ActionParser::DrvParamToByte(const QString &action, int value, int pa
         data[10] = 0x01;    //保留
         data[11] = value&0xFF;
         FormatBytes(0x01,data);
-    }
+    }    
     else if(action == "Fan"){
         data[6] = 0x00;
         if (value == 1){    //query fan's speed
@@ -181,7 +181,7 @@ QByteArray ActionParser::ParamToByte(const QString &action, int value, int param
             data[14] = (pumpSoftHomeX>>8)&0xFF;
             data[15] = pumpSoftHomeX&0xFF;
         }
-        else if(value == 3){
+        else if(value == 3 || value == 6){
             data.resize(17);
             data[6] = 0x00;
             data[7] = 0x70;
@@ -189,12 +189,14 @@ QByteArray ActionParser::ParamToByte(const QString &action, int value, int param
             data[9] = 0x06;
             data[10] = 0x01;    //保留            
             data[11] = 0x48;
+            if (value == 6)
+                param1 = ExGlobal::VDWorkX;
             data[12] = (param1>>8)&0xFF;    //时序参数
             data[13] = param1&0xFF;
             data[14] = (param2>>8)&0xFF;
             data[15] = (param2)&0xFF;
         }
-        else if(value == 4){
+        else if(value == 4 || value == 7){
             data.resize(17);
             data[6] = 0x00;
             data[7] = 0x70;
@@ -203,6 +205,8 @@ QByteArray ActionParser::ParamToByte(const QString &action, int value, int param
             data[10] = 0x01;    //保留
             data[9] = 0x06;
             data[11] = 0x49;
+            if (value == 7)
+                param1 = ExGlobal::VDWorkX;
             data[12] = (param1>>8)&0xFF;    //时序参数
             data[13] = param1&0xFF;
             data[14] = (param2>>8)&0xFF;

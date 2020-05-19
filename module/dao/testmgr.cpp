@@ -70,3 +70,12 @@ int TestMgr::TestClose(int type){
     }
     return result;
 }
+
+void TestMgr::CheckTest(int testid){
+    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(QString("select * from PanelTest where Testid=%1").arg(testid));
+    if (query.next())
+    {
+        QString sql = QString("update PanelTest set Checker='%1' where Testid=%2").arg(ExGlobal::User).arg(testid);
+        SqliteMgr::sqlitemgrinstance->execute(sql);
+    }
+}

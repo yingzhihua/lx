@@ -1,10 +1,12 @@
 #include "testmodel.h"
 #include "../exglobal.h"
+#include "../sqlitemgr.h"
 #include<QDebug>
 TestModel::TestModel(QObject *parent):QAbstractListModel (parent)
 {
     roles[RolesTestid] = "Testid";
     roles[RoleUser] = "User";
+    roles[RoleChecker] = "Checker";
     roles[RoleTestTime] = "TestTime";
     roles[RolesSerialNo] = "SerialNo";
     roles[RoleResultType] = "ResultType";
@@ -30,6 +32,8 @@ QVariant TestModel::data(const QModelIndex &index, int role) const
         return test.Testid;
     else if(role == RoleUser)
         return test.User;
+    else if(role == RoleChecker)
+        return test.Checker;
     else if(role == RoleTestTime)
         return test.TestTime;
     else if(role == RolesSerialNo)
@@ -72,4 +76,22 @@ void TestModel::setCurrTest(int TestIndex){
     ExGlobal::setBoxSerial(m_display_list[TestIndex].SerialNo);
     ExGlobal::pTestResultModel->setTestid(currTestid);
     qDebug()<<"setCurrTest:"<<currTestid;
+}
+
+bool TestModel::mayCheck(){
+    qDebug()<<"mayCheck,"<<ExGlobal::UserType<<"Checker:"<<m_display_list[currTestIndex].Checker;
+    if ((ExGlobal::UserType & 0x2) && m_display_list[currTestIndex].Checker.length() == 0)
+        return true;
+    return false;
+}
+
+void TestModel::checkTest(){
+    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(QString("select * from PanelTest where Testid=%1").arg(currTestid));
+    if (query.next())
+    {
+        QString sql = QString("update PanelTest set Checker='%1' where Testid=%2").arg(ExGlobal::User).arg(currTestid);
+        SqliteMgr::sqlitemgrinstance->execute(sql);
+        m_display_list[currTestIndex].Checker = ExGlobal::User;
+    }
+    emit dataChanged(createIndex(currTestIndex,0),createIndex(currTestIndex,0));
 }

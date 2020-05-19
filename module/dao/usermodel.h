@@ -37,7 +37,7 @@ public:
     int rowCount(const QModelIndex & parent = QModelIndex()) const;
     QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;    
     void LoadUser();
-    Q_INVOKABLE bool addUser(QString name,QString password);
+    Q_INVOKABLE bool addUser(QString name,QString password, QString displayName, int type);
     Q_INVOKABLE bool deleteUser(int row);
     Q_INVOKABLE bool login(QString name,QString password);
     Q_INVOKABLE bool updatePassword(QString oldpassword,QString newpassword);

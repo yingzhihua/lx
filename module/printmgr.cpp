@@ -215,6 +215,8 @@ bool printmgr::printPTP(){
         Pos_FeedLine();
         printStr = QString("检验者： ")+user+"\n";
         Pos_Text(printStr.toStdString().c_str(),0,-1,0,0,0,0);
+        printStr = QString("审核者： ")+checker+"\n";
+        Pos_Text(printStr.toStdString().c_str(),0,-1,0,0,0,0);
         printStr = QString("检测日期： ")+testTime+"\n";
         Pos_Text(printStr.toStdString().c_str(),0,-1,0,0,0,0);
         printStr = QString("报告日期： ")+QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")+"\n";

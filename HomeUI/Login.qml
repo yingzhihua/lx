@@ -136,10 +136,6 @@ Page {
         console.log("login_name:",ExGlobal.adminPassword)
         if (userModel.login(login_name.text,login_password.text))
         {
-            if (login_name.text.length == 0)
-                ExGlobal.user = "user001";
-            else
-                ExGlobal.user = login_name.text;
             console.log("login:",login_name.text,ExGlobal.user);
             mainView.pop();
             mainView.push("qrc:/HomeUI/Idle.qml");

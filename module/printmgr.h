@@ -11,6 +11,7 @@ public:
     QMap<QString,int> itemMap;
     QString testTime;
     QString user;
+    QString checker;
     QString sampInfo;
     QString sampCode;
 

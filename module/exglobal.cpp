@@ -12,6 +12,7 @@ QString ExGlobal::t_sampleCode = "SLX 01079";
 QString ExGlobal::t_sampleInfo = "华山11";
 QString ExGlobal::t_BoxSerial = "Lot# 000001";
 QString ExGlobal::User = "NotLoggedIn";
+int ExGlobal::UserType = 0;
 QString ExGlobal::t_ReagentBox = "203";
 bool ExGlobal::test = false;
 
@@ -556,7 +557,8 @@ void ExGlobal::addTest(){
         test.SampleInfo = query.value(5).toString();
         test.SampleId = query.value(6).toString();
         test.User = query.value(7).toString();
-        test.ResultType = query.value(8).toInt();
+        test.Checker = query.value(8).toString();
+        test.ResultType = query.value(9).toInt();
         if (!pTestModel->ExistTest(test.Testid))
             pTestModel->AddTest(test);
     }
