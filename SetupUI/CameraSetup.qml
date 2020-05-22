@@ -104,7 +104,10 @@ Page {
         anchors.verticalCenter: startView.verticalCenter
         text: qsTr("自动对焦")
         font.pixelSize: 30
-        onClicked: Sequence.autoFocus()
+        onClicked: {
+            bView = true
+            Sequence.autoFocus()
+        }
     }
 
     Text {

@@ -26,13 +26,15 @@ class ImageCapture : public QThread
 public:
     enum class CaptureMode{
         Idle,
+        Open,
         View,
         Capture
     };
     Q_ENUM(CaptureMode)
     explicit ImageCapture(QObject *parent = nullptr);
-    int start_capturing(CaptureMode mode);
-    int stop_capturing();
+    int openCamera();
+    int closeCamera();
+    int stopCamera();
     void setFileName(QString fileName){filename = fileName;}
     void setImageCount(int nCount){count = nCount;}    
     int getabsExpose();
@@ -46,6 +48,7 @@ public:
     double getDefinition();
     double getDefinition2();
     int imagetype;
+    CaptureMode captureMode;
 
 protected:
     void run();
@@ -75,8 +78,7 @@ private:
     unsigned char *bufy;
     unsigned short *buf2y;
     unsigned int *sum;
-    QString filename;
-    CaptureMode captureMode;    
+    QString filename;    
     bool stopping;
     int internal_stop_capturing();
     void recordParam();

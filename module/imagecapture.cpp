@@ -740,7 +740,7 @@ int ImageCapture::uninit_device(){
     return 0;
 }
 
-int ImageCapture::start_capturing(CaptureMode mode)
+int ImageCapture::openCamera()
 {
     qDebug()<<"start_capturing,camerainited:"<<camerainited<<"captureMode:"<<captureMode;
     Log::LogCam(QString("start_capturing,camerainited:%1").arg(camerainited));
@@ -759,8 +759,9 @@ int ImageCapture::start_capturing(CaptureMode mode)
             return -1;
     }
 
-    captureMode = mode;
+    captureMode = CaptureMode::Open;
     stopping = false;
+
     if (io == IO_METHOD_MMAP)
     {
         enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -789,21 +790,26 @@ int ImageCapture::start_capturing(CaptureMode mode)
     return 0;
 }
 
-int ImageCapture::stop_capturing()
-{
-    qDebug()<<"stop_capturing,captureMode:"<<captureMode<<",this.Running="<<this->isRunning();
-    if (captureMode == CaptureMode::Idle)
+int ImageCapture::stopCamera(){
+    if (captureMode == CaptureMode::Idle || captureMode == CaptureMode::Open)
         return 0;
-
     while (this->isRunning())
     {
         stopping = true;
-        qDebug()<<"stop capturing:isRunning...";
+        qDebug()<<"stopCamera:isRunning...";
         QThread::msleep(100);
     }
+    captureMode = CaptureMode::Open;
+    return 0;
+}
+int ImageCapture::closeCamera()
+{
+    qDebug()<<"closeCamera,captureMode:"<<captureMode;
+    if (captureMode == CaptureMode::Idle)
+        return 0;
 
+    stopCamera();
     internal_stop_capturing();
-
     return 0;
 }
 

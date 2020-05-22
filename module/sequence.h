@@ -194,6 +194,7 @@ private:
     void SwitchDoor();
     bool bQrOpenLight = true;
     bool bAutoFocus = false;
+    bool bFocused = false;
 
     int t_fan1Speed;
     int t_fan2Speed;
@@ -213,6 +214,8 @@ private:
     int loopTestCurrCount;
     QString loopTestName;
     bool continueLoopTest();
+
+    bool dirctAction(QString device, int value, int param1, int param2, int param3);
 };
 
 static Sequence *sequence;
