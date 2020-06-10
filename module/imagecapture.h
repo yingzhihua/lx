@@ -32,11 +32,12 @@ public:
     };
     Q_ENUM(CaptureMode)
     explicit ImageCapture(QObject *parent = nullptr);
+    static bool readCamera();
     int openCamera();
     int closeCamera();
     int stopCamera();
-    void setFileName(QString fileName){filename = fileName;}
-    void setImageCount(int nCount){count = nCount;}    
+    bool capture(QString fileName, int nCount);
+    bool preview();
     int getabsExpose();
     bool setabsExpose(int value);
     int getGain();
@@ -66,11 +67,10 @@ private:
     int uninit_device();    
     int read_frame(int index);
     int clear_frame();
-    int process_image(int index, const void *p, int size);
+    int process_image(int index, const void *p, int size);    
     io_method io;    
     CAMERA_TYPE cameraType;
 
-    int fd;
     int count;
     buffer *buffers;
     unsigned int n_buffers;
@@ -81,7 +81,7 @@ private:
     QString filename;    
     bool stopping;
     int internal_stop_capturing();
-    void recordParam();
+    void recordParam();    
 #if 1
     int dvp_open_device();
     int dvp_close_device();

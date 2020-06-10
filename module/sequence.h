@@ -6,7 +6,6 @@
 #include <QtCore>
 #include <QtXml>
 #include "serialmgr.h"
-#include "imagecapture.h"
 #include "imageprovider.h"
 #include "imageanalysis.h"
 #include "entity.h"
@@ -16,7 +15,7 @@
 #include "log.h"
 #include "dao/testmgr.h"
 #include "cvcapture.h"
-#include "cameraplayer.h"
+#include "tcamera.h"
 
 class Sequence : public QObject
 {
@@ -102,8 +101,8 @@ public:
     Q_INVOKABLE void showAnaImg(int type,int light);
     Q_INVOKABLE void qrSet(bool bopenlight, bool scale, bool handlimage, int bin,int pox);
 
-    Q_INVOKABLE double getDefinition(){return imageCapture->getDefinition();}
-    Q_INVOKABLE double getDefinition2(){return imageCapture->getDefinition2();}
+    Q_INVOKABLE double getDefinition(){return camera->getDefinition();}
+    Q_INVOKABLE double getDefinition2(){return camera->getDefinition2();}
     Q_INVOKABLE bool validBox(){return bValidBox;}
 
     Q_PROPERTY(int fan1Speed READ fan1Speed NOTIFY fan1SpeedChanged)
@@ -169,11 +168,13 @@ private:
     int waitCount;
     QString message;
     SerialMgr *serialMgr;
-    ImageCapture *imageCapture;
+
     cvCapture *cvcap;
     TestMgr *testMgr;
     printmgr *printer;
-    CameraPlayer *camera;
+
+    //ImageCapture *imageCapture;
+    TCamera *camera;
 
     bool bFinishAction;
     TimeState durationState;

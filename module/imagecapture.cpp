@@ -16,6 +16,7 @@
 #include <QImage>
 #include <QDir>
 #include <QMutex>
+#include <QTime>
 
 #include <linux/videodev2.h>
 #include "log.h"
@@ -24,7 +25,7 @@
 
 #define CLEAR(x) memset (&(x),0,sizeof(x))
 #define CAPTURE_COUNT 1
-#define device_name "/dev/video0"
+#define device_name "/dev/video1"
 
 #define begin_inited false
 #define FRAME_TOTALNUM 2
@@ -32,6 +33,10 @@
 static bool camerainited = false;
 static QByteArray resultData;
 static QMutex qmutex;
+static int fd = -1;
+
+static char device_file[20];
+
 static int xioctl(int fd, unsigned long request, void * arg){
     int r;
     do{
@@ -168,24 +173,14 @@ ImageCapture::ImageCapture(QObject *parent) : QThread(parent),io(IO_METHOD_MMAP)
     buf2y = (unsigned short *)malloc(2592 * 1944 * 2);
     sum = (unsigned int *)malloc(2592 * 1944 * 8);
 
-    if (cameraType == CAMERA_DVP){
-        if (dvp_open_device() == 0 && dvp_init_device() == 0)
-            camerainited = true;
-    }
-    else{
-        if (open_device() == 0 && init_device() == 0)
-            camerainited = true;
-    }
 
-    if (begin_inited == false && camerainited == true){
-        if (cameraType == CAMERA_DVP){
-            dvp_uninit_device();
-            dvp_close_device();
-        }
-        else{
-            uninit_device();
-            close_device();
-        }
+    if (open_device() == 0 && init_device() == 0)
+        camerainited = true;
+
+
+    if (begin_inited == false && camerainited == true){        
+        uninit_device();
+        close_device();
         camerainited = false;
     }
 
@@ -193,11 +188,54 @@ ImageCapture::ImageCapture(QObject *parent) : QThread(parent),io(IO_METHOD_MMAP)
     imagetype = 0;
 }
 
+bool ImageCapture::readCamera(){
+    struct stat st;
+    struct v4l2_cropcap cropcap;
+
+    if (stat("/dev/video0",&st) == 0 && S_ISCHR(st.st_mode))
+    {
+        fd = open("/dev/video0",O_RDWR|O_NONBLOCK,0);
+        if (fd != -1){
+            CLEAR(cropcap);
+            cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+            if (0==xioctl(fd,VIDIOC_CROPCAP,&cropcap)){
+                qDebug()<<"Camera0 Width="<<cropcap.defrect.width;
+                if (2592 == cropcap.defrect.width)
+                {
+                    close(fd);
+                    strcpy(device_file,"/dev/video0");
+                    return true;
+                }
+            }
+            close(fd);
+        }
+    }
+
+    if (stat("/dev/video1",&st) == 0 && S_ISCHR(st.st_mode))
+    {
+        fd = open("/dev/video1",O_RDWR|O_NONBLOCK,0);
+        if (fd != -1){
+            CLEAR(cropcap);
+            cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+            if (0==xioctl(fd,VIDIOC_CROPCAP,&cropcap)){
+                qDebug()<<"Camera1 Width="<<cropcap.defrect.width;
+                if (2592 == cropcap.defrect.width)
+                {
+                    close(fd);
+                    strcpy(device_file,"/dev/video1");
+                    return true;
+                }
+            }
+            close(fd);
+        }
+    }
+    return false;
+}
 
 int ImageCapture::open_device(){
     struct stat st;
 
-    if (-1==stat(device_name,&st))
+    if (-1==stat(device_file,&st))
     {
         qDebug()<<"Cannot identify dev,errno:"<<errno;
         Log::LogCam(QString("open_device,Cannot identify dev,errno:%1").arg(errno));
@@ -209,13 +247,14 @@ int ImageCapture::open_device(){
         Log::LogCam("open_device,dev is no devive, return -1");
         return -1;
     }
-    fd = open(device_name,O_RDWR|O_NONBLOCK,0);
+    fd = open(device_file,O_RDWR|O_NONBLOCK,0);
     if (-1==fd)
     {
         qDebug()<<"Cannot open video,errno:"<<errno;
         Log::LogCam(QString("open_device,Cannot open video,errno:%1").arg(errno));
         return -1;
     }
+
     return 0;
 }
 
@@ -311,7 +350,7 @@ int ImageCapture::init_device(){
     }
     else {
         Log::LogCam(QString("init_device,after Get frame:%1/%2,capalibility=%3,capturemode=%4").arg(streamparam.parm.capture.timeperframe.numerator).arg(streamparam.parm.capture.timeperframe.denominator)
-                    .arg(streamparam.parm.capture.capability).arg(streamparam.parm.capture.capturemode));
+                    .arg(streamparam.parm.capture.capability).arg(streamparam.parm.capturecropcap.defrect.width.capturemode));
         qDebug()<<"after set param,Get frame "<<streamparam.parm.capture.timeperframe.numerator<<"/"<<streamparam.parm.capture.timeperframe.denominator;
     }
 #endif
@@ -708,7 +747,7 @@ int ImageCapture::init_mmap(){
         }
         //qDebug("init_mmap,index=%d,length=%d",n_buffers,buf.length);
         buffers[n_buffers].length = buf.length;
-        buffers[n_buffers].start = mmap(NULL,buf.length,PROT_READ|PROT_WRITE,MAP_SHARED,fd,buf.m.offset);
+        buffers[n_buffers].start = mmap(nullptr,buf.length,PROT_READ|PROT_WRITE,MAP_SHARED,fd,buf.m.offset);
         if(MAP_FAILED == buffers[n_buffers].start)
         {
             qDebug()<<"mmap error,return";
@@ -746,7 +785,7 @@ int ImageCapture::openCamera()
     Log::LogCam(QString("start_capturing,camerainited:%1").arg(camerainited));
 
     if (captureMode != CaptureMode::Idle)
-        return -1;
+        return 0;
 
     if (begin_inited){
         if (camerainited == false)
@@ -799,6 +838,7 @@ int ImageCapture::stopCamera(){
         qDebug()<<"stopCamera:isRunning...";
         QThread::msleep(100);
     }
+    stopping = false;
     captureMode = CaptureMode::Open;
     return 0;
 }
@@ -811,6 +851,31 @@ int ImageCapture::closeCamera()
     stopCamera();
     internal_stop_capturing();
     return 0;
+}
+
+bool ImageCapture::capture(QString fileName, int nCount){
+    qDebug()<<"v4l2 capture"<<captureMode;
+    waitStop();
+    filename = fileName;
+    count = nCount;
+    openCamera();
+    captureMode = CaptureMode::Capture;
+    stopping = false;
+    this->start();
+    return true;
+}
+
+bool ImageCapture::preview(){
+    qDebug()<<"v4l2 preview"<<captureMode;
+    if (captureMode == CaptureMode::View)
+        return true;
+    waitStop();
+    openCamera();
+    count = 9999;
+    stopping = false;
+    captureMode = CaptureMode::View;
+    this->start();
+    return true;
 }
 
 int ImageCapture::internal_stop_capturing(){
@@ -1050,7 +1115,7 @@ void ImageCapture::run()
         int r;
 
         if (stopping == true){
-            qDebug()<<"stop Capture";
+            qDebug()<<"stop Capture";            
             break;
         }
 
@@ -1101,6 +1166,9 @@ void ImageCapture::run()
 #endif
         qmutex.unlock();
     }
+    captureMode = CaptureMode::Open;
+    stopping = false;
+
     resultData[10] = 0;
     emit finishCapture(resultData);
 }
@@ -1352,6 +1420,7 @@ void ImageCapture::recordParam(){
 
 }
 bool ImageCapture::waitStop(){
+    stopping = true;
     for (int i = 0; i < 30; i++){
         if (!this->isRunning())
             return true;

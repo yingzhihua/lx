@@ -5,12 +5,14 @@
 #include <QDir>
 
 static int CameraIndex = 0;
+static QString cameraName = "";
+
 CameraPlayer::CameraPlayer(QObject *parent) : QThread(parent)
 {
     bufy = new uint8_t[2592 * 1944 * 4];
     rawData = new uint8_t[2592 * 1944 * 2];
     m_hCamera = nullptr;
-
+/*
     if (CKReadCamera())
     {
         qDebug()<<"CameraPlayer CK Camera";
@@ -25,6 +27,7 @@ CameraPlayer::CameraPlayer(QObject *parent) : QThread(parent)
     }    
     qDebug()<<"CameraPlayer NO Camera";
     cameraType = CAMERA_EMPTY;
+    */
 }
 
 bool CameraPlayer::CameraStart(CaptureMode mode){
@@ -108,6 +111,9 @@ bool CameraPlayer::CKReadCamera(){
 }
 
 bool CameraPlayer::CKOpenCamera(){    
+    if (m_hCamera != nullptr)
+        return false;
+
     CameraSdkStatus ret = CameraInit(&m_hCamera, 0);
     if (ret != CAMERA_STATUS_SUCCESS)
     {

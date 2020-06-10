@@ -57,5 +57,6 @@
         <file>HomeUI/TestCancel.qml</file>
         <file>components/TestExitConfirm.qml</file>
         <file>HomeUI/E04.qml</file>
+        <file>components/SecondConfirm.qml</file>
     </qresource>
 </RCC>

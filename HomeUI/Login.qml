@@ -1,11 +1,11 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.5
 
-//import Dx.SqliteMgr 1.0
 import Dx.Sequence 1.0
-//import Dx.ParmMgr 1.0
 import Dx.UserMgr 1.0
 import Dx.Global 1.0
+
+import "../components"
 Page {
     id: login_page
     Rectangle{
@@ -115,6 +115,28 @@ Page {
         }
     }
 
+    SecondConfirm{
+        id: confirmDlg
+        anchors.fill: parent
+        onQueryAck: {
+            if (res == "confirm")
+                ExGlobal.exClose()
+        }
+    }
+
+    Button {
+        id: btClose
+        font.pixelSize: 30
+        text: qsTr("关机")
+        width: 200
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 50
+        anchors.right: parent.right
+        anchors.rightMargin: 20
+        //onClicked: ExGlobal.exClose()
+        onClicked: confirmDlg.show(qsTr("确认关机？"))
+    }
+
     Component.onCompleted: {
         //home_page.titlemsg=qsTr("登录");
         //home_page.enableTabBar = false;
@@ -134,14 +156,17 @@ Page {
 
     function login(){                
         console.log("login_name:",ExGlobal.adminPassword)
-        if (userModel.login(login_name.text,login_password.text))
+        var loginresult = userModel.login(login_name.text,login_password.text);
+        if (loginresult === 0)
         {
             console.log("login:",login_name.text,ExGlobal.user);
             mainView.pop();
             mainView.push("qrc:/HomeUI/Idle.qml");
         }
+        else if (loginresult === 1)
+            labelMessage.text = qsTr("密码错误！");
         else
-            labelMessage.text = qsTr("密码错误！")
+            labelMessage.text = qsTr("帐号不存在！");
     }
 
     function createtable(){

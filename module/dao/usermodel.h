@@ -39,7 +39,7 @@ public:
     void LoadUser();
     Q_INVOKABLE bool addUser(QString name,QString password, QString displayName, int type);
     Q_INVOKABLE bool deleteUser(int row);
-    Q_INVOKABLE bool login(QString name,QString password);
+    Q_INVOKABLE int login(QString name,QString password);
     Q_INVOKABLE bool updatePassword(QString oldpassword,QString newpassword);
 
 protected:

@@ -17,7 +17,8 @@ Page {
     }
     Component.onCompleted: {
         changeTimer.stop();
-        headerMsg.text=qsTr("检测试剂盒");
+        //headerMsg.text=qsTr("检测试剂盒");
+        changeTimer.start();
         tabBar.enabled = false;
         //appicon.visible = false;
         openDoor.visible = false;
@@ -25,8 +26,7 @@ Page {
         Sequence.sequenceInit();
         if (ExGlobal.projectMode() === 0)
         {
-            Sequence.sequenceDo(Sequence.Sequence_SelfCheck);
-            changeTimer.start();
+            Sequence.sequenceDo(Sequence.Sequence_SelfCheck);            
         }
         else
             Sequence.actionDo("Query",3,0,0,0);

@@ -30,6 +30,7 @@ void QRcoder::run(){
     int count = 0;
     QString result;
     int nresult = 0;
+    bool openSecondCamera = false;
     VideoCapture cap;
 
     QByteArray res;
@@ -51,9 +52,37 @@ void QRcoder::run(){
     {
         qDebug()<<"open cam 1 fail";
         Log::LogCam("open cam 1 fail");
-        res.append("Cannot identify");
-        emit finishQRcode(res);
-        return;
+        cap.open(0);
+        if (!cap.isOpened()){
+            res.append("Cannot identify");
+            emit finishQRcode(res);
+            return;
+        }
+        openSecondCamera = true;
+    }
+    cap.set(CAP_PROP_FRAME_WIDTH,10000);
+    cap.set(CAP_PROP_FRAME_HEIGHT,10000);
+    if (cap.get(CAP_PROP_FRAME_WIDTH) != 1920){
+        qDebug()<<"width is not 1920"<<cap.get(CAP_PROP_FRAME_WIDTH);
+        cap.release();
+        if (openSecondCamera == false){
+            cap.open(0);
+            if (!cap.isOpened()){
+                qDebug()<<"open cam 0 fail";
+                Log::LogCam("open cam 0 fail");
+                res.append("Cannot identify");
+                emit finishQRcode(res);
+                return;
+            }
+            cap.set(CAP_PROP_FRAME_WIDTH,10000);
+            cap.set(CAP_PROP_FRAME_HEIGHT,10000);
+            if (cap.get(CAP_PROP_FRAME_WIDTH) != 1920){
+               cap.release();
+               res.append("Cannot identify");
+               emit finishQRcode(res);
+               return;
+            }
+        }
     }
     cap.set(CAP_PROP_FRAME_WIDTH,1920);
     cap.set(CAP_PROP_FRAME_HEIGHT,1080);
@@ -328,14 +357,16 @@ int QRcoder::pierce(Mat &image, QString &qrStr){
         if (havehole(handleFrame))
             result += 4;
 
-        //*
+//*
         handleFrame = Mat(500,100,image.type(),ExGlobal::hbufrgb);
         Point left_top(center.x + 490,center.y - 580);
-        rectangle(image,left_top,Point(left_top.x+100,left_top.y+500),Scalar(255),3);
-        cvtColor(image(Rect(left_top.x,left_top.y,100,500)), handleFrame, COLOR_RGB2GRAY);
+        if (left_top.x+100<1920 && left_top.y>0 && left_top.y+500<1080){
+            rectangle(image,left_top,Point(left_top.x+100,left_top.y+500),Scalar(255),3);
+            cvtColor(image(Rect(left_top.x,left_top.y,100,500)), handleFrame, COLOR_RGB2GRAY);
 
-        if (haveliquids(handleFrame))
-            result += 8;
+            if (haveliquids(handleFrame))
+                result += 8;
+        }
             //*/
     }
 

@@ -93,7 +93,7 @@ ApplicationWindow {
             anchors.verticalCenter: parent.verticalCenter
             font.pixelSize: parent.height*0.5
             color: "white"
-            text: qsTr("text")
+            text: qsTr("系统启动");
         }
         Text {
             id: headerTitle

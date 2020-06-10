@@ -21,7 +21,7 @@ QString ExGlobal::AdminPassword = "123456";
 int ExGlobal::LanguageCode = 1;
 int ExGlobal::PanelBoxIndex = 1;
 
-QString ExGlobal::t_version = "V2.30";
+QString ExGlobal::t_version = "V2.31";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
@@ -130,20 +130,39 @@ bool ExGlobal::setTime(QString time){
     return true;
 }
 
+int ExGlobal::getDiskSpace(){
+    int result = 0;
+    if (system("df / > /opt/diskspacet") == 0){
+        QFile file("/opt/diskspacet");
+        if (!file.open(QIODevice::ReadOnly)){
+            qDebug()<<"getDiskSpace open file error!";
+            return 0;
+        }
+        if (file.size()>0){
+            QTextStream in(&file);
+            QString line = in.readLine();
+            if (!line.isEmpty()){
+                int availableIndex = line.indexOf("Available");
+                int usepaIndex = line.indexOf("Use%");
+                line = in.readLine();
+                if (!line.isEmpty())
+                {
+                    QString available = line.mid(availableIndex,(usepaIndex-availableIndex)).simplified();
+                    qDebug()<<available;
+                    result = available.toInt();
+                }
+            }
+        }
+        file.close();
+    }
+    return result;
+}
 void ExGlobal::exInit()
 {
     CaliParamInit();
     SerialMgr::SerialInit();    
-    //Sequence::sequenceInit();
 
-    if(SqliteMgr::sqlitemgrinstance == nullptr)
-    {
-        qDebug()<<"global sqlitemgrinstance is nullptr";
-    }
-    else
-    {
-        qDebug()<<"global sqlitemgrinstance is not nullptr";
-    }
+    //Sequence::sequenceInit();
 }
 
 void ExGlobal::CaliParamInit()

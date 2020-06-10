@@ -32,6 +32,14 @@ QByteArray ActionParser::DrvParamToByte(const QString &action, int value, int pa
             data[7] = 0x32;
             FormatBytes(0x01,data);
         }
+        else if(value == 4)
+        {
+            data.resize(13);
+            data[7] = 0x25;
+            data[9] = 0x02;
+            data[11] = 0xFF;
+            FormatBytes(0x02,data);
+        }
     }
     else if(action == "SetPID"){
         data.resize(19);
@@ -107,6 +115,21 @@ QByteArray ActionParser::DrvParamToByte(const QString &action, int value, int pa
         data[11] = value&0xFF;
         FormatBytes(0x01,data);
     }    
+    else if(action == "Lamp"){//byte[10]保留,byte[11]:0-2,对应蓝绿红,byte[12]:0,关闭,1,打开；byte[13-14]:灯点亮时间;byte[15-16]:灯熄灭时间
+        data.resize(18);
+        data[6] = 0x00;
+        data[7] = 0x2A;
+        data[8] = 0x00;
+        data[9] = 0x07;
+        data[10] = 0x01;    //保留
+        data[11] = param1&0xFF;
+        data[12] = value&0xFF;
+        data[13] = (param2>>8)&0xFF;
+        data[14] = param2&0xFF;
+        data[15] = (param3>>8)&0xFF;
+        data[16] = param3&0xFF;
+        FormatBytes(0x01,data);
+    }
     else if(action == "Fan"){
         data[6] = 0x00;
         if (value == 1){    //query fan's speed

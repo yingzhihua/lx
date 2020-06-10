@@ -22,6 +22,9 @@ public:
     Q_ENUM(CaptureMode)
 
     explicit CameraPlayer(QObject *parent = nullptr);
+    static bool CKReadCamera();
+    bool CKOpenCamera();
+    bool CKCloseCamera();
     bool CameraStart(CaptureMode mode);
     bool CameraStop();
     void setFileName(QString fileName){filename = fileName;}
@@ -33,7 +36,6 @@ protected:
 
 private:
     CAMERATYPE cameraType;
-    QString cameraName;
     QString filename;
     int count;
     CaptureMode captureMode;
@@ -44,9 +46,8 @@ private:
 
     //CKCamera
     HANDLE m_hCamera;    
-    bool CKReadCamera();
-    bool CKOpenCamera();
-    bool CKCloseCamera();
+
+
     bool CKGetFrame(int index);
 
     //DVPCamera

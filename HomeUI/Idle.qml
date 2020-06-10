@@ -70,6 +70,22 @@ Page {
         }
     }
 
+    Text{
+        id: sampleCode
+        text:ExGlobal.sampleCode
+        font.pixelSize: 30
+        anchors.left: editsample.right
+        anchors.leftMargin: 30
+        anchors.verticalCenter: editsample.verticalCenter
+        MouseArea{
+            anchors.fill: parent
+            onClicked: {
+                queryDlg.show()
+            }
+        }
+    }
+
+
     TwoQuery{
         id: queryDlg
         qtitle: qsTr("输入样本信息")
@@ -96,27 +112,38 @@ Page {
         anchors.bottomMargin: 20
     }
 
+    SecondConfirm{
+        id: confirmDlg
+        anchors.fill: parent
+        onQueryAck: {
+            if (res == "confirm")
+                ExGlobal.exClose()
+        }
+    }
+
     Button {
         id: btClose        
         font.pixelSize: 30
         text: qsTr("关机")
         width: 200
+        height: 70
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 50
         anchors.right: parent.right
         anchors.rightMargin: 20
-        onClicked: ExGlobal.exClose()
+        onClicked: confirmDlg.show(qsTr("确认关机？"))
     }
 
     Button {
         id: btExit        
         font.pixelSize: 30
         width: 200
+        height: 70
         text: qsTr("退出登录")
         anchors.bottom: btClose.top
-        anchors.bottomMargin: 20
+        anchors.bottomMargin: 60
         anchors.right: parent.right
-        anchors.rightMargin: 20
+        anchors.rightMargin: 20        
         onClicked: {
             mainView.pop();
             mainView.push("qrc:/HomeUI/Login.qml");
@@ -128,9 +155,10 @@ Page {
         font.pixelSize: 30
         visible: true
         width: 200
+        height: 70
         text: qsTr("试剂盒就绪")
         anchors.bottom: btExit.top
-        anchors.bottomMargin: 20
+        anchors.bottomMargin: 60
         anchors.right: parent.right
         anchors.rightMargin: 20
         onClicked: {
@@ -163,11 +191,7 @@ Page {
         text: qsTr("text")
     }
 
-    Component.onCompleted: {
-        //home_page.titlemsg=qsTr("待机");
-        //home_page.enableTabBar = true;
-
-        //headerMsg.text = qsTr("待机");
+    Component.onCompleted: {        
         Sequence.changeTitle(qsTr("待机"));
         tabBar.enabled = true;
 
@@ -236,14 +260,7 @@ Page {
                 bErrorOpenDoor = true;
                 busyDes.text = qsTr("试剂盒错误，正在开仓");
                 Sequence.sequenceDo(Sequence.Sequence_OpenBox);
-                /*
-                if (result == Sequence.Result_Pierce_No)
-                    busyDes.text = qsTr("检测试剂盒失败");
-                else if (result == Sequence.Result_Pierce_Yes_NoQr)
-                    busyDes.text = qsTr("二维码识别识别");
-                else if (result == Sequence.Result_Pierce_Damage)
-                    busyDes.text = qsTr("试剂盒已使用");
-                    */
+
                 console.log("close box after Pierce No");
             }
 

@@ -39,13 +39,17 @@ Sequence::Sequence(QObject *parent) : QObject(parent)
     connect(serialMgr,&SerialMgr::errAction,this,&Sequence::errFinish);
     connect(serialMgr,&SerialMgr::errOccur,this,&Sequence::errReceive);
 
-    imageCapture = new ImageCapture();
+
     imageProvider = new ImageProvider();
     cvcap = new cvCapture();
-    connect(imageCapture,&ImageCapture::finishCapture,this,&Sequence::ActionFinish);
-    connect(imageCapture,&ImageCapture::reView,this,&Sequence::CameraView);
 
-    camera = new CameraPlayer();
+    //imageCapture = new ImageCapture();
+    //connect(imageCapture,&ImageCapture::finishCapture,this,&Sequence::ActionFinish);
+    //connect(imageCapture,&ImageCapture::reView,this,&Sequence::CameraView);
+
+    camera = new TCamera();
+    connect(camera,&TCamera::finishCapture,this,&Sequence::ActionFinish);
+    connect(camera,&TCamera::reView,this,&Sequence::CameraView);
 
     testMgr = new TestMgr();
 
@@ -131,6 +135,11 @@ bool Sequence::sequenceDo(SequenceId id)
     QDomElement root = doc.documentElement();    
     if (id == SequenceId::Sequence_Test)
     {
+        if (ExGlobal::getDiskSpace()<1000000)
+        {
+            errReceive(ERROR_CODE_DISK_FULL);
+            return false;
+        }
         for (sequenceAction = root.firstChildElement("PanelTest"); !sequenceAction.isNull(); sequenceAction = sequenceAction.nextSiblingElement("PanelTest"))
         {
             if (sequenceAction.attribute("PanelCode")==ExGlobal::panelCode())
@@ -138,8 +147,8 @@ bool Sequence::sequenceDo(SequenceId id)
                 testStartTime = QDateTime::currentDateTime();
                 QString current_time_str = testStartTime.toString("yyyyMMdd_hhmmss");
                 Log::setDir(QCoreApplication::applicationDirPath()+"/"+current_time_str);
-                imageCapture->openCamera();
-                camera->CameraStart(CameraPlayer::CaptureMode::Capture);
+                //imageCapture->openCamera();
+                camera->openCamera();
                 ExGlobal::setPanelName(sequenceAction.attribute("PanelName"));
 
                 //ExGlobal::setReagentBox("202");
@@ -218,8 +227,8 @@ void Sequence::sequenceCancel()
     qDebug()<<"sequenceCancel:"<<",currSequenceId:"<<currSequenceId<<",durationState:"<<durationState<<",bFinishAction:"<<bFinishAction;
     if (!isTesting()&&!isLoopTesting())
         return;
-    imageCapture->closeCamera();
-    camera->CameraStop();
+    //imageCapture->closeCamera();
+    camera->closeCamera();
 
     if(durationState == TimeState::running)
         timer->stop();
@@ -258,7 +267,8 @@ void Sequence::WaitSequenceTimeout()
 void Sequence::ActionFinish(QByteArray data)
 {
     qDebug()<<"Sequence ActionFinish:"<<data.toHex(' ');
-
+    if(bAutoFocus)
+        Log::LogByFile("Focus.txt",data.toHex(' '));
     if (data[7] == '\x72'){
         //if (currSequenceId != SequenceId::Sequence_Test){
         if (currSequenceId == SequenceId::Sequence_Idle){
@@ -294,6 +304,40 @@ void Sequence::ActionFinish(QByteArray data)
                 if (isLoopTesting())
                     Log::LogByFile("LoopTest.txt",QString("风扇:%1,转速：%2").arg(fan).arg(fanspeed));
             }
+            else if(data[7] == '\x25' && data.length() == 40){
+                QString logstr;
+                for (int i = 0; i < 13; i++){
+                    int temp1 = (data[2*i+13]<<8) + data[2*i+14];
+                    double ftemp = (double)temp1/100;
+                    if (i == 0)
+                        logstr += QString("\n后帕尔贴A温度：\t%1\n").arg(ftemp);
+                    else if (i == 1)
+                        logstr += QString("后帕尔贴B温度：\t%1\n").arg(ftemp);
+                    else if (i == 2)
+                        logstr += QString("前帕尔贴A温度：\t%1\n").arg(ftemp);
+                    else if (i == 3)
+                        logstr += QString("前帕尔贴B温度：\t%1\n").arg(ftemp);
+                    else if (i == 4)
+                        logstr += QString("裂解A温度：\t%1\n").arg(ftemp);
+                    else if (i == 5)
+                        logstr += QString("裂解B温度：\t%1\n").arg(ftemp);
+                    else if (i == 6)
+                        logstr += QString("后置散热器A温度：\t%1\n").arg(ftemp);
+                    else if (i == 7)
+                        logstr += QString("后置散热器B温度：\t%1\n").arg(ftemp);
+                    else if (i == 8)
+                        logstr += QString("前置散热器A温度：\t%1\n").arg(ftemp);
+                    else if (i == 9)
+                        logstr += QString("前置散热器B温度：\t%1\n").arg(ftemp);
+                    else if (i == 10)
+                        logstr += QString("环境温度：\t%1\n").arg(ftemp);
+                    else if (i == 11)
+                        logstr += QString("预设1温度：\t%1\n").arg(ftemp);
+                    else if (i == 12)
+                        logstr += QString("预设2温度：\t%1\n").arg(ftemp);
+                }
+                Log::LogWithTime(logstr);
+            }
         }
         else if (data[1] == '\x01') //drive board
         {
@@ -302,16 +346,28 @@ void Sequence::ActionFinish(QByteArray data)
             else if (data[7] == '\x32')
                 setSenorState(data[12],data[13]);
             else if(bAutoFocus == true && data[7] == '\x70' && data.length()>12 && (data[12] == '\x2a'||data[12] == '\x2b'))
+            {
                 autoFocus_JumpStep = 1;
+                Log::LogByFile("Focus.txt",QString("ActionFinish,move step."));
+                return;
+            }
         }
         else if(data[1] == '\x03')//CameraCapture
         {
             qDebug()<<"CameraCapture ActionFinish,type="<<currCameraCaptureType;
             if (data[7] == '\xa0' && data[10] == '\x00' && currCameraCaptureType == 5){
+                /*
                 if (currCameraCycle < 2)                
                     imageAna->FirstImage(imageCapture->getyData(),imageCapture->imagetype);
                 else                
                     imageAna->AddImage(imageCapture->getyData(),imageCapture->imagetype);
+                    //*/
+                //*
+                if (currCameraCycle < 2)
+                    imageAna->FirstImage(camera->getyData(),camera->imagetype);
+                else
+                    imageAna->AddImage(camera->getyData(),camera->imagetype);
+                    //*/
 
                 imageProvider->anaMainImg = imageAna->getMainImg(0,1);
                 emit callQmlRefeshAnaMainImg();
@@ -373,7 +429,8 @@ void Sequence::ActionFinish(QByteArray data)
                     boxparam = 3;
                 else
                     boxparam = 4;
-                emit sequenceFinish(SequenceResult::Result_Box_Invalid);
+                //emit sequenceFinish(SequenceResult::Result_Box_Invalid);
+                emit sequenceFinish(SequenceResult::Result_Box_Valid);
             }
             /*
             else if (data[2]&0x04)
@@ -424,7 +481,13 @@ void Sequence::ActionFinish(QByteArray data)
         }
 
         if (durationState == TimeState::running && currSequenceId == SequenceId::Sequence_Test && bFocused == false && nDuration >= 200000)
-            autoFocus();
+        {
+            if (ExGlobal::projectMode() == 2)
+            {
+                Log::LogByFile("Focus.txt",QString("ActionFinish,nDuration:%1").arg(nDuration));
+                autoFocus();
+            }
+        }
     }
 }
 
@@ -490,11 +553,14 @@ void Sequence::FinishSequence()
         out = SequenceResult::Result_OpenBox_ok;
     }
     else if(currSequenceId == SequenceId::Sequence_CannelTest)
+    {
         out = SequenceResult::Result_CannelTest_ok;
+        Log::setDir(QCoreApplication::applicationDirPath());
+    }
     else if(currSequenceId == SequenceId::Sequence_Test)
     {
-        imageCapture->closeCamera();
-        camera->CameraStop();
+        //imageCapture->closeCamera();
+        camera->closeCamera();
         currSequenceId = SequenceId::Sequence_Idle;
         if (imageAna->getItem().size() > 45)
         {
@@ -518,8 +584,8 @@ void Sequence::FinishSequence()
             return;
         else
         {
-            imageCapture->closeCamera();
-            camera->CameraStop();
+            //imageCapture->closeCamera();
+            camera->closeCamera();
             currSequenceId = SequenceId::Sequence_Idle;
             testMgr->TestClose(3);
             out = SequenceResult::Result_LoopTest_finish;
@@ -651,18 +717,15 @@ bool Sequence::DoAction(QDomElement action,bool isChild)
         }
         else if (action.attribute("ActionValue") == "3")
             captureFileName = "Fill";
-        imageCapture->setFileName(captureFileName);
-        camera->setFileName(captureFileName);
 
         currOrder = '\xA0';
+        /*
+        imageCapture->setFileName(captureFileName);
         imageCapture->setImageCount(action.attribute("ActionParam1").toInt());
         if (imageCapture->waitStop())
             imageCapture->start();
-#if 1
-        camera->setImageCount(action.attribute("ActionParam1").toInt());
-        if (camera->waitStop())
-            camera->start();
-#endif
+            //*/
+        camera->capture(captureFileName,action.attribute("ActionParam1").toInt());
     }
     else if(action.attribute("Device")=="Door" || action.attribute("Device")=="Light" || action.attribute("Device")=="Temperature"
             ||action.attribute("Device")=="V1" || action.attribute("Device")=="V2" || action.attribute("Device")=="V3" || action.attribute("Device")=="V123"
@@ -912,6 +975,7 @@ void Sequence::CameraView(QImage img)
     emit callQmlRefeshView();
 
     if (bAutoFocus){
+        Log::LogByFile("Focus.txt",QString("CameraView,JumpStep:%1,CurrPoint:%2,ClearValue:%3,ClearPoint:%4").arg(autoFocus_JumpStep).arg(autoFocus_CurrPoint).arg(autoFocus_ClarityValue).arg(autoFocus_ClarityPoint));
         qDebug()<<"JumpStep:"<<autoFocus_JumpStep<<"CurrPoint:"<<autoFocus_CurrPoint<<"ClarityValue:"<<autoFocus_ClarityValue<<"ClarityPoint:"<<autoFocus_ClarityPoint;
         if (autoFocus_JumpStep == 2){
             if (autoFocus_CurrPoint > 0)
@@ -931,20 +995,25 @@ void Sequence::CameraView(QImage img)
                         autoFocus_ClarityValue = 0;
                     }
                     else{
-                        if (autoFocus_dec == true){
-                            dirctAction("Focus",2,AUTOFOCUS_MAX-AUTOFOCUS_STEP*(autoFocus_ClarityPoint-1),0,0);
-                            emit autoFocusNotify(0,AUTOFOCUS_MAX-AUTOFOCUS_STEP*(autoFocus_ClarityPoint-1)-AUTOFOCUS_MIN);
-                            ExGlobal::updateCaliParam("CamFocus",AUTOFOCUS_MAX-AUTOFOCUS_STEP*(autoFocus_ClarityPoint-1)-AUTOFOCUS_MIN);
+                        int focusResult;
+                        if (autoFocus_dec == true){                            
+                            focusResult = AUTOFOCUS_MAX-AUTOFOCUS_STEP*(autoFocus_ClarityPoint-1)-AUTOFOCUS_MIN;
                         }
-                        else {
-                            dirctAction("Focus",2,AUTOFOCUS_STEP*(autoFocus_ClarityPoint-1)+AUTOFOCUS_MIN,0,0);
-                            emit autoFocusNotify(1,AUTOFOCUS_STEP*(autoFocus_ClarityPoint-1));
-                            ExGlobal::updateCaliParam("CamFocus",AUTOFOCUS_STEP*(autoFocus_ClarityPoint-1));
+                        else {                            
+                            focusResult = AUTOFOCUS_STEP*(autoFocus_ClarityPoint-1);
                         }
+                        dirctAction("Focus",2,focusResult+AUTOFOCUS_MIN,0,0);
+                        emit autoFocusNotify(1,focusResult);
+                        ExGlobal::updateCaliParam("CamFocus",focusResult);
+
                         bAutoFocus = false;
                         bFocused = true;
-                        stopView();
+                        //imageCapture->stopCamera();
+                        //imageCapture->captureMode = ImageCapture::CaptureMode::Capture;
+                        camera->stopCamera();
+
                         dirctAction("Light",1,0,0,0);
+                        Log::LogByFile("Focus.txt",QString("CameraView,focus result:%1,AUTOFOCUS_MIN=%2").arg(focusResult).arg(AUTOFOCUS_MIN));
                         return;
                     }
                 }
@@ -967,22 +1036,27 @@ void Sequence::CameraView(QImage img)
 }
 
 bool Sequence::startView(int id){
-    if (id == 0){        
+    if (id == 0){
+        /*
         if (imageCapture->waitStop())
         {
             actionDo("Light",2,0,0,0);
             imageCapture->imagetype = 0;
             imageCapture->openCamera();
+            imageCapture->captureMode = ImageCapture::CaptureMode::View;
             imageCapture->setImageCount(99999);
             imageCapture->start();
         }
+        //*/
+        actionDo("Light",5,0,0,0);
+        camera->preview();
     }
     return true;
 }
 
 bool Sequence::stopView(){
-    imageCapture->closeCamera();
-    camera->CameraStop();
+    //imageCapture->closeCamera();
+    camera->closeCamera();
     return true;
 }
 
@@ -1013,44 +1087,57 @@ void Sequence::errReceive(ERROR_CODE code){
         errStr = "配置文件格式出错！";
     else if(code == ERROR_CODE_FILE_MODEL)
         errStr = "模板文件读取出错！";
+    else if(code == ERROR_CODE_DISK_FULL)
+        errStr = "磁盘已满！";
     emit errOccur(errStr+" \n\n错误码："+QString::number(code,16));
 }
 
 int Sequence::getAbs(){
-    return imageCapture->getabsExpose();
+    //return imageCapture->getabsExpose();
+    return camera->getabsExpose();
 }
 
 bool Sequence::setAbs(int value){
-    return imageCapture->setabsExpose(value);
+    //return imageCapture->setabsExpose(value);
+    return camera->setabsExpose(value);
 }
 
 int Sequence::getGain(){
-    return imageCapture->getGain();
+    //return imageCapture->getGain();
+    return camera->getGain();
 }
 
 bool Sequence::setGain(int value){
-    return imageCapture->setGain(value);
+    //return imageCapture->setGain(value);
+    return camera->setGain(value);
 }
 
 int Sequence::getWhiteBalance(){
-    return imageCapture->getWhite();
+    //return imageCapture->getWhite();
+    return camera->getWhite();
 }
 
 bool Sequence::setWhiteBalance(int value){
-    return imageCapture->setWhite(value);
+    //return imageCapture->setWhite(value);
+    return camera->setWhite(value);
 }
 
 void test(const char *str){
     qDebug()<<QString::number(str[0],16)<<QString::number(str[1],16)<<QString::number(str[2],16)<<QString::number(str[3],16)<<QString::number(str[4],16)<<QString::number(str[5],16);
 }
 
-static int tempInt = 0;
+static int tempInt = 8;
 void Sequence::lxDebug(){
     qDebug()<<"lxDebug";    
     tempInt++;
+    /*
     if (tempInt > 69 || tempInt < 64)
         tempInt = 64;
 
+    if (tempInt > 2)
+        tempInt = 0;
+    serialMgr->serialWrite(ActionParser::ParamToByte("Lamp",1,tempInt,200,200));
+*/
     //serialMgr->serialWrite(ActionParser::ParamToByte("Led",tempInt,0,0,0));
     serialMgr->serialWrite(ActionParser::ParamToByte("Door",7,0,0,0));
     return;
@@ -1098,7 +1185,11 @@ bool Sequence::listNextAction(bool first){
                 actList.append(act);
 
                 act.device = "Pump";
-                act.value = 1;
+                act.value = 3;
+                actList.append(act);
+
+                act.device = "Query";
+                act.value = 3;
             }
             else {                
                 act.value = 1;
@@ -1191,7 +1282,9 @@ void Sequence::fan1SetSpeed(int speed)
 }
 
 void Sequence::autoFocus(){    
+    Log::LogByFile("Focus.txt",QString("bAutoFocus:%1").arg(bAutoFocus));
     if (bAutoFocus == false){
+        /*
         if (!imageCapture->isRunning()){
             dirctAction("Light",2,0,0,0);
             imageCapture->imagetype = 0;
@@ -1202,6 +1295,9 @@ void Sequence::autoFocus(){
             imageCapture->setImageCount(99999);
             imageCapture->start();
         }
+        //*/
+        dirctAction("Light",2,0,0,0);
+        camera->preview();
 
         dirctAction("Focus",1,0,0,0);
         bAutoFocus = true;
@@ -1253,8 +1349,8 @@ bool Sequence::loopTest(QString testName, int count){
             testStartTime = QDateTime::currentDateTime();
             QString current_time_str = testStartTime.toString("yyyyMMdd_hhmmss");
             Log::setDir(QCoreApplication::applicationDirPath()+"/"+current_time_str);
-            imageCapture->openCamera();
-            camera->CameraStart(CameraPlayer::CaptureMode::Capture);
+            //imageCapture->openCamera();
+            camera->openCamera();
             ExGlobal::setPanelName(sequenceAction.attribute("PanelName"));
             //ExGlobal::setReagentBox("202");
             imageAna->SetMask(ExGlobal::getReagentBox(ExGlobal::reagentBox()),0);

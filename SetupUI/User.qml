@@ -228,7 +228,7 @@ Rectangle {
             radius: 5
         }
         onClicked: {
-            userModel.deleteUser(listView.currentIndex)
+            confirmDlg.show(qsTr("确定删除帐号？"))
         }
     }
 
@@ -240,6 +240,15 @@ Rectangle {
         anchors.rightMargin: 20
         onClicked: {
             mainView.pop();
+        }
+    }
+
+    SecondConfirm{
+        id: confirmDlg
+        anchors.fill: parent
+        onQueryAck: {
+            if (res == "confirm")
+                userModel.deleteUser(listView.currentIndex)
         }
     }
 }

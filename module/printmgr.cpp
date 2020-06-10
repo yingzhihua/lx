@@ -26,6 +26,7 @@ void printmgr::run(){
     res[2] = '\x01';
     res[7] = '\xB1';
 
+    //printPDF();
     printPTP();
     msleep(1000);
     emit finishPrint(res);
@@ -226,6 +227,9 @@ bool printmgr::printPTP(){
         Pos_Reset();
         Pos_Align(1);
         Pos_Qrcode("https://www.ubaike.cn/show_10459701.html\n",4);
+
+        Pos_FeedLine();
+        Pos_Barcode("SLX 123",0x45,0,3,96,0,2);
         Pos_Feed_N_Line(3);
 
         Port_ClosePort(handle);

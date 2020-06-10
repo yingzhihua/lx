@@ -94,6 +94,7 @@ public:
     Q_INVOKABLE void setDataEntry(int entry){DataEntry = entry;}
     Q_INVOKABLE static QString boxSerial(){return t_BoxSerial;}
     static void setBoxSerial(QString serial){t_BoxSerial = serial;}
+    static int getDiskSpace();
 
     static int V1WorkX;
     static int V2WorkX;

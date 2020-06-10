@@ -72,6 +72,9 @@ bool UserModel::addUser(QString name, QString password, QString displayName, int
     //QString sql = "INSERT INTO User (Name, Password, UserType) VALUES ('"+name+"', '"+ password+"', 1)";
     QString sql = QString("INSERT INTO User (Name, Password, DisplayName, UserType) VALUES ('%1', '%2', '%3', %4)").arg(name).arg(password).arg(displayName).arg(type);
     qDebug()<<"addUser:"<<sql;
+    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select("SELECT * FROM User WHERE Name = '"+name+"' COLLATE NOCASE");
+    if (query.next())
+        return false;
     bool result = SqliteMgr::sqlitemgrinstance->execute(sql);
 
     if (result){
@@ -94,7 +97,7 @@ bool UserModel::deleteUser(int row){
     return result;
 }
 
-bool UserModel::login(QString name, QString password){
+int UserModel::login(QString name, QString password){
     QString sql = "SELECT * FROM User WHERE Name = '"+name+"' COLLATE NOCASE AND Password = '"+password+"'";
     QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(sql);
     qDebug()<<"login:"<<sql;
@@ -103,13 +106,13 @@ bool UserModel::login(QString name, QString password){
     while(query.next())
     {        
         ExGlobal::UserType = query.value(4).toInt();
-        return true;
+        return 0;
     }
 
     if (name.toLower() == "admin" && password == ExGlobal::AdminPassword)
     {
         ExGlobal::UserType = 3;
-        return true;
+        return 0;
     }
 
     if (ExGlobal::projectMode() == 0)
@@ -117,10 +120,13 @@ bool UserModel::login(QString name, QString password){
         if (name.length() == 0)
             ExGlobal::User = "user";
         ExGlobal::UserType = 1;
-        return true;
+        return 0;
     }
 
-    return false;
+    query = SqliteMgr::sqlitemgrinstance->select("SELECT * FROM User WHERE Name = '"+name+"' COLLATE NOCASE");
+    if (query.next())
+        return 1;
+    return 2;
 }
 
 bool UserModel::updatePassword(QString oldpassword, QString newpassword){
