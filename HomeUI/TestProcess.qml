@@ -87,16 +87,15 @@ Page {
         anchors.right: parent.right
         anchors.rightMargin: 20
         onClicked: {
-            testcancelDialog.show()
+            testcancelDialog.show(1)
         }
     }
 
     TestExitConfirm{
-        id: testcancelDialog
-        prompt:qsTr("取消测试后，试剂盒将不再可用！")
+        id: testcancelDialog        
         anchors.fill: parent
         onQueryAck: {
-            if (res == true){
+            if (res === 0){
                 Sequence.sequenceCancel();
             }
         }

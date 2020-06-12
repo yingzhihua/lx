@@ -19,11 +19,16 @@ Page {
             anchors.fill: parent
             onClicked: {
                 //Sequence.sequenceDo(Sequence.Sequence_Test);
-                mainView.pop();
-                if (ExGlobal.projectMode() === 0)
-                    mainView.push("qrc:/HomeUI/TestProcessT.qml");
-                else
-                    mainView.push("qrc:/HomeUI/TestProcess.qml");
+                if (ExGlobal.diskCheck() === 1){
+                    testcancelDialog.show(2)
+                }
+                else {
+                    mainView.pop();
+                    if (ExGlobal.projectMode() === 0)
+                        mainView.push("qrc:/HomeUI/TestProcessT.qml");
+                    else
+                        mainView.push("qrc:/HomeUI/TestProcess.qml");
+                }
             }
         }
     }
@@ -129,18 +134,24 @@ Page {
             //mainView.pop();
             //mainView.push("qrc:/HomeUI/Idle.qml");
             //mainView.push("qrc:/HomeUI/TestCancel.qml");
-            testcancelDialog.show()
+            testcancelDialog.show(0)
         }
     }
 
     TestExitConfirm{
-        id: testcancelDialog
-        prompt:qsTr("取消测试后，试剂盒将不再可用！")
+        id: testcancelDialog        
         anchors.fill: parent
         onQueryAck: {
-            if (res == true){
+            if (res === 0){
                 mainView.pop();
                 mainView.push("qrc:/HomeUI/Idle.qml");
+            }
+            else if(res === 2){
+                mainView.pop();
+                if (ExGlobal.projectMode() === 0)
+                    mainView.push("qrc:/HomeUI/TestProcessT.qml");
+                else
+                    mainView.push("qrc:/HomeUI/TestProcess.qml");
             }
         }
     }

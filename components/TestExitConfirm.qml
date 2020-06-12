@@ -5,8 +5,9 @@ import Dx.Sequence 1.0
 
 Page {
     id: testcancelDialog
-    property alias prompt: cancelText.text
-    signal queryAck(bool res)
+    property int dialogstatus: 0
+    //property alias prompt: cancelText.text
+    signal queryAck(int res)
     visible: false
     Text {
         id: cancelText
@@ -28,6 +29,7 @@ Page {
         radius: 30
 
         Text {
+            id: continueTest
             anchors.centerIn: parent
             color: "white"
             font.pixelSize: 50
@@ -38,7 +40,10 @@ Page {
             anchors.fill: parent
             onClicked: {
                 testcancelDialog.visible = false
-                queryAck(false)
+                if (dialogstatus === 2)
+                    queryAck(2)
+                else
+                    queryAck(1)
             }
         }
     }
@@ -65,13 +70,29 @@ Page {
             anchors.fill: parent
             onClicked: {
                 testcancelDialog.visible = false
-                queryAck(true)
+                queryAck(0)
             }
         }
     }
 
-    function show(){
+    function show(status){
         //cancelText.text = prompt;
+        dialogstatus = status;
+        if (status === 0)
+        {
+            cancelText.text = qsTr("确定取消测试？")
+            continueTest.text = qsTr("返回测试")
+        }
+        else if (status === 1)
+        {
+            cancelText.text = qsTr("取消测试后，试剂盒将不再可用，确定取消测试？")
+            continueTest.text = qsTr("返回测试")
+        }
+        else
+        {
+            cancelText.text = qsTr("磁盘空间剩余不多，是否继续测试？")
+            continueTest.text = qsTr("继续测试")
+        }
         testcancelDialog.visible = true;
     }
 }

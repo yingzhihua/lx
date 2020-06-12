@@ -219,6 +219,7 @@ Page {
     Connections{
         target: Sequence
         onSequenceFinish:{
+            console.log("idle.qml,onSequenceFinish:"+result);
             if (result == Sequence.Result_OpenBox_ok)
             {
                 if (bErrorOpenDoor)

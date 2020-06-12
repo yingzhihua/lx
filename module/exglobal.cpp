@@ -130,7 +130,7 @@ bool ExGlobal::setTime(QString time){
     return true;
 }
 
-int ExGlobal::getDiskSpace(){
+int ExGlobal::diskCheck(){
     int result = 0;
     if (system("df / > /opt/diskspacet") == 0){
         QFile file("/opt/diskspacet");
@@ -155,8 +155,14 @@ int ExGlobal::getDiskSpace(){
         }
         file.close();
     }
-    return result;
+    if (result < 6000000)
+        return 1;
+    else if (result < 1000000){
+        return 2;
+    }
+    return 0;
 }
+
 void ExGlobal::exInit()
 {
     CaliParamInit();

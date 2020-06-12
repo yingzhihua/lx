@@ -9,7 +9,7 @@
 
 static QString cameraName = "";
 static QByteArray resultData;
-
+static int imageCount = 0;
 CKCamera::CKCamera(QObject *parent) : QThread(parent)
 {
     ExGlobal::bufrgb = (unsigned char *)malloc(2592 * 1944 * 3);
@@ -20,7 +20,7 @@ CKCamera::CKCamera(QObject *parent) : QThread(parent)
     m_hCamera = nullptr;
     stopping = false;
     count = 0;
-    closeCamera();
+    captureMode = CaptureMode::Idle;
     resultData.resize(12);
     resultData[0] = '\xaa';
     resultData[1] = '\x03';
@@ -29,12 +29,15 @@ CKCamera::CKCamera(QObject *parent) : QThread(parent)
     resultData[8] = '\x00';
     resultData[9] = '\x02';
     resultData[11] = '\x55';
+
+    Log::LogByFile("CK.txt",QString("CK Camera Init imageCount=%1").arg(imageCount));
 }
 
 bool CKCamera::readCamera(){
     int cameraNum = 0;
     CameraEnumerateDevice(&cameraNum);
     qDebug()<<"CKReadCamera count="<<cameraNum;
+    Log::LogByFile("CK.txt",QString("ReadCamera count=%1").arg(cameraNum));
     if (cameraNum > 0)
     {
         tDevEnumInfo devAllInfo;
@@ -50,12 +53,13 @@ bool CKCamera::openCamera(){
     CameraSdkStatus ret;
     tSdkCameraCapbility cap;
 
+    Log::LogByFile("CK.txt",QString("openCamera m_hCamera=%1").arg(m_hCamera!=nullptr));
     if (m_hCamera != nullptr)
         return true;
 
-    ret = CameraInit(&m_hCamera, 0);
-    if (ret != CAMERA_STATUS_SUCCESS)
+    if (CameraInit(&m_hCamera, 0) != CAMERA_STATUS_SUCCESS)
     {
+        Log::LogByFile("CK.txt",QString("openCamera CameraInit failed"));
         m_hCamera = nullptr;
         return false;
     }
@@ -83,12 +87,14 @@ bool CKCamera::openCamera(){
     double exposureTime = 0;
     CameraGetExposureTime(m_hCamera, &exposureTime);
     qDebug()<<"Exposure Time="<<exposureTime<<"ret:"<<ret;
+    Log::LogByFile("CK.txt",QString("openCamera Exposure Time==%1").arg(exposureTime));
     CameraPlay(m_hCamera);
     return true;
 }
 
 bool CKCamera::closeCamera(){
     qDebug()<<"CK closeCamera";
+    Log::LogByFile("CK.txt",QString("closeCamera m_hCamera=%1").arg(m_hCamera!=nullptr));
     waitStop();
     if (m_hCamera != nullptr)
     {
@@ -102,6 +108,7 @@ bool CKCamera::closeCamera(){
 
 bool CKCamera::stopCamera(){
     qDebug()<<"CK stopCamera";
+    Log::LogByFile("CK.txt",QString("stopCamera m_hCamera=%1").arg(m_hCamera!=nullptr));
     waitStop();
     qDebug()<<"CK stopCamera finish";
     captureMode = CaptureMode::Idle;
@@ -115,23 +122,33 @@ uint32_t CKCamera::CKGetFrame(){
     HANDLE hBuf;
     uint8_t* pbyBuffer = nullptr;
     stImageInfo imageInfo;
-
+    imageCount++;
+    Log::LogByFile("CK.txt",QString("CKGetFrame imageCount==%1,m_hCamera=%2").arg(imageCount).arg(m_hCamera!=nullptr));
     qDebug()<<"CKGetFrame"<<m_hCamera;
     status = CameraSoftTrigger(m_hCamera);
-    qDebug()<<"CKGetFrame-1"<<status;
-    status = CameraGetRawImageBuffer(m_hCamera, &hBuf, 2000);
-    qDebug()<<"CKGetFrame-2"<<status;
+    if (status != CAMERA_STATUS_SUCCESS){
+        Log::LogByFile("CK.txt",QString("CKGetFrame, CameraSoftTrigger fail, status =%1").arg(status));
+        return 0;
+    }
 
+    status = CameraGetRawImageBuffer(m_hCamera, &hBuf, 2000);
     if (status != CAMERA_STATUS_SUCCESS)
     {
-        Log::LogByFile("CK.txt",QString("GetRaw fail status =%1").arg(status));
+        Log::LogByFile("CK.txt",QString("CKGetFrame, CameraGetRawImageBuffer fail, status =%1").arg(status));
         return 0;
     }
 
     // 获取图像帧信息
     pbyBuffer = CameraGetImageInfo(m_hCamera, hBuf, &imageInfo);    
     memcpy(rawData,pbyBuffer,imageInfo.TotalBytes);    
-    CameraReleaseFrameHandle(m_hCamera, hBuf);    
+    status = CameraReleaseFrameHandle(m_hCamera, hBuf);
+    if (status != CAMERA_STATUS_SUCCESS)
+    {
+        Log::LogByFile("CK.txt",QString("CKGetFrame, CameraReleaseFrameHandle fail, status =%1").arg(status));
+        return 0;
+    }
+
+    Log::LogByFile("CK.txt",QString("CKGetFrame, complete TotalBytes =%1").arg(imageInfo.TotalBytes));
     if (saverawimage == false)
     {
         saveRaw(rawData,imageInfo.TotalBytes);
@@ -205,6 +222,7 @@ void CKCamera::saveRaw(uint8_t *data, uint32_t datalength){
 
 bool CKCamera::capture(QString fileName, int nCount){
     qDebug()<<"CK capture"<<captureMode;
+    Log::LogByFile("CK.txt",QString("capture"));
     waitStop();
     filename = fileName;
     count = nCount;    
@@ -217,6 +235,7 @@ bool CKCamera::capture(QString fileName, int nCount){
 
 bool CKCamera::preview(){
     qDebug()<<"CK preview"<<captureMode;
+    Log::LogByFile("CK.txt",QString("preview"));
     if (captureMode == CaptureMode::View)
         return true;        
     waitStop();
@@ -229,6 +248,7 @@ bool CKCamera::preview(){
 }
 
 bool CKCamera::setabsExpose(int value){
+    Log::LogByFile("CK.txt",QString("setabsExpose,value=%1").arg(value));
     if (openCamera())
     {
         if (CAMERA_STATUS_SUCCESS != CameraSetExposureTime(m_hCamera,value*1000))
@@ -238,6 +258,7 @@ bool CKCamera::setabsExpose(int value){
         CameraSdkStatus ret = CameraGetExposureTime(m_hCamera, &exposureTime);
         qDebug()<<"Exposure Time="<<exposureTime<<"ret:"<<ret;
         ExGlobal::updateCaliParam("CamAbs",value);
+        Log::LogByFile("CK.txt",QString("setabsExpose,result=%1").arg(ret));
         return true;
     }
     return false;
@@ -277,7 +298,13 @@ void CKCamera::run(){
                     QThread::msleep(500-elapse);
                 }
             }
-        }        
+        }
+        else {
+            resultData[10] = 1;
+            emit finishCapture(resultData);
+            break;
+        }
+
     }
     captureMode = CaptureMode::Idle;
     stopping = false;

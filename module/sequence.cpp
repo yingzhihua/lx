@@ -135,7 +135,7 @@ bool Sequence::sequenceDo(SequenceId id)
     QDomElement root = doc.documentElement();    
     if (id == SequenceId::Sequence_Test)
     {
-        if (ExGlobal::getDiskSpace()<1000000)
+        if (ExGlobal::diskCheck() == 2)
         {
             errReceive(ERROR_CODE_DISK_FULL);
             return false;
