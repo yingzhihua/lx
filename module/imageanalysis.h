@@ -32,7 +32,7 @@ public:
 
     int thrsh = 170;
 private:
-    int subsize = 110;
+    int subsize = 120;
     size_t debugx = 9;
     size_t debugy = 8;
     int imageCount = 0;

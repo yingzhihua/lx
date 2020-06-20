@@ -58,6 +58,8 @@ QHash<int, QByteArray> TestModel::roleNames() const
 void TestModel::AddTest(const Test &test){
     beginInsertRows(QModelIndex(),rowCount(),rowCount());
     m_display_list<<test;
+    currTestIndex = m_display_list.count() - 1;
+    currTestid = m_display_list[currTestIndex].Testid;
     endInsertRows();
     //emit dataChanged(createIndex(index,0),createIndex(index,0));
 }
@@ -80,18 +82,33 @@ void TestModel::setCurrTest(int TestIndex){
 
 bool TestModel::mayCheck(){
     qDebug()<<"mayCheck,"<<ExGlobal::UserType<<"Checker:"<<m_display_list[currTestIndex].Checker;
-    if ((ExGlobal::UserType & 0x2) && m_display_list[currTestIndex].Checker.length() == 0)
+    if ((ExGlobal::UserType & 0x2)/* && m_display_list[currTestIndex].Checker.length() == 0*/)
         return true;
     return false;
 }
 
-void TestModel::checkTest(){
+bool TestModel::haveCheck(){
+    return (m_display_list[currTestIndex].Checker.length() != 0);
+}
+
+void TestModel::checkTest(){    
     QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(QString("select * from PanelTest where Testid=%1").arg(currTestid));
     if (query.next())
     {
         QString sql = QString("update PanelTest set Checker='%1' where Testid=%2").arg(ExGlobal::User).arg(currTestid);
         SqliteMgr::sqlitemgrinstance->execute(sql);
         m_display_list[currTestIndex].Checker = ExGlobal::User;
+    }
+    emit dataChanged(createIndex(currTestIndex,0),createIndex(currTestIndex,0));
+}
+
+void TestModel::uncheckTest(){
+    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(QString("select * from PanelTest where Testid=%1").arg(currTestid));
+    if (query.next())
+    {
+        QString sql = QString("update PanelTest set Checker='' where Testid=%1").arg(currTestid);
+        SqliteMgr::sqlitemgrinstance->execute(sql);
+        m_display_list[currTestIndex].Checker = "";
     }
     emit dataChanged(createIndex(currTestIndex,0),createIndex(currTestIndex,0));
 }

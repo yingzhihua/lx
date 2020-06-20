@@ -1,5 +1,6 @@
 #include "usermodel.h"
 #include "../exglobal.h"
+#include "../log.h"
 
 #include<QDebug>
 UserModel::UserModel(QObject *parent):QAbstractListModel (parent)
@@ -106,12 +107,14 @@ int UserModel::login(QString name, QString password){
     while(query.next())
     {        
         ExGlobal::UserType = query.value(4).toInt();
+        Log::Logdb(LOGTYPE_LOGIN,0,name);
         return 0;
     }
 
     if (name.toLower() == "admin" && password == ExGlobal::AdminPassword)
     {
         ExGlobal::UserType = 3;
+        Log::Logdb(LOGTYPE_LOGIN,0,name);
         return 0;
     }
 
@@ -124,6 +127,7 @@ int UserModel::login(QString name, QString password){
     }
 
     query = SqliteMgr::sqlitemgrinstance->select("SELECT * FROM User WHERE Name = '"+name+"' COLLATE NOCASE");
+    Log::Logdb(LOGTYPE_LOGIN,1,name,password);
     if (query.next())
         return 1;
     return 2;

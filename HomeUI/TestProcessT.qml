@@ -90,14 +90,15 @@ Page {
         anchors.horizontalCenter: chartView.horizontalCenter
         anchors.top: parent.top
         anchors.topMargin: 10
-        //anchors.left: mainAnaImage.right
-        //anchors.leftMargin: 1
+        anchors.left: mainAnaImage.right
+        anchors.leftMargin: 10
         columns:6
         rowSpacing: 20
         columnSpacing: 4
 
         Repeater{
-            model: ["IC","IFA","IFB","RSV-A","RSV-B","ADV-1","ADV-2","PIV-1","PIV-2","PIV-3","PIV-4","MP","BP","BP-IS97","HRV","MP-r2","BP-893"]
+            //model: ["IC","IFA","IFB","RSV-A","RSV-B","ADV-1","ADV-2","PIV-1","PIV-2","PIV-3","PIV-4","MP","BP","BP-IS97","HRV","MP-r2","BP-893"]
+            model: ExGlobal.getPosNameArray()
             CheckBox{
                 checked: true
                 text:modelData
@@ -120,7 +121,7 @@ Page {
         anchors.topMargin: 10
         anchors.left: mainAnaImage.right
         anchors.leftMargin: 10
-        height: 700
+        height: 600
         width: 860
         legend.visible: false
         //legend.alignment: Qt.AlignTop
@@ -166,6 +167,7 @@ Page {
 
     Component.onCompleted: {
         Sequence.sequenceDo(Sequence.Sequence_Test);
+        console.log(ExGlobal.getPosNameArray());
         //var newline = chartView.createSeries(ChartView.SeriesTypeLine,"lx");
         //newline.axisX = axisX;
         //newline.axisY = axisY;
@@ -216,6 +218,7 @@ Page {
             else if(result == Sequence.Result_Test_finish){
                 headerMsg.text = "测试完成！";
                 mainView.pop();
+                //mainView.push("qrc:/HomeUI/Idle.qml");
                 mainView.push("qrc:/DataUI/DataView.qml");
                 ExGlobal.setDataEntry(1);
             }

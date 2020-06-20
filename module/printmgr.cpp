@@ -11,6 +11,7 @@
 #include <QDebug>
 #include <QTextCodec>
 #include "PrinterLibs.h"
+#include "log.h"
 
 printmgr::printmgr(QObject *parent) : QThread(parent)
 {
@@ -25,9 +26,13 @@ void printmgr::run(){
     res[1] = '\x04';
     res[2] = '\x01';
     res[7] = '\xB1';
+    res[8] = '\x00';
 
     //printPDF();
-    printPTP();
+    if (!printPTP())
+        res[8] = '\x01';
+
+    //Log::Logdb(LOGTYPE_PRINT,printok?1:0,ExGlobal::User);
     msleep(1000);
     emit finishPrint(res);
 }

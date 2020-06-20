@@ -13,7 +13,7 @@ QString ExGlobal::t_sampleInfo = "华山11";
 QString ExGlobal::t_BoxSerial = "Lot# 000001";
 QString ExGlobal::User = "NotLoggedIn";
 int ExGlobal::UserType = 0;
-QString ExGlobal::t_ReagentBox = "203";
+QString ExGlobal::t_ReagentBox = "204";
 bool ExGlobal::test = false;
 
 QString ExGlobal::SysName = "样机02";
@@ -21,7 +21,7 @@ QString ExGlobal::AdminPassword = "123456";
 int ExGlobal::LanguageCode = 1;
 int ExGlobal::PanelBoxIndex = 1;
 
-QString ExGlobal::t_version = "V2.31";
+QString ExGlobal::t_version = "V2.34";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
@@ -113,6 +113,7 @@ void ExGlobal::exClose(){
     qDebug()<<"exClose";
     //QProcess p;
     //p.start("halt");
+    Log::Logdb(LOGTYPE_POWERDOWN);
     system("shutdown -t 0");
 }
 
@@ -198,6 +199,7 @@ void ExGlobal::CaliParamInit()
     addTest();
     pUserModel->LoadUser();
     pWifiModel->LoadData();
+    Log::Logdb(LOGTYPE_POWERON);
 }
 
 uchar* ExGlobal::getReagentBox(QString BoxCode){
@@ -449,6 +451,29 @@ QStringList ExGlobal::serialPort(){
     return port;
 }
 
+QStringList ExGlobal::getPosNameArray(){
+    QStringList nameArr;
+
+    QString sql = "SELECT * FROM ReagentPos where BoxCode='"+t_ReagentBox+"'";
+    qDebug()<<"getPosNameArray"<<t_ReagentBox<<AssayItem;
+    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(sql);
+    while(query.next())
+    {
+        if (query.value(2).toInt()<2)
+            continue;
+        QString name = AssayItem[query.value(2).toInt()];
+        bool findit = false;
+        for (int i = 0; i < nameArr.size(); i++){
+            if(nameArr[i] == name){
+                findit = true;
+                break;
+            }
+        }
+        if (findit == false)
+            nameArr<<name;
+    }
+    return nameArr;
+}
 
 QString ExGlobal::getPosName(int pos){
     return AssayItem[pos];
@@ -585,7 +610,11 @@ void ExGlobal::addTest(){
         test.Checker = query.value(8).toString();
         test.ResultType = query.value(9).toInt();
         if (!pTestModel->ExistTest(test.Testid))
+        {
+            qDebug()<<"pTestModel->AddTest start";
             pTestModel->AddTest(test);
+            qDebug()<<"pTestModel->AddTest end";
+        }
     }
 }
 

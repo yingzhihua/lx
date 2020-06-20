@@ -15,6 +15,16 @@ typedef enum{
     ERROR_CODE_DISK_FULL=0x404
 } ERROR_CODE;
 
+typedef enum{
+    LOGTYPE_POWERON,
+    LOGTYPE_POWERDOWN,
+    LOGTYPE_LOGIN,
+    LOGTYPE_ERR,
+    LOGTYPE_PRINT,
+    LOGTYPE_CHECK,
+    LOGTYPE_UNCHECK
+} LOGTYPE;
+
 class Log
 {
 public:
@@ -28,6 +38,14 @@ public:
     static void LogPos(QString log);    
     static void LogTime(QString log);
     static void LogByFile(QString filename, QString log);
+
+    static bool Logdb(LOGTYPE logType);
+    static bool Logdb(LOGTYPE logType, int param1);
+    static bool Logdb(LOGTYPE logType, int param1, int param2);
+    static bool Logdb(LOGTYPE logType, int param1, QString param2);
+    static bool Logdb(LOGTYPE logType, int param1, QString param2, QString param3);
+    static bool Logdb(LOGTYPE logType, int param1, int param2, QString param3);
+    static bool Logdb(LOGTYPE logType, int param1, int param2, QString param3, QString param4);
 };
 
 #endif // LOG_H

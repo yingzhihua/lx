@@ -54,6 +54,7 @@ public:
         Result_LoopTest_finish,
         Result_CannelLoopTest_ok,
         Result_Print_finish,
+        Result_Print_Error,
         Result_Test_DataErr,
         Result_Test_ProcessErr,
         Result_Box_Valid,

@@ -176,7 +176,7 @@ int CKCamera::process_image(int index, uint8_t *data, uint32_t datalength){
         file.write((const char *)data,datalength);
         file.close();
     }
-
+    Log::LogByFile("CK.txt",QString("process_image,count=%1,index=%2").arg(count).arg(index));
     if (count != 1)
     {
         if (index == 1)
@@ -284,8 +284,6 @@ void CKCamera::run(){
         time.start();
         dataLength = CKGetFrame();
         if (dataLength != 0){
-            elapse = time.elapsed();
-            qDebug()<<"CKCamera::run,elapse="<<elapse<<"Frame="<<nFrame;
             if (captureMode == CaptureMode::View){
                 QImage image(rawData, 2592, 1944, QImage::Format_Grayscale8);
                 emit reView(image);
@@ -294,6 +292,8 @@ void CKCamera::run(){
             {
                 nFrame++;
                 process_image(nFrame,rawData,dataLength);
+                elapse = time.elapsed();
+                qDebug()<<"CKCamera::run,elapse="<<elapse<<"Frame="<<nFrame;
                 if (nFrame<count && elapse < 500){
                     QThread::msleep(500-elapse);
                 }

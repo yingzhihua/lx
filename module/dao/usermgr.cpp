@@ -21,6 +21,8 @@ bool UserMgr::logon(QString name, QString password)
 
     while(query.next())
     {
+        ExGlobal::UserType = query.value(4).toInt();
+        qDebug()<<"userType"<<ExGlobal::UserType;
         return true;
     }
 

@@ -493,8 +493,9 @@ void Sequence::ActionFinish(QByteArray data)
 
 void Sequence::errFinish(QByteArray data){
     qDebug()<<"Sequence errFinish:"<<data.toHex(' ');
-    QString errStr;
-    bool errHandle = false;
+    QString errStr = "未知错误！"+data.toHex(' ');
+    int errCode = 0;
+
     if (data.length()>11 && data[0] == '\xaa' && data[data.length()-1]=='\x55'){
         if (data[1] == '\x02'){            
             if (data[7] == '\x89'){
@@ -502,36 +503,35 @@ void Sequence::errFinish(QByteArray data){
                 int temp2 = (data[14]<<8)+data[15];
                 int chan = data[11];
                 errStr = QString("通道%1两传感器温差过大，一传感器温度：%2，一传感器温度：%3").arg(chan).arg(temp1).arg(temp2);
-                emit errOccur(errStr+" \n\n错误码："+QString::number(ERROR_CODE_TEMP_DIFF,16));
-                errHandle = true;
+                errCode = ERROR_CODE_TEMP_DIFF;
             }
             else if(data[7] == '\x24')
             {
                 errStr = QString("温度错误！");
-                emit errOccur(errStr+" \n\n错误码："+QString::number(ERROR_CODE_TEMP_ERR,16));
-                errHandle = true;
+                errCode = ERROR_CODE_TEMP_ERR;
             }
 
         }
         else if(data[1] == '\x01' && data.length() > 15){
             if (data[13] == '\x79' && data[14] == '\x27'){
                 errStr = QString("刺破电机运动超时！");
-                emit errOccur(errStr+" \n\n错误码："+QString::number(0x7927,16));
-                errHandle = true;
+                errCode = 0x7927;
             }
         }
 
+        emit errOccur(errStr+" \n\n错误码："+QString::number(errCode,16));
+        Log::Logdb(LOGTYPE_ERR,errCode,errStr);
 
-        if (errHandle == false) {
-            emit errOccur("未知错误："+data.toHex(' '));
-        }
         sequenceCancel();
     }
 }
 //因为打印动作可能同步执行，所有独立接收函数
 void Sequence::PrintFinish(QByteArray data){
     if (data[7] == '\xB1'){
-        emit sequenceFinish(SequenceResult::Result_Print_finish);
+        if (data[8] == '\x00')
+            emit sequenceFinish(SequenceResult::Result_Print_finish);
+        else
+            emit sequenceFinish(SequenceResult::Result_Print_Error);
     }
 }
 void Sequence::FinishSequence()
@@ -562,9 +562,11 @@ void Sequence::FinishSequence()
         //imageCapture->closeCamera();
         camera->closeCamera();
         currSequenceId = SequenceId::Sequence_Idle;
+        qDebug()<<"Itemsize"<<imageAna->getItem().size();
         if (imageAna->getItem().size() > 45)
         {
             int testid = testMgr->TestClose(2);
+            qDebug()<<"testid"<<testid;
             ExGlobal::addTest();            
             ExGlobal::pTestResultModel->setTestid(testid);
             out = SequenceResult::Result_Test_finish;
@@ -750,7 +752,9 @@ bool Sequence::DoAction(QDomElement action,bool isChild)
     if (isTesting()||isLoopTesting()){
         emit processFinish(sequenceAction.attribute("Duration").toInt(),nPreTime);
         int remain = (sequenceAction.attribute("Duration").toInt() - nPreTime)/1000;
-        QString title = "预计剩余"+QString::number(remain)+"秒";
+        QString title = "正在测试，预计剩余"+QString::number(remain)+"秒";
+        if (remain > 60)
+            title = "正在测试，预计剩余"+QString::number((remain/60)+1)+"分钟";
         if (isLoopTesting()){
             int oneloop = sequenceAction.attribute("Duration").toInt()/1000;
             remain += (loopTestCount-loopTestCurrCount)*oneloop;
@@ -894,6 +898,8 @@ bool Sequence::FormatAction(){
                 if (e.tagName()=="Action")
                 {
                     nFinishTime += e.attribute("Duration").toInt();
+                    if (e.hasAttribute("ActionTime"))
+                        nFinishTime += e.attribute("ActionTime").toInt();
                 }
                 else if(e.tagName()=="Actions"){
                     int childTotalStep = CalSteps(e);
@@ -912,6 +918,8 @@ bool Sequence::FormatAction(){
                             if (!ce.isNull()&& ce.hasAttribute("No") && ce.attribute("No").toInt() == j){
                                 ce.setAttribute("pretime",nChildFinshTime);
                                 nChildFinshTime += ce.attribute("Duration").toInt();
+                                if (ce.hasAttribute("ActionTime"))
+                                    nChildFinshTime += ce.attribute("ActionTime").toInt();
                                 cresult = true;
                                 break;
                             }
@@ -1168,7 +1176,9 @@ bool Sequence::listNextAction(bool first){
             qr->Pierce();
         }
         else if(act.device == "SwitchDoor"){
-            act.device = "Door";
+/*
+ * 前面已经执行查询sensor状态，合仓：1，Pump复位，2，Pump下移25000步，3，舱门进，4：Pump到工装位置
+ */
             if (bDoorState)
             {
                 act.device = "Pump";
@@ -1185,15 +1195,12 @@ bool Sequence::listNextAction(bool first){
                 actList.append(act);
 
                 act.device = "Pump";
-                act.value = 3;
-                actList.append(act);
-
-                act.device = "Query";
-                act.value = 3;
-            }
-            else {                
                 act.value = 1;
-                //act.param1 = 300;
+            }
+            else {
+                act.device = "Door";
+                act.value = 1;
+                act.param1 = 300;
             }
             QByteArray send = ActionParser::ParamToByte(act.device,act.value,act.param1,act.param2,act.param3);
             currOrder = send[7];

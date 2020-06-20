@@ -72,6 +72,7 @@ public:
     void setQrCode(int set){updateCaliParam("QrCode",set);emit qrCodeChanged();}
 
     static uchar* getReagentBox(QString BoxCode);
+    Q_INVOKABLE static QString getPosName(int pos);
     static void addTest();
     Q_INVOKABLE static void updateCaliParam(const QString &caliName, int caliValue);
     Q_INVOKABLE static int getCaliParam(const QString &caliName);
@@ -80,7 +81,7 @@ public:
     Q_INVOKABLE static QString getIP();
     Q_INVOKABLE static bool setTime(QString time);
     Q_INVOKABLE static void exClose();
-    Q_INVOKABLE static QString getPosName(int pos);
+    Q_INVOKABLE static QStringList getPosNameArray();
     Q_INVOKABLE static int getItemCT(int Itemid);
     Q_INVOKABLE static int getItemResult(int Testid, int Itemid);
     Q_INVOKABLE static QList<int> getBoxItemList();

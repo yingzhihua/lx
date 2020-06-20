@@ -56,7 +56,9 @@ public:
     QString getCurrTestChecker(){return m_display_list[currTestIndex].Checker;}
     Q_INVOKABLE void setCurrTest(int TestIndex);
     Q_INVOKABLE bool mayCheck();
+    Q_INVOKABLE bool haveCheck();
     Q_INVOKABLE void checkTest();
+    Q_INVOKABLE void uncheckTest();
 
 protected:
     QHash<int, QByteArray> roleNames() const;

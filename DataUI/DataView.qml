@@ -9,6 +9,7 @@ Page {
     property var itemList:[]
     Text{
         id: panelName
+        //text: "panelName"
         text:ExGlobal.panelName+" / "+ExGlobal.boxSerial()
         font.pixelSize: 40
         anchors.horizontalCenter: parent.horizontalCenter
@@ -83,6 +84,7 @@ Page {
         }
     }
 
+    //*
     Grid{
         id: gridPos
         //anchors.top: parent.top
@@ -122,6 +124,7 @@ Page {
             }
         }
     }
+    //*/
 
     Bt1 {
         id: btCannel
@@ -131,6 +134,8 @@ Page {
         anchors.rightMargin: 20
         onClicked: {            
             mainView.pop();
+            if (ExGlobal.dataEntry() === 1)
+                mainView.push("qrc:/HomeUI/Idle.qml");
         }
     }
 
@@ -140,12 +145,17 @@ Page {
         width: 200
         text: qsTr("审核")
         anchors.bottom: btCannel.top
-        anchors.bottomMargin: 50
+        anchors.bottomMargin: 80
         anchors.right: parent.right
         anchors.rightMargin: 20
         onClicked: {
-            testModel.checkTest();
+            if (btCheck.text === qsTr("撤回审核"))
+                testModel.uncheckTest();
+            else
+                testModel.checkTest();
             mainView.pop();
+            if (ExGlobal.dataEntry() === 1)
+                mainView.push("qrc:/HomeUI/Idle.qml");
         }
     }
 
@@ -158,10 +168,21 @@ Page {
         running: false
     }
 
+    AutoCloseMsg{
+        id: promptDialog
+        anchors.fill: parent
+    }
+
     Component.onCompleted: {
         itemList = ExGlobal.getBoxItemList();
         if (testModel.mayCheck())
+        {
             btCheck.visible = true;
+            if (testModel.haveCheck())
+                btCheck.text = qsTr("撤回审核")
+            else
+                btCheck.text = qsTr("通过审核")
+        }
         else
             btCheck.visible = false;
         console.debug(itemList)
@@ -173,6 +194,11 @@ Page {
             if (result == Sequence.Result_Print_finish)
             {
                 busyIndicator.running = false;
+                promptDialog.show(qsTr("打印完成"))
+            }
+            else if(result == Sequence.Result_Print_Error){
+                busyIndicator.running = false;
+                promptDialog.show(qsTr("未找到打印机"))
             }
         }
     }
