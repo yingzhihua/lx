@@ -167,8 +167,8 @@ ImageCapture::ImageCapture(QObject *parent) : QThread(parent),io(IO_METHOD_MMAP)
     resultData[9] = '\x02';
     resultData[11] = '\x55';
 
-    ExGlobal::bufrgb = (unsigned char *)malloc(2592 * 1944 * 3);
-    ExGlobal::hbufrgb = (ExGlobal::bufrgb) + (1296*1944*3);
+    //ExGlobal::bufrgb = (unsigned char *)malloc(2592 * 1944 * 3);
+    //ExGlobal::hbufrgb = (ExGlobal::bufrgb) + (1296*1944*3);
     bufy = (unsigned char *)malloc(2592 * 1944);
     buf2y = (unsigned short *)malloc(2592 * 1944 * 2);
     sum = (unsigned int *)malloc(2592 * 1944 * 8);
@@ -1098,6 +1098,9 @@ int ImageCapture::process_image(int i, const void *p, int size){
 
 void ImageCapture::run()
 {
+    QTime time;
+    int elapse;
+
     if (camerainited == false)
     {
         resultData[10] = 0x10;
@@ -1113,6 +1116,8 @@ void ImageCapture::run()
         fd_set fds;
         struct timeval tv;
         int r;
+
+        time.start();
 
         if (stopping == true){
             qDebug()<<"stop Capture";            
@@ -1164,6 +1169,10 @@ void ImageCapture::run()
             return;
         }
 #endif
+        elapse = time.elapsed();
+        if (elapse < 500){
+            QThread::msleep(500-elapse);
+        }
         qmutex.unlock();
     }
     captureMode = CaptureMode::Open;

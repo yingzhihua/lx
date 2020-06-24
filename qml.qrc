@@ -59,5 +59,6 @@
         <file>HomeUI/E04.qml</file>
         <file>components/SecondConfirm.qml</file>
         <file>components/AutoCloseMsg.qml</file>
+        <file>components/TwoBtnQuery.qml</file>
     </qresource>
 </RCC>

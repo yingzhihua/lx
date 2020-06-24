@@ -21,7 +21,7 @@ QString ExGlobal::AdminPassword = "123456";
 int ExGlobal::LanguageCode = 1;
 int ExGlobal::PanelBoxIndex = 1;
 
-QString ExGlobal::t_version = "V2.34";
+QString ExGlobal::t_version = "V2.35";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
@@ -610,10 +610,8 @@ void ExGlobal::addTest(){
         test.Checker = query.value(8).toString();
         test.ResultType = query.value(9).toInt();
         if (!pTestModel->ExistTest(test.Testid))
-        {
-            qDebug()<<"pTestModel->AddTest start";
-            pTestModel->AddTest(test);
-            qDebug()<<"pTestModel->AddTest end";
+        {            
+            pTestModel->AddTest(test);            
         }
     }
 }

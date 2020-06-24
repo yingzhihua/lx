@@ -55,6 +55,8 @@ Page {
             errorDesp.text = qsTr("试剂盒未检测到二维码");
         else if (Sequence.boxParam() === 2)
             errorDesp.text = qsTr("空试剂盒");
+        else if (Sequence.boxParam() === 5)
+            errorDesp.text = qsTr("试剂盒已过期");
         updateState.start()
     }
 }

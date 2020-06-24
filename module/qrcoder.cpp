@@ -12,6 +12,7 @@
 
 QImage QRcoder::img;
 QImage QRcoder::img2;
+QImage QRcoder::img3;
 
 const int scaleX = 520;
 const int scaleY = 180;
@@ -26,11 +27,25 @@ QRcoder::QRcoder(QObject *parent) : QThread(parent)
     scale = true;
 }
 
+bool QRcoder::OpenCamera(int index, VideoCapture &cap){
+    cap.open(index);
+    if (cap.isOpened())
+    {
+        cap.set(CAP_PROP_FRAME_WIDTH,10000);
+        cap.set(CAP_PROP_FRAME_HEIGHT,10000);
+        if (cap.get(CAP_PROP_FRAME_WIDTH) == 1920)
+            return true;
+        qDebug()<<"camera "<<index<<" width is valid";
+        cap.release();
+    }
+    qDebug()<<"can't open camera"<<index;
+    return false;
+}
+
 void QRcoder::run(){
     int count = 0;
     QString result;
-    int nresult = 0;
-    bool openSecondCamera = false;
+    int nresult = 0;    
     VideoCapture cap;
 
     QByteArray res;
@@ -47,43 +62,14 @@ void QRcoder::run(){
     qDebug()<<"start time:"<<QDateTime::currentDateTime().toString("hh:mm:ss.zzz");
     Log::LogCam("QRcoder start:"+QDateTime::currentDateTime().toString("hh:mm:ss.zzz"));
 
-    cap.open(1);
-    if (!cap.isOpened())
-    {
-        qDebug()<<"open cam 1 fail";
-        Log::LogCam("open cam 1 fail");
-        cap.open(0);
-        if (!cap.isOpened()){
+    if (!OpenCamera(1,cap)){
+        if (!OpenCamera(0,cap)){
             res.append("Cannot identify");
             emit finishQRcode(res);
             return;
         }
-        openSecondCamera = true;
     }
-    cap.set(CAP_PROP_FRAME_WIDTH,10000);
-    cap.set(CAP_PROP_FRAME_HEIGHT,10000);
-    if (cap.get(CAP_PROP_FRAME_WIDTH) != 1920){
-        qDebug()<<"width is not 1920"<<cap.get(CAP_PROP_FRAME_WIDTH);
-        cap.release();
-        if (openSecondCamera == false){
-            cap.open(0);
-            if (!cap.isOpened()){
-                qDebug()<<"open cam 0 fail";
-                Log::LogCam("open cam 0 fail");
-                res.append("Cannot identify");
-                emit finishQRcode(res);
-                return;
-            }
-            cap.set(CAP_PROP_FRAME_WIDTH,10000);
-            cap.set(CAP_PROP_FRAME_HEIGHT,10000);
-            if (cap.get(CAP_PROP_FRAME_WIDTH) != 1920){
-               cap.release();
-               res.append("Cannot identify");
-               emit finishQRcode(res);
-               return;
-            }
-        }
-    }
+
     cap.set(CAP_PROP_FRAME_WIDTH,1920);
     cap.set(CAP_PROP_FRAME_HEIGHT,1080);
     cap.set(CAP_PROP_AUTO_EXPOSURE,1);
@@ -92,7 +78,7 @@ void QRcoder::run(){
 
     qDebug()<<"width:"<<cap.get(CAP_PROP_FRAME_WIDTH)<<" height:"<<cap.get(CAP_PROP_FRAME_HEIGHT)<<" Frame:"<<cap.get(CAP_PROP_FPS)<<" auto_expoure:"<<cap.get(CAP_PROP_AUTO_EXPOSURE)<<" exp:"<<cap.get(CAP_PROP_EXPOSURE);
 
-
+    strQr.clear();
     for (;;) {
         Mat Frame;
         cap>>Frame;
@@ -102,41 +88,60 @@ void QRcoder::run(){
         qDebug()<<"read Frame "<<count<<",time:"<<QDateTime::currentDateTime().toString("hh:mm:ss.zzz")<<",cols="<<Frame.cols<<",rows="<<Frame.rows<<"scale:"<<scale;
         Log::LogCam(QString("read Frame %1,time:%2,cols=%3,rows=%4,type=%5").arg(count).arg(QDateTime::currentDateTime().toString("hh:mm:ss.zzz")).arg(Frame.cols).arg(Frame.rows).arg(Frame.type()));
 
-        Mat sourceFrame = Mat(Frame.rows, Frame.cols, Frame.type(), ExGlobal::bufrgb);
+        Mat sourceFrame = Mat(Frame.rows, Frame.cols, Frame.type(), ExGlobal::bufrgb);        
         cvtColor(Frame, sourceFrame, COLOR_BGR2RGB);
         img = QImage((const uchar*)sourceFrame.data,sourceFrame.cols,sourceFrame.rows,QImage::Format_RGB888);
 
-        if (mode == DECODE_MODE_PIERCE)
-            nresult = pierce(sourceFrame,result);
-        else if (mode == DECODE_MODE_QR)            
-            //result = QrDecode(sourceFrame);
-        nresult = pierce(sourceFrame,result);
+        Mat handleFrame = Mat(sourceFrame.rows,sourceFrame.cols,CV_8UC1,ExGlobal::hbufrgb);
+        cvtColor(sourceFrame, handleFrame, COLOR_RGB2GRAY);
 
-        if (!result.isEmpty()||++count > 3)
-        {
-            qDebug()<<"result="<<result<<",count="<<count;
-            break;
+        initX = 650;
+        initY = 300;
+        if (haveQrcode(handleFrame)){
+            qDebug()<<"haveQrcode";
+            res[2] = 1;
         }
+        else
+            res[2] = 0;
+
+        initX += 600;
+        initY -= 100;
+        qDebug()<<"initX="<<initX<<"initY="<<initY;
+        if (initX > 0 && initX < (1920-200) && initY > 0 && initY < (1080-500))
+        {
+            handleFrame = Mat(500,120,CV_8UC1,ExGlobal::hbufrgb);
+            cvtColor(sourceFrame(Rect(initX,initY,120,500)), handleFrame, COLOR_RGB2GRAY);
+
+            if (haveliquids(handleFrame)){
+                qDebug()<<"haveliquids";
+                res[3] = 1;
+            }
+            else
+                res[3] = 0;
+
+            Mat liquids = sourceFrame(Rect(initX,initY,120,500)).clone();
+            img2 = QImage((const uchar*)liquids.data,liquids.cols,liquids.rows,QImage::Format_RGB888);
+        }
+        img3 = QImage((const uchar*)handleFrame.data,handleFrame.cols,handleFrame.rows,QImage::Format_Grayscale8);
+        if (!strQr.isEmpty()||++count > 3)
+            break;
     }
     cap.release();
 
     qDebug()<<"end time:"<<QDateTime::currentDateTime().toString("hh:mm:ss.zzz");
     Log::LogCam("QRcoder end:"+QDateTime::currentDateTime().toString("hh:mm:ss.zzz"));
 
-    if (result.isEmpty())
+    if (strQr.isEmpty())
     {
         res.append("Cannot identify");
         qDebug()<<"result is empty";
     }
     else
-    {
-        res[2] = '\x01';
-        nresult |= 0x01;
-        res.append(result);
+    {        
+        res.append(strQr);
         qDebug()<<"result="<<result;
     }
 
-    res[2] = static_cast<char>(nresult);
     emit finishQRcode(res);
 }
 
@@ -394,7 +399,7 @@ bool QRcoder::haveliquids(Mat &image)
     for (size_t i = 0; i < contours.size(); i++)
     {
         qDebug()<<"s="<<contourArea(contours[i])<<"L="<<arcLength(contours[i],true);
-        if (contourArea(contours[i]) < 800)
+        if (contourArea(contours[i]) < 400)
             continue;
         int maxValue = contours[i][0].y;
         int minValue = contours[i][0].y;
@@ -468,6 +473,46 @@ bool QRcoder::havehole(Mat &image){
         qDebug()<<"s="<<contourArea(contours[i])<<"L="<<arcLength(contours[i],true);
     }
     */
+    return result;
+}
+
+bool QRcoder::haveQrcode(Mat &image){
+    bool result = false;
+
+    QRCodeDetector qrcode;
+    vector<Point> transform;
+    bool result_detection = qrcode.detect(image,transform);
+    Mat straight_barcode;
+    if(qrcode.detect(image,transform)){
+        initX = transform[0].x;
+        initY = transform[0].y;
+        string decode_info = qrcode.decode(image,transform,straight_barcode);
+        if (!decode_info.empty()){
+            strQr = QString::fromStdString(decode_info);
+            qDebug()<<"decode_info"<<strQr;
+            return true;
+        }
+    }
+    qDebug()<<"haveQrcode"<<result_detection<<"posnum"<<transform.size();
+    for (int i = 0; i < transform.size();i++)
+        qDebug()<<"i="<<i<<"x="<<transform[i].x<<"y="<<transform[i].y;
+
+    zbar::ImageScanner scanner;
+    scanner.set_config(zbar::ZBAR_NONE,zbar::ZBAR_CFG_ENABLE,1);
+
+    zbar::Image imageZbar(image.cols,image.rows,"Y800",image.data,image.cols*image.rows);
+    scanner.scan(imageZbar);
+    zbar::Image::SymbolIterator symbol = imageZbar.symbol_begin();
+    if (imageZbar.symbol_begin()==imageZbar.symbol_end()){
+        qDebug()<<"zbar scan fail";
+        Log::LogCam("zbar scan fail");
+    }
+    else {
+        strQr = QString::fromStdString(imageZbar.symbol_begin()->get_data());
+        result = true;
+        qDebug()<<"decode_info:"<<strQr;
+        Log::LogCam("decode_info:"+strQr);
+    }
     return result;
 }
 

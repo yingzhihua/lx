@@ -767,3 +767,12 @@ double ImageAnalysis::GetDefinition3(void *data, int imageType){
     meanValue = imageMeanStdValue.at<double>(0,0);
     return meanValue*meanValue;
 }
+
+double ImageAnalysis::GetMeanLight(void *data, int imageType){
+    Mat imageGrey;
+    if (imageType == 0)
+        imageGrey = Mat(1944,2592,CV_8U,data);
+    else if(imageType == 1)
+        imageGrey = Mat(1080,1920,CV_8U,data);
+    return mean(imageGrey)[0];
+}

@@ -21,8 +21,9 @@ Rectangle {
                 Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:200;text:SampleId}
                 Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:500;text:SampleInfo}
                 Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:300;text:TestTime}
-                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:200;text:User}
-                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:200;text:Checker}
+                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:150;text:User}
+                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:150;text:Checker}
+                Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:50;text:Checker!=""?"√":""}
             }
             MouseArea{
                 anchors.fill: parent

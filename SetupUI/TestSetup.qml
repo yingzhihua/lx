@@ -218,16 +218,27 @@ Item {
     Image {
         id: qrBox2
         anchors.left: qrBox.right
-        anchors.leftMargin: 50
+        anchors.leftMargin: 10
         anchors.top: messageTest.bottom
         anchors.topMargin: 20
-        width: 440
+        width: 300
         height: 440
         fillMode: Image.Pad
         cache: false
         source: ""
     }
-
+    Image {
+        id: qrBox3
+        anchors.left: qrBox2.right
+        anchors.leftMargin: 10
+        anchors.top: messageTest.bottom
+        anchors.topMargin: 20
+        width: 300
+        height: 440
+        fillMode: Image.Pad
+        cache: false
+        source: ""
+    }
     Label{
         id:l3
         height: 20
@@ -255,7 +266,7 @@ Item {
     GroupBox{
         id:qrxy
         title: qsTr("二维码剪切坐标")
-        anchors.left: qrBox2.right
+        anchors.left: qrBox3.right
         anchors.leftMargin: 50
         anchors.top: messageTest.bottom
         anchors.topMargin: 20
@@ -437,6 +448,7 @@ Item {
             //qrBox.source = "";
             qrBox.source = "image://CodeImg/qr";
             qrBox2.source = "image://CodeImg/qr2";
+            qrBox3.source = "image://CodeImg/qr3";
             l3.visible = true;
             l4.visible = true;
             console.log("TestSetup.qml,onCallQmlRefeshQrImg");

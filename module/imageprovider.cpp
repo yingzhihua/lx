@@ -17,6 +17,8 @@ QImage ImageProvider::requestImage(const QString &id, QSize *size, const QSize &
         return QRcoder::img;
     else if (id == "qr2")
         return QRcoder::img2;
+    else if (id == "qr3")
+        return QRcoder::img3;
 
     return anaMainImg;
 }
@@ -30,5 +32,7 @@ QPixmap ImageProvider::requestPixmap(const QString &id, QSize *size, const QSize
         return QPixmap::fromImage(QRcoder::img);
     else if (id == "qr2")
         return QPixmap::fromImage(QRcoder::img2);
+    else if (id == "qr3")
+        return QPixmap::fromImage(QRcoder::img3);
     return QPixmap::fromImage(anaMainImg);
 }

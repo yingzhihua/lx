@@ -4,7 +4,7 @@ import QtCharts 2.3
 
 import Dx.Sequence 1.0
 import Dx.Global 1.0
-
+import "../components"
 Page {
     property int showtype: 0
     property int showlight: 1
@@ -165,6 +165,15 @@ Page {
         }
     }
 
+    AutoCloseMsg{
+        id:closemsg
+        anchors.fill: parent
+        onCloseAck: {
+            mainView.pop();
+            mainView.push("qrc:/HomeUI/Idle.qml");
+        }
+    }
+
     Component.onCompleted: {
         Sequence.sequenceDo(Sequence.Sequence_Test);
         console.log(ExGlobal.getPosNameArray());
@@ -224,8 +233,7 @@ Page {
             }
             else if(result == Sequence.Result_Test_unfinish){
                 headerMsg.text = "测试完成！";
-                mainView.pop();
-                mainView.push("qrc:/HomeUI/Idle.qml");
+                closemsg.show(qsTr("试剂盒异常，测试非正常完成！"))
             }
 
             console.log("TestProcessT.qml,result:"+result);

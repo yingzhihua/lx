@@ -26,6 +26,7 @@ public:
     explicit QRcoder(QObject *parent = nullptr);
     static QImage img;
     static QImage img2;
+    static QImage img3;
     bool handleimage;
     bool scale;
     int binValue = 120;
@@ -44,11 +45,16 @@ public slots:
 
 private:
     DECODE_MODE mode;
+    QString strQr;
+    int initX,initY;
     void handleImage(Mat &image);
     int pierce(Mat &image, QString &qrStr);
     QString QrDecode(Mat &image);
     bool haveliquids(Mat &image);
     bool havehole(Mat &image);
+    bool haveQrcode(Mat &image);
+
+    bool OpenCamera(int index, VideoCapture &cap);
 };
 
 #endif // QRCODER_H

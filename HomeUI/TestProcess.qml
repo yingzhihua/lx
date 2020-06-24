@@ -101,6 +101,15 @@ Page {
         }
     }
 
+    AutoCloseMsg{
+        id:closemsg
+        anchors.fill: parent
+        onCloseAck: {
+            mainView.pop();
+            mainView.push("qrc:/HomeUI/Idle.qml");
+        }
+    }
+
     Component.onCompleted: {
         message.visible = false;
         Sequence.sequenceDo(Sequence.Sequence_Test);
@@ -109,31 +118,7 @@ Page {
     Connections{
         target: Sequence
         onProcessFinish:{
-            console.log("TestProcess.qml,total:"+total+",finish:"+finish);
-            /*
-            var ffinish = finish*1000/total;
-
-            if (ffinish >= 1000)
-            {
-                testCompleted.width = 0;
-                testunCompleted.width = 0;
-            }
-            else
-            {
-                testCompleted.width = ffinish*headerRec.width/1000;
-                testunCompleted.x = testCompleted.width;
-                testunCompleted.width = (1000-ffinish)*headerRec.width/1000;
-            }
-
-            if (total == finish)
-            {
-                //headerMsg.text = "测试完成！";
-                //stackView.pop();
-                //stackView.push("qrc:/HomeUI/Idle.qml");
-            }
-            else
-                headerMsg.text = "预计剩余"+((total-finish)/1000)+"秒";
-                */
+            console.log("TestProcess.qml,total:"+total+",finish:"+finish);            
             message.text = Sequence.sequenceMessage();
         }
 
@@ -156,8 +141,11 @@ Page {
             }
             else if(result == Sequence.Result_Test_unfinish){
                 headerMsg.text = "测试完成！";
-                mainView.pop();
-                mainView.push("qrc:/HomeUI/Idle.qml");
+                closemsg.show(qsTr("试剂盒异常，测试非正常完成！"))
+
+            }
+            else if(result == Sequence.Result_Test_DryFillErr){
+                testcancelDialog.show(3)
             }
 
             console.log("TestProcess.qml,result:"+result);

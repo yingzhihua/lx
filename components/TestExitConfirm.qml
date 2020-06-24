@@ -88,11 +88,17 @@ Page {
             cancelText.text = qsTr("取消测试后，试剂盒将不再可用，确定取消测试？")
             continueTest.text = qsTr("返回测试")
         }
-        else
+        else if (status === 2)
         {
             cancelText.text = qsTr("磁盘空间剩余不多，是否继续测试？")
             continueTest.text = qsTr("继续测试")
         }
+        else if (status === 3)
+        {
+            cancelText.text = qsTr("吸液异常，是否继续测试？")
+            continueTest.text = qsTr("继续测试")
+        }
+
         testcancelDialog.visible = true;
     }
 }

@@ -4,8 +4,7 @@ import "../components"
 import Dx.Sequence 1.0
 import Dx.Global 1.0
 
-Page {
-    property bool bDoorIsOpen: false
+Page {    
     property bool bErrorOpenDoor: false
     id: idle_page
 
@@ -19,27 +18,7 @@ Page {
         source: "qrc:/image/openDoor.png"
         MouseArea{
             anchors.fill: parent
-            onClicked: {
-                console.log("openDoor,status:"+Sequence.door+"box,"+Sequence.box);                
-                if (Sequence.door == false)
-                {
-                    if (Sequence.sequenceDo(Sequence.Sequence_OpenBox))
-                    {
-                        busyIndicator.running = true;
-                        busyDes.text = qsTr("正在开仓");
-                        busyDes.visible = true;
-                    }
-                }
-                else
-                {
-                    if (Sequence.sequenceDo(Sequence.Sequence_CloseBox))
-                    {
-                        busyIndicator.running = true;
-                        busyDes.text = qsTr("正在合仓");
-                        busyDes.visible = true;
-                    }
-                }
-            }
+            onClicked: switchDoor()
         }
     }
 
@@ -98,6 +77,26 @@ Page {
             console.log(res1,res2);
             ExGlobal.sampleCode = res1;
             ExGlobal.sampleInfo = res2;
+        }
+    }
+
+    TwoBtnQuery{
+        id: promptDlg
+        anchors.fill: parent
+        btn1: qsTr("继续")
+        btn2: qsTr("停止")
+        onCloseAck: {
+            if (res == 1){
+                mainView.pop();
+                mainView.push("qrc:/HomeUI/BoxReady.qml");
+            }
+            else{
+                bErrorOpenDoor = true;
+                busyIndicator.running = true;
+                busyDes.visible = true;
+                busyDes.text = qsTr("试剂盒错误，正在开仓");
+                Sequence.sequenceDo(Sequence.Sequence_OpenBox);
+            }
         }
     }
 
@@ -195,8 +194,7 @@ Page {
         Sequence.changeTitle(qsTr("待机"));
         tabBar.enabled = true;
 
-        Sequence.actionDo("Query",3,0,0,0);
-        bDoorIsOpen = Sequence.door;
+        Sequence.actionDo("Query",3,0,0,0);        
         //*
         if (Sequence.door)
             updateState.start();
@@ -228,8 +226,7 @@ Page {
                     mainView.push("qrc:/HomeUI/E04.qml");
                 }
                 else
-                {
-                    bDoorIsOpen = true;
+                {                    
                     busyIndicator.running = false;
                     busyDes.visible = false;
                     updateState.start();
@@ -237,7 +234,6 @@ Page {
             }            
             else if(result == Sequence.Result_CloseBox_ok)
             {
-                bDoorIsOpen = false;
                 updateState.stop();
 
                 if (Sequence.box){
@@ -258,11 +254,15 @@ Page {
             }
             else if(result == Sequence.Result_Box_Invalid)
             {                
-                bErrorOpenDoor = true;
-                busyDes.text = qsTr("试剂盒错误，正在开仓");
-                Sequence.sequenceDo(Sequence.Sequence_OpenBox);
 
-                console.log("close box after Pierce No");
+                busyIndicator.running = false;
+                busyDes.visible = false;
+                promptDlg.msg = qsTr("试剂盒错误，是否继续？")
+                promptDlg.show()
+
+                //bErrorOpenDoor = true;
+                //busyDes.text = qsTr("试剂盒错误，正在开仓");
+                //Sequence.sequenceDo(Sequence.Sequence_OpenBox);
             }
 
 
@@ -275,12 +275,16 @@ Page {
             else
                 boxstate.text = qsTr("未检测到试剂盒");
         }
-        onDoorStateChanged:{
-            bDoorIsOpen = Sequence.door;
+        onDoorStateChanged:{            
             if (Sequence.door)
                 updateState.start();
             else
                 updateState.stop();
+        }
+
+        onDoorKeyPress:{
+            console.log("idle.qml doorKeyPress");
+            switchDoor();
         }
     }
 
@@ -292,6 +296,29 @@ Page {
         onTriggered: {
             console.log("idle query sensor state");
             Sequence.actionDo("Query",3,0,0,0);
+        }
+    }
+
+    function switchDoor(){
+        console.log("openDoor,status:"+Sequence.door+"box,"+Sequence.box);
+        bErrorOpenDoor = false;
+        if (Sequence.door == false)
+        {
+            if (Sequence.sequenceDo(Sequence.Sequence_OpenBox))
+            {
+                busyIndicator.running = true;
+                busyDes.text = qsTr("正在开仓");
+                busyDes.visible = true;
+            }
+        }
+        else
+        {
+            if (Sequence.sequenceDo(Sequence.Sequence_CloseBox))
+            {
+                busyIndicator.running = true;
+                busyDes.text = qsTr("正在合仓");
+                busyDes.visible = true;
+            }
         }
     }
 }

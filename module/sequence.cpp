@@ -11,6 +11,8 @@
 #define AUTOFOCUS_STEP 100
 #define AUTOFOCUS_MAXOFFSET 6
 
+#define DRYPFILL 1.10
+
 static int autoFocus_CurrPoint = 0;
 static int autoFocus_ClarityPoint = 0;
 static double autoFocus_ClarityValue = 0;
@@ -25,6 +27,9 @@ static QDateTime testStartTime;
 static QMetaEnum metaEnum = QMetaEnum::fromType<Sequence::SequenceId>();
 Sequence::Sequence(QObject *parent) : QObject(parent)
 {    
+    ExGlobal::bufrgb = (unsigned char *)malloc(2592 * 1944 * 3);
+    ExGlobal::hbufrgb = (ExGlobal::bufrgb) + (1296*1944*3);
+
     imageAna = new ImageAnalysis();
     timer = new QTimer(this);
     timer->setTimerType(Qt::PreciseTimer);
@@ -105,7 +110,7 @@ void Sequence::sequenceSetPanel(QString panelName)
 
     for (QDomElement e = root.firstChildElement("PanelTest"); !e.isNull(); e = e.nextSiblingElement("PanelTest"))
     {
-        if (e.attribute("PanelName")==panelName)
+        if (e.attribute("PanelName")==panelName || e.attribute("PanelCode")==panelName)
         {
             ExGlobal::setPanelName(e.attribute("PanelName"));
             ExGlobal::setPanelCode(e.attribute("PanelCode"));
@@ -155,6 +160,8 @@ bool Sequence::sequenceDo(SequenceId id)
                 imageAna->SetMask(ExGlobal::getReagentBox(ExGlobal::reagentBox()),0);
                 testMgr->TestCreate(ExGlobal::boxSerial());
                 bFocused = false;
+                dryMeanValue = 0;
+                fillMeanValue = 0;
                 break;
             }
         }
@@ -272,10 +279,13 @@ void Sequence::ActionFinish(QByteArray data)
     if (data[7] == '\x72'){
         //if (currSequenceId != SequenceId::Sequence_Test){
         if (currSequenceId == SequenceId::Sequence_Idle){
+            /*
             if (bDoorState == false)//close
                 sequenceDo(SequenceId::Sequence_OpenBox);
             else
                 sequenceDo(SequenceId::Sequence_CloseBox);
+                */
+            emit doorKeyPress();
         }
         return;
     }
@@ -355,51 +365,63 @@ void Sequence::ActionFinish(QByteArray data)
         else if(data[1] == '\x03')//CameraCapture
         {
             qDebug()<<"CameraCapture ActionFinish,type="<<currCameraCaptureType;
-            if (data[7] == '\xa0' && data[10] == '\x00' && currCameraCaptureType == 5){
-                /*
-                if (currCameraCycle < 2)                
-                    imageAna->FirstImage(imageCapture->getyData(),imageCapture->imagetype);
-                else                
-                    imageAna->AddImage(imageCapture->getyData(),imageCapture->imagetype);
+            if (data[7] == '\xa0' && data[10] == '\x00'){
+                if (currCameraCaptureType == 5){
+                    /*
+                    if (currCameraCycle < 2)
+                        imageAna->FirstImage(imageCapture->getyData(),imageCapture->imagetype);
+                    else
+                        imageAna->AddImage(imageCapture->getyData(),imageCapture->imagetype);
                     //*/
-                //*
-                if (currCameraCycle < 2)
-                    imageAna->FirstImage(camera->getyData(),camera->imagetype);
-                else
-                    imageAna->AddImage(camera->getyData(),camera->imagetype);
+                    //*
+                    if (currCameraCycle < 2)
+                        imageAna->FirstImage(camera->getyData(),camera->imagetype);
+                    else
+                        imageAna->AddImage(camera->getyData(),camera->imagetype);
                     //*/
 
-                imageProvider->anaMainImg = imageAna->getMainImg(0,1);
-                emit callQmlRefeshAnaMainImg();
-                QVector<int> item = imageAna->getItem();
-                QVector<int> value = imageAna->getValue();
-                QVector<int> posIndex = imageAna->getIndex();
-                emit callQmlRefeshData(currCameraCycle,item,value);
+                    imageProvider->anaMainImg = imageAna->getMainImg(0,1);
+                    emit callQmlRefeshAnaMainImg();
+                    QVector<int> item = imageAna->getItem();
+                    QVector<int> value = imageAna->getValue();
+                    QVector<int> posIndex = imageAna->getIndex();
+                    emit callQmlRefeshData(currCameraCycle,item,value);
 
-                SqliteMgr::sqlitemgrinstance->StartTransations();
-                for(int i = 0; i < item.size(); i++){
-                    testMgr->InsertData(posIndex[i],item[i],currCameraCycle,value[i]);
-                }
-                SqliteMgr::sqlitemgrinstance->EndTransations();
+                    SqliteMgr::sqlitemgrinstance->StartTransations();
+                    for(int i = 0; i < item.size(); i++){
+                        testMgr->InsertData(posIndex[i],item[i],currCameraCycle,value[i]);
+                    }
+                    SqliteMgr::sqlitemgrinstance->EndTransations();
 
-                /*
-                QString saveStr;
-                if (currCameraCycle == 1){
-                    saveStr = "cycle";
+                    /*
+                    QString saveStr;
+                    if (currCameraCycle == 1){
+                        saveStr = "cycle";
+                        for (int i = 0; i < item.size(); i++){
+                            saveStr += ",";
+                            //saveStr += Log::getPosName(item[i]);
+                            saveStr += ExGlobal::getPosName(item[i]);
+                        }
+                        Log::LogPos(saveStr);
+                    }
+                    saveStr = QString::number(currCameraCycle);
                     for (int i = 0; i < item.size(); i++){
                         saveStr += ",";
-                        //saveStr += Log::getPosName(item[i]);
-                        saveStr += ExGlobal::getPosName(item[i]);
+                        saveStr += QString::number(value[i]);
                     }
                     Log::LogPos(saveStr);
+                    //*/
                 }
-                saveStr = QString::number(currCameraCycle);
-                for (int i = 0; i < item.size(); i++){
-                    saveStr += ",";
-                    saveStr += QString::number(value[i]);
+                else if(currCameraCaptureType == 1){
+                    dryMeanValue = imageAna->GetMeanLight(camera->getyData(),camera->imagetype);
+                    Log::LogTime(QString("Dry Mean Value:%1").arg(dryMeanValue));
                 }
-                Log::LogPos(saveStr);
-                //*/
+                else if(currCameraCaptureType == 3){
+                    fillMeanValue = imageAna->GetMeanLight(camera->getyData(),camera->imagetype);
+                    Log::LogTime(QString("Fill Mean Value:%1").arg(fillMeanValue));
+                    if (dryMeanValue > 3 && fillMeanValue > 3 && dryMeanValue/fillMeanValue < DRYPFILL)
+                        emit sequenceFinish(SequenceResult::Result_Test_DryFillErr);
+                }
             }
             else if(data[7] == '\xa0' && data[10] != '\x00'){
                 //errReceive(0x300 + data[10]);
@@ -418,30 +440,30 @@ void Sequence::ActionFinish(QByteArray data)
             emit qrDecode(data.data());
         }
         else if(data[7] == '\xB1'){ //刺穿识别 1:识别出二维码;2:检查出刺穿孔;4:已刺穿;8:有试剂液体
-            if (ExGlobal::projectMode() == 0 || data[2] == '\x0B')
+            if (ExGlobal::projectMode() == 2)
                 emit sequenceFinish(SequenceResult::Result_Box_Valid);
-            else {
-                if (data[2]&0x04)
-                    boxparam = 1;
-                else if((data[2]&0x08) == 0)
-                    boxparam = 2;
-                else if ((data[2]&0x02) == 0)
-                    boxparam = 3;
-                else
-                    boxparam = 4;
-                //emit sequenceFinish(SequenceResult::Result_Box_Invalid);
-                emit sequenceFinish(SequenceResult::Result_Box_Valid);
+            else if(data[2] == '\x0')
+            {
+                boxparam = 4;
+                emit sequenceFinish(SequenceResult::Result_Box_Invalid);
             }
-            /*
-            else if (data[2]&0x04)
-                emit sequenceFinish(SequenceResult::Result_Pierce_Damage);
-            else if ((data[2]&0x08) == 0)
-                emit sequenceFinish(SequenceResult::Result_Pierce_Empty);
-            else if ((data[2]&0x02) == 0)
-                emit sequenceFinish(SequenceResult::Result_Pierce_No);
             else
-                emit sequenceFinish(SequenceResult::Result_Pierce_Yes_NoQr);
-                */
+            {
+                int decodeResult = decodeQr(data.remove(0,10));
+                if (decodeResult == 1){
+                    boxparam = 5;
+                    emit sequenceFinish(SequenceResult::Result_Box_Invalid);
+                }
+                else if(data[3] == '\x0')
+                {
+                    boxparam = 2;
+                    emit sequenceFinish(SequenceResult::Result_Box_Invalid);
+                }
+                else
+                {
+                    emit sequenceFinish(SequenceResult::Result_Box_Valid);
+                }
+            }
         }
     }
 
@@ -1265,6 +1287,21 @@ void Sequence::PierceDect(){
     actList.append(act);
 
     listNextAction(true);
+}
+
+int Sequence::decodeQr(QString strQr){
+    qDebug()<<"decodeQr"<<strQr;
+    QStringList record = strQr.split(' ');
+    if (record.size() > 6 && record[0] == "FLASHDX1"){
+        sequenceSetPanel(record[1]);
+        ExGlobal::setReagentBox(record[2]);
+        ExGlobal::setBoxSerial(QString("Lot# %1").arg(record[3]));
+
+        QDateTime time = QDateTime::fromString(record[4],"yyyyMMddhh");
+        if (time.addDays(record[5].toInt()).toTime_t() < QDateTime::currentDateTime().toTime_t())
+            return 1;
+    }
+    return 0;
 }
 
 void Sequence::SwitchDoor(){

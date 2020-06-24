@@ -12,9 +12,6 @@ static QByteArray resultData;
 static int imageCount = 0;
 CKCamera::CKCamera(QObject *parent) : QThread(parent)
 {
-    ExGlobal::bufrgb = (unsigned char *)malloc(2592 * 1944 * 3);
-    ExGlobal::hbufrgb = (ExGlobal::bufrgb) + (1296*1944*3);
-
     rawData = new uint8_t[2592 * 1944];
     sum = new uint32_t[2592 * 1944];
     m_hCamera = nullptr;

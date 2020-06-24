@@ -19,6 +19,7 @@ public:
     static double GetDefinition(void *data, int imageType);
     static double GetDefinition2(void *data, int imageType);
     static double GetDefinition3(void *data, int imageType);
+    static double GetMeanLight(void *data, int imageType);
     void FirstImage(void *data, int imageType);
     void AddImage(void *data, int imageType);
 

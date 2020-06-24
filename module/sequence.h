@@ -57,7 +57,8 @@ public:
         Result_Print_Error,
         Result_Test_DataErr,
         Result_Test_ProcessErr,
-        Result_Box_Valid,
+        Result_Test_DryFillErr,
+        Result_Box_Valid,        
         Result_Box_Invalid,
         Result_NULL
     };
@@ -128,6 +129,7 @@ signals:
     void panelNameChanged();
     void testListChanged();
     void doorStateChanged();
+    void doorKeyPress();
     void boxStateChanged();
     void errOccur(QString error);
     void callQmlRefeshView();
@@ -192,6 +194,7 @@ private:
     QList<action> actList;
     bool listNextAction(bool first);
     void qrDect();
+    int decodeQr(QString strQr);
     void PierceDect();
     void SwitchDoor();
     bool bQrOpenLight = true;
@@ -218,6 +221,8 @@ private:
     bool continueLoopTest();
 
     bool dirctAction(QString device, int value, int param1, int param2, int param3);
+
+    double dryMeanValue,fillMeanValue;
 };
 
 static Sequence *sequence;

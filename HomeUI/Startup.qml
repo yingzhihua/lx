@@ -52,24 +52,7 @@ Page {
         MouseArea{
             anchors.fill: parent
             onClicked: {
-                if (Sequence.door == false)
-                {
-                    if (Sequence.sequenceDo(Sequence.Sequence_OpenBox))
-                    {
-                        busyIndicator.running = true;
-                        busyDes.text = qsTr("正在开仓");
-                        busyDes.visible = true;
-                    }
-                }
-                else
-                {
-                    if (Sequence.sequenceDo(Sequence.Sequence_CloseBox))
-                    {
-                        busyIndicator.running = true;
-                        busyDes.text = qsTr("正在合仓");
-                        busyDes.visible = true;
-                    }
-                }
+                switchDoor()
             }
         }
     }
@@ -162,6 +145,10 @@ Page {
             console.log("box",Sequence.box,"door",Sequence.door)
             */
         }
+        onDoorKeyPress:{
+            if (openDoor.visible)
+                switchDoor();
+        }
     }
 
     Timer{
@@ -188,6 +175,27 @@ Page {
             if (titleChange>6)
                 titleChange = 0;
 
+        }
+    }
+
+    function switchDoor(){
+        if (Sequence.door == false)
+        {
+            if (Sequence.sequenceDo(Sequence.Sequence_OpenBox))
+            {
+                busyIndicator.running = true;
+                busyDes.text = qsTr("正在开仓");
+                busyDes.visible = true;
+            }
+        }
+        else
+        {
+            if (Sequence.sequenceDo(Sequence.Sequence_CloseBox))
+            {
+                busyIndicator.running = true;
+                busyDes.text = qsTr("正在合仓");
+                busyDes.visible = true;
+            }
         }
     }
 }
