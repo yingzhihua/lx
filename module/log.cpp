@@ -132,6 +132,24 @@ void Log::LogTime(QString log)
     file.close();
 }
 
+void Log::LogCData(QString log)
+{
+    QFile file;
+
+    file.setFileName(QCoreApplication::applicationDirPath()+"/CriticalData.txt");
+    if (!file.open(QIODevice::WriteOnly|QIODevice::Text|QIODevice::Append))
+    {
+        qDebug()<<"Critical file open error!";
+    }
+    QTextStream textStream(&file);
+
+    QDateTime current_time = QDateTime::currentDateTime();
+    QString current_time_str = current_time.toString("yyyy-MM-dd hh:mm:ss.zzz ");
+    textStream<<current_time_str<<log<<endl;
+    textStream.flush();
+    file.close();
+}
+
 bool Log::Logdb(LOGTYPE logType){
     QString sql = QString("INSERT INTO Log (LogType, LogTime) VALUES(%1, '%2')").arg(logType).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
     return SqliteMgr::sqlitemgrinstance->execute(sql);

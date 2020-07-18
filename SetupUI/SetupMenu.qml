@@ -106,6 +106,7 @@ Rectangle {
 
         //headerMsg.text = qsTr("设置");
         Sequence.changeTitle(qsTr("设置"));
+        Sequence.hideTitle(true);
     }
 
     Connections{

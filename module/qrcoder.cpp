@@ -399,7 +399,7 @@ bool QRcoder::haveliquids(Mat &image)
     for (size_t i = 0; i < contours.size(); i++)
     {
         qDebug()<<"s="<<contourArea(contours[i])<<"L="<<arcLength(contours[i],true);
-        if (contourArea(contours[i]) < 400)
+        if (contourArea(contours[i]) < 150)
             continue;
         int maxValue = contours[i][0].y;
         int minValue = contours[i][0].y;
@@ -436,7 +436,8 @@ bool QRcoder::haveliquids(Mat &image)
         qDebug()<<"i="<<i<<"j="<<j<<"minValue="<<minDistance;        
         if (j == maxminvalue.size()/2)
         {
-            Log::LogCam(QString("minDistance:%1,ref:>80").arg(minDistance));
+            Log::LogCData(QString("Liquid height = %1 (reference value > 80)").arg(minDistance));
+            //Log::LogCam(QString("minDistance:%1,ref:>80").arg(minDistance));
             return minDistance > 80;
         }
     }

@@ -117,6 +117,7 @@ public:
 
     Q_INVOKABLE bool isTesting(){return currSequenceId == SequenceId::Sequence_Test;}
     Q_INVOKABLE void changeTitle(QString title);
+    Q_INVOKABLE void hideTitle(bool hide);
 
     Q_INVOKABLE bool loopTest(QString testName, int count);
     Q_INVOKABLE bool isLoopTesting(){return currSequenceId == SequenceId::Sequence_LoopTest;}
@@ -146,6 +147,7 @@ signals:
 public slots:
     void SequenceTimeout();
     void WaitSequenceTimeout();
+    void TestSecondTimeout();
     void ActionFinish(QByteArray data);
     void PrintFinish(QByteArray data);
     void errFinish(QByteArray data);
@@ -166,6 +168,7 @@ private:
     QDomElement sequenceAction;
     QTimer *timer;
     QTimer *waitNextSequence;
+    QTimer *testSecondTime;
     SequenceId currSequenceId;
     SequenceId nextSequenceId;
     int waitCount;
@@ -182,6 +185,8 @@ private:
     bool bFinishAction;
     TimeState durationState;
     int nDuration;
+    int nPreTime;
+    int nTestSecond;
     bool firstCapture;    
     bool bCannelSequence;
     bool bDoorState;

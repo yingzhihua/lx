@@ -156,6 +156,7 @@ public:
     static int AutoFocus;
     static int QrCode;
     static int ProjectMode;
+    static int DoorOut;
     static int DataEntry;
     static unsigned char *bufrgb;
     static unsigned char *hbufrgb;

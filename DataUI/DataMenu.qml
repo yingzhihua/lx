@@ -27,6 +27,13 @@ Rectangle {
             }
             MouseArea{
                 anchors.fill: parent
+                onPressed: {
+                    console.log("Pressed:"+index);
+                }
+                onReleased: {
+                    console.log("Released:"+index);
+                }
+
                 onClicked: {
                     console.log("click:"+index);
                     testModel.setCurrTest(index);

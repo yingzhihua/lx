@@ -118,3 +118,9 @@ double TCamera::getDefinition(){
 double TCamera::getDefinition2(){
     return 0;
 }
+
+bool TCamera::saveRaw(QString filename){
+    if (cameraType == CAMERA_TYPE_CK)
+        return ckCamera->saveRaw(filename);
+    return false;
+}

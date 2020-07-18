@@ -36,8 +36,13 @@ Sequence::Sequence(QObject *parent) : QObject(parent)
     timer->setSingleShot(true);
     waitNextSequence = new QTimer(this);
     waitNextSequence->setSingleShot(true);
+
     connect(timer,SIGNAL(timeout()),this,SLOT(SequenceTimeout()));
     connect(waitNextSequence,SIGNAL(timeout()),this,SLOT(WaitSequenceTimeout()));
+
+    testSecondTime = new QTimer(this);
+    testSecondTime->setSingleShot(false);
+    connect(testSecondTime,SIGNAL(timeout()),this,SLOT(TestSecondTimeout()));
 
     serialMgr = new SerialMgr();
     connect(serialMgr,&SerialMgr::finishAction,this,&Sequence::ActionFinish);
@@ -162,6 +167,8 @@ bool Sequence::sequenceDo(SequenceId id)
                 bFocused = false;
                 dryMeanValue = 0;
                 fillMeanValue = 0;
+                nTestSecond = 0;
+                testSecondTime->start(1000);
                 break;
             }
         }
@@ -269,6 +276,18 @@ void Sequence::WaitSequenceTimeout()
         else
             sequenceDo(nextSequenceId);
     }
+}
+
+void Sequence::TestSecondTimeout(){    
+    qDebug()<<"TestSecondTimeout,nPreTime="<<nPreTime<<"nDuration="<<nDuration<<"TotalTime="
+           <<sequenceAction.attribute("Duration")<<"nTestSecond="<<nTestSecond;
+    Log::LogByFile("ProgressBar.txt",QString("TestSecondTimeout,nPreTime=%1,nDuration=%2,TotalTime=%3,nTestSecond=%4")
+                   .arg(nPreTime).arg(nDuration).arg(sequenceAction.attribute("Duration")).arg(nTestSecond));
+    if ((nPreTime + nDuration)/1000 > nTestSecond)
+        nTestSecond++;
+    int remain = sequenceAction.attribute("Duration").toInt()/1000 - nTestSecond;
+    title = QString("正在测试，预计剩余%1分%2秒").arg(remain/60).arg(remain%60);
+    emit titleNotify((nTestSecond*1000)/(sequenceAction.attribute("Duration").toInt()/1000)+100,title);
 }
 
 void Sequence::ActionFinish(QByteArray data)
@@ -414,11 +433,12 @@ void Sequence::ActionFinish(QByteArray data)
                 }
                 else if(currCameraCaptureType == 1){
                     dryMeanValue = imageAna->GetMeanLight(camera->getyData(),camera->imagetype);
-                    Log::LogTime(QString("Dry Mean Value:%1").arg(dryMeanValue));
+                    //Log::LogTime(QString("Dry Mean Value:%1").arg(dryMeanValue));
                 }
                 else if(currCameraCaptureType == 3){
                     fillMeanValue = imageAna->GetMeanLight(camera->getyData(),camera->imagetype);
-                    Log::LogTime(QString("Fill Mean Value:%1").arg(fillMeanValue));
+                    //Log::LogTime(QString("Dry Mean Value:%1,Fill Mean Value:%2").arg(dryMeanValue).arg(fillMeanValue));
+                    Log::LogCData(QString("Dry Value/Fill Value = %1/%2 = %3 (reference value > %4)").arg(dryMeanValue).arg(fillMeanValue).arg(dryMeanValue/fillMeanValue).arg(DRYPFILL));
                     if (dryMeanValue > 3 && fillMeanValue > 3 && dryMeanValue/fillMeanValue < DRYPFILL)
                         emit sequenceFinish(SequenceResult::Result_Test_DryFillErr);
                 }
@@ -560,6 +580,7 @@ void Sequence::FinishSequence()
 {
     SequenceResult out = SequenceResult::Result_NULL;
     qDebug()<<"FinishSequence:"<<currSequenceId;
+
     if (currSequenceId == SequenceId::Sequence_SelfCheck)
     {        
         out = SequenceResult::Result_SelfCheck_ok;
@@ -577,6 +598,7 @@ void Sequence::FinishSequence()
     else if(currSequenceId == SequenceId::Sequence_CannelTest)
     {
         out = SequenceResult::Result_CannelTest_ok;
+        testSecondTime->stop();
         Log::setDir(QCoreApplication::applicationDirPath());
     }
     else if(currSequenceId == SequenceId::Sequence_Test)
@@ -599,6 +621,7 @@ void Sequence::FinishSequence()
             out = SequenceResult::Result_Test_unfinish;
         }
 
+        testSecondTime->stop();
         Log::setDir(QCoreApplication::applicationDirPath());
 
     }
@@ -643,6 +666,10 @@ bool Sequence::ReadTestProcess(QString panel)
     QDomElement root = doc.documentElement();    
     if (root.hasAttribute("ProjectMode")){
         //ExGlobal::ProjectMode = root.attribute("ProjectMode").toInt();
+    }
+
+    if (root.hasAttribute("DoorOut")){
+        ExGlobal::DoorOut = root.attribute("DoorOut").toInt();
     }
 
     if (root.hasAttribute("DefaultPanelCode"))
@@ -696,7 +723,7 @@ bool Sequence::WriteTestProcess(QString panel)
 bool Sequence::DoAction(QDomElement action,bool isChild)
 {    
     nDuration = action.attribute("Duration").toInt();
-    int nPreTime = action.attribute("pretime").toInt();
+    nPreTime = action.attribute("pretime").toInt();
     qDebug()<<"DoAction:"<<action.attribute("Device")<<"step:"<<action.attribute("No")<<"duration:"<<action.attribute("Duration")<<"Value:"<<action.attribute("ActionValue")<<"Param:"<<action.attribute("ActionParam1");
 
     message.sprintf("No: %d; Duration:%d; Device:",action.attribute("No").toInt(),action.attribute("Duration").toInt());
@@ -787,7 +814,7 @@ bool Sequence::DoAction(QDomElement action,bool isChild)
         }
         else
         {
-            emit titleNotify(nPreTime/(sequenceAction.attribute("Duration").toInt()/1000)+100,title);
+            //emit titleNotify(nPreTime/(sequenceAction.attribute("Duration").toInt()/1000)+100,title);
             Log::LogWithTime(QString("total time=%1,completion time=%2").arg(sequenceAction.attribute("Duration")).arg(nPreTime));
         }
     }
@@ -1099,6 +1126,8 @@ bool Sequence::saveView(){
     char filenames[100] = {0};
     sprintf(filenames,"%s/tmp%d.bmp",QCoreApplication::applicationDirPath().toLatin1().data(),fileList.count()+1);
     imageProvider->img.save(filenames);
+    sprintf(filenames,"%s/tmp%d.raw",QCoreApplication::applicationDirPath().toLatin1().data(),fileList.count()+1);
+    camera->saveRaw(filenames);
     return true;
 }
 
@@ -1160,16 +1189,16 @@ static int tempInt = 8;
 void Sequence::lxDebug(){
     qDebug()<<"lxDebug";    
     tempInt++;
-    /*
-    if (tempInt > 69 || tempInt < 64)
-        tempInt = 64;
+    //*
+    //if (tempInt > 69 || tempInt < 64)
+    //    tempInt = 64;
 
     if (tempInt > 2)
         tempInt = 0;
     serialMgr->serialWrite(ActionParser::ParamToByte("Lamp",1,tempInt,200,200));
-*/
-    //serialMgr->serialWrite(ActionParser::ParamToByte("Led",tempInt,0,0,0));
-    serialMgr->serialWrite(ActionParser::ParamToByte("Door",7,0,0,0));
+//*/
+
+    //serialMgr->serialWrite(ActionParser::ParamToByte("Door",7,0,0,0));
     return;
     serialMgr->serialWrite(ActionParser::ParamToByte("Light",4,0,0,0));
     cvcap->setCurrCamera(0);
@@ -1222,7 +1251,8 @@ bool Sequence::listNextAction(bool first){
             else {
                 act.device = "Door";
                 act.value = 1;
-                act.param1 = 300;
+                //act.param1 = 19900;
+                act.param1 = ExGlobal::DoorOut;
             }
             QByteArray send = ActionParser::ParamToByte(act.device,act.value,act.param1,act.param2,act.param3);
             currOrder = send[7];
@@ -1375,6 +1405,13 @@ bool Sequence::printTest(){
 void Sequence::changeTitle(QString title){
     if (!isTesting() && !isLoopTesting())
         emit titleNotify(0, title);
+}
+
+void Sequence::hideTitle(bool hide){
+    if (hide)
+        emit titleNotify(1,"");
+    else
+        emit titleNotify(2,"");
 }
 
 bool Sequence::loopTest(QString testName, int count){

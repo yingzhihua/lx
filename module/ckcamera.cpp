@@ -12,7 +12,9 @@ static QByteArray resultData;
 static int imageCount = 0;
 CKCamera::CKCamera(QObject *parent) : QThread(parent)
 {
-    rawData = new uint8_t[2592 * 1944];
+    rawData = new uint8_t[2592 * 1944 * 8];
+    wRawData = (uint16_t *)rawData;
+    wtobRawData = rawData + 2592 * 1944 * 2;
     sum = new uint32_t[2592 * 1944];
     m_hCamera = nullptr;
     stopping = false;
@@ -67,24 +69,45 @@ bool CKCamera::openCamera(){
         }
     }
 
-    CameraSetSensorOutPixelFormat(m_hCamera,cap.tDeviceCapbility.pBayerTypeDesc[0].iMediaType);
+    rawImageType = 0;
+
+    if (cap.tDeviceCapbility.iBayerTypeDesc > 1)
+        CameraSetSensorOutPixelFormat(m_hCamera,cap.tDeviceCapbility.pBayerTypeDesc[1].iMediaType);
 
     uint mediaType;
     if (CameraGetSensorOutPixelFormat(m_hCamera,&mediaType) == CAMERA_STATUS_SUCCESS)
+    {
         qDebug()<<"mediaType:"<<mediaType;
+        if (cap.tDeviceCapbility.iBayerTypeDesc > 1)
+        {
+            if (mediaType == cap.tDeviceCapbility.pBayerTypeDesc[1].iMediaType)
+                rawImageType = 1;
+        }
+    }
 
     //CameraSetIspOutFormat(m_hCamera, CAMERA_MEDIA_TYPE_BGR8);
     CameraSetIspOutFormat(m_hCamera, CAMERA_MEDIA_TYPE_MONO8);
     CameraSetAeState(m_hCamera,false);
     ret = CameraSetExposureTime(m_hCamera,ExGlobal::CamAbs*1000);
-    CameraSetAnalogGain(m_hCamera,1000);
+
+    uint nGain = ExGlobal::CamGain;
+    nGain = nGain*100;
+    if (nGain < 1000)
+        nGain = 1000;
+    else if (nGain > 8000)
+        nGain = 8000;
+
+    CameraSetAnalogGain(m_hCamera,nGain);
     CameraSetTriggerMode(m_hCamera,1);
     CameraSetFrameSpeed(m_hCamera,2);
 
     double exposureTime = 0;
     CameraGetExposureTime(m_hCamera, &exposureTime);
-    qDebug()<<"Exposure Time="<<exposureTime<<"ret:"<<ret;
-    Log::LogByFile("CK.txt",QString("openCamera Exposure Time==%1").arg(exposureTime));
+    qDebug()<<"Exposure Time="<<exposureTime<<"ret:"<<ret;    
+
+    nGain = 0;
+    CameraGetAnalogGain(m_hCamera,&nGain);
+    Log::LogByFile("CK.txt",QString("openCamera Exposure Time=%1,AnalogGain=%2").arg(exposureTime).arg(nGain));
     CameraPlay(m_hCamera);
     return true;
 }
@@ -112,7 +135,7 @@ bool CKCamera::stopCamera(){
     return true;
 }
 
-static bool saverawimage = true;
+static bool saverawimage = false;
 
 uint32_t CKCamera::CKGetFrame(){
     CameraSdkStatus status;
@@ -136,8 +159,15 @@ uint32_t CKCamera::CKGetFrame(){
     }
 
     // 获取图像帧信息
-    pbyBuffer = CameraGetImageInfo(m_hCamera, hBuf, &imageInfo);    
-    memcpy(rawData,pbyBuffer,imageInfo.TotalBytes);    
+    pbyBuffer = CameraGetImageInfo(m_hCamera, hBuf, &imageInfo);
+    memcpy(rawData,pbyBuffer,imageInfo.TotalBytes);
+
+    if (rawImageType == 1){
+        for (int i = 0; i < 2592*1944; i++){
+            wtobRawData[i] = wRawData[i]*255/4095;
+        }
+    }
+
     status = CameraReleaseFrameHandle(m_hCamera, hBuf);
     if (status != CAMERA_STATUS_SUCCESS)
     {
@@ -159,6 +189,7 @@ int CKCamera::process_image(int index, uint8_t *data, uint32_t datalength){
     int width = 2592;
     int height = 1944;
 
+    uint16_t *wData = (uint16_t *)rawData;
 /*
     if (index == count){
         QImage img(bufy, width, height, QImage::Format_Grayscale8);
@@ -170,7 +201,7 @@ int CKCamera::process_image(int index, uint8_t *data, uint32_t datalength){
         QString savefile = QString("%1/%2-%3.raw").arg(Log::getDir()).arg(filename).arg(index);
         QFile file(savefile);
         file.open(QIODevice::WriteOnly);
-        file.write((const char *)data,datalength);
+        file.write((const char *)rawData,datalength);
         file.close();
     }
     Log::LogByFile("CK.txt",QString("process_image,count=%1,index=%2").arg(count).arg(index));
@@ -179,14 +210,23 @@ int CKCamera::process_image(int index, uint8_t *data, uint32_t datalength){
         if (index == 1)
         {
             for (int j = 0; j < width*height; j++)
-                sum[j] = data[j];
+                if (rawImageType == 0)
+                    sum[j] = rawData[j];
+                else
+                    sum[j] = wData[j];
         }
         else {
             for (int j = 0; j < width*height; j++)
-                sum[j] += data[j];
+                if (rawImageType == 0)
+                    sum[j] += rawData[j];
+                else
+                    sum[j] += wData[j];
             if (count == index){
                 for (int j = 0; j < width*height; j++)
-                    rawData[j] = sum[j]/count;
+                    if (rawImageType == 0)
+                        rawData[j] = sum[j]/count;
+                    else
+                        wData[j] = sum[j]/count;
             }
         }
     }
@@ -198,9 +238,20 @@ int CKCamera::process_image(int index, uint8_t *data, uint32_t datalength){
         file.write((const char *)rawData,datalength);
         file.close();
 
-        QImage img(rawData, width, height, QImage::Format_Grayscale8);
+
         savefile = QString("%1/%2.bmp").arg(Log::getDir()).arg(filename);
-        img.save(savefile);
+        if (rawImageType == 0){
+            QImage img(rawData, width, height, QImage::Format_Grayscale8);
+            img.save(savefile);
+        }
+        else {
+            for (int i = 0; i < 2592*1944; i++){
+                wtobRawData[i] = wData[i]*255/4096;
+            }
+            QImage image(wtobRawData, 2592, 1944, QImage::Format_Grayscale8);
+            image.save(savefile);
+        }
+
         Log::LogByFile("CK.txt","save file:"+savefile);
         resultData[10] = 0;
         emit finishCapture(resultData);
@@ -209,12 +260,25 @@ int CKCamera::process_image(int index, uint8_t *data, uint32_t datalength){
     return 0;
 }
 
-void CKCamera::saveRaw(uint8_t *data, uint32_t datalength){
+void CKCamera::saveRaw(void *data, uint32_t datalength){
     QString savefile = QString("%1/test.raw").arg(Log::getDir());
     QFile file(savefile);
     file.open(QIODevice::WriteOnly);
     file.write((const char *)data,datalength);
     file.close();
+}
+
+bool CKCamera::saveRaw(QString fileName){
+    uint32_t datalength = 0;
+    if (rawImageType == 0)
+        datalength = 2592*1944;
+    else
+        datalength = 2592*1944*2;
+    QFile file(fileName);
+    file.open(QIODevice::WriteOnly);
+    file.write((const char *)rawData,datalength);
+    file.close();
+    return true;
 }
 
 bool CKCamera::capture(QString fileName, int nCount){
@@ -263,7 +327,24 @@ bool CKCamera::setabsExpose(int value){
 
 bool CKCamera::setGain(int value){
     qDebug()<<"setGain:"<<value;
-    return true;
+    uint nGain = value;
+    nGain = nGain*100;
+    if (nGain < 1000)
+        nGain = 1000;
+    else if (nGain > 8000)
+        nGain = 8000;
+    if (openCamera())
+    {
+        if (CAMERA_STATUS_SUCCESS != CameraSetAnalogGain(m_hCamera,nGain))
+            return false;
+
+        CameraSdkStatus ret = CameraGetAnalogGain(m_hCamera, &nGain);
+        qDebug()<<"AnalogGain="<<nGain<<"ret:"<<ret;
+        ExGlobal::updateCaliParam("CamGain",value);
+        Log::LogByFile("CK.txt",QString("CameraSetAnalogGain,result=%1").arg(ret));
+        return true;
+    }
+    return false;
 }
 
 bool CKCamera::setWhite(int value){
@@ -282,8 +363,16 @@ void CKCamera::run(){
         dataLength = CKGetFrame();
         if (dataLength != 0){
             if (captureMode == CaptureMode::View){
-                QImage image(rawData, 2592, 1944, QImage::Format_Grayscale8);
-                emit reView(image);
+                qDebug()<<"View,rawImageType="<<rawImageType;
+                if (rawImageType == 0)
+                {
+                    QImage image(rawData, 2592, 1944, QImage::Format_Grayscale8);
+                    emit reView(image);
+                }
+                else{
+                    QImage image(wtobRawData, 2592, 1944, QImage::Format_Grayscale8);
+                    emit reView(image);
+                }
             }
             else if (captureMode == CaptureMode::Capture)
             {
@@ -291,8 +380,9 @@ void CKCamera::run(){
                 process_image(nFrame,rawData,dataLength);
                 elapse = time.elapsed();
                 qDebug()<<"CKCamera::run,elapse="<<elapse<<"Frame="<<nFrame;
-                if (nFrame<count && elapse < 500){
-                    QThread::msleep(500-elapse);
+                int nFrameMs = ExGlobal::CamAbs + 400;
+                if (nFrame<count && elapse < nFrameMs){
+                    QThread::msleep(nFrameMs-elapse);
                 }
             }
         }
@@ -315,4 +405,10 @@ bool CKCamera::waitStop(){
         QThread::msleep(100);
     }
     return false;
+}
+
+void *CKCamera::getyData(){
+    if (rawImageType == 0)
+        return rawData;
+    return wtobRawData;
 }

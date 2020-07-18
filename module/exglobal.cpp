@@ -83,6 +83,7 @@ int ExGlobal::QrY4 = 715;
 #endif
 
 int ExGlobal::ProjectMode = 0;
+int ExGlobal::DoorOut = 300;
 int ExGlobal::DataEntry = 0;
 
 

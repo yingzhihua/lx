@@ -32,6 +32,10 @@ ApplicationWindow {
         x: window.width/3
         y: window.height
         width: window.width*2/3
+        //x: 0
+        //y: window.height
+        //width: window.width
+        //height: window.height*2/3
 
         states: State {
             name: "visible"
@@ -106,6 +110,7 @@ ApplicationWindow {
         }
     }
 
+    /*
     header:Rectangle{
         id:headerdatetime
         height: 60
@@ -119,31 +124,40 @@ ApplicationWindow {
             font.pixelSize: 40
             text:qsTr("17:22:14")
         }
-/*
-        Text{
-            id:starttime
-            anchors.centerIn: parent
-            anchors.horizontalCenterOffset: -100
-            anchors.bottom: parent.bottom
-            font.pixelSize: 30
-            text:qsTr("")
-        }
 
-        Text{
-            id:runtime
-            anchors.left: starttime.right
-            anchors.leftMargin: 30
-            anchors.bottom: parent.bottom
-            font.pixelSize: 30
-            text:qsTr("")
-        }
-*/
         Text {
             id: headerdate
             anchors.right: parent.right
             anchors.rightMargin: 10
             anchors.bottom: parent.bottom
             font.pixelSize: 40
+            text: qsTr("2020-03-12")
+        }
+    }
+*/
+    header:Rectangle{
+        id:headerdatetime
+        height: 100
+        width: parent.width
+
+        Text{
+            id:headertime
+            color: "gray"
+            anchors.right: parent.right
+            anchors.rightMargin: 60
+            anchors.top: parent.top
+            anchors.topMargin: 10
+            font.pixelSize: 60
+            text:qsTr("17:22:14")
+        }
+
+        Text {
+            id: headerdate
+            color: "gray"
+            anchors.top: headertime.bottom
+            anchors.topMargin: -10
+            anchors.horizontalCenter: headertime.horizontalCenter
+            font.pixelSize: 30
             text: qsTr("2020-03-12")
         }
     }
@@ -187,7 +201,11 @@ ApplicationWindow {
         onCurrentIndexChanged: {
             mainView.clear()
             if (currentIndex == 0)
+            {
                 mainView.push("qrc:/SetupUI/SetupMenu.qml");
+                headerRec.visible = false;
+                headerdatetime.visible = false;
+            }
             else if(currentIndex == 1)
             {
                 if (Sequence.isTesting()){
@@ -198,9 +216,15 @@ ApplicationWindow {
                 }
                 else
                     mainView.push("qrc:/HomeUI/Idle.qml");
+                headerRec.visible = true;
+                headerdatetime.visible = true;
             }
             else if(currentIndex == 2)
+            {
                 mainView.push("qrc:/DataUI/DataMenu.qml");
+                headerRec.visible = true;
+                headerdatetime.visible = true;
+            }
 
             console.debug("currIndex",currentIndex)
         }
@@ -255,7 +279,7 @@ ApplicationWindow {
         running: true
         onTriggered: {
             headertime.text = Qt.formatTime(new Date(),"hh:mm:ss")
-            headerdate.text = Qt.formatDate(new Date(),"yyyy-MM-dd")
+            headerdate.text = Qt.formatDate(new Date(),"yyyy年MM月dd日")
             /*
             if (timeinited == false){
                 timeinited = true;
@@ -286,6 +310,15 @@ ApplicationWindow {
                 testCompleted.width = 0;
                 testunCompleted.width = 0;
                 headerMsg.text = title;
+            }
+            else if (titleparam == 1){
+                headerRec.visible = false;
+                headerdatetime.visible = false;
+            }
+            else if(titleparam == 2)
+            {
+                headerRec.visible = true;
+                headerdatetime.visible = true;
             }
             else if (titleparam >= 100){
                 var finish = titleparam - 100;

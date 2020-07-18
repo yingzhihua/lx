@@ -38,6 +38,7 @@ public:
     static void LogPos(QString log);    
     static void LogTime(QString log);
     static void LogByFile(QString filename, QString log);
+    static void LogCData(QString log);
 
     static bool Logdb(LOGTYPE logType);
     static bool Logdb(LOGTYPE logType, int param1);

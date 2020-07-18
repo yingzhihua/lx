@@ -131,8 +131,21 @@ QVariant TestResultModel::getField(int row,QString field) const{
     return QVariant();
 }
 
-QList<int> TestResultModel::getItemValue(int posIndex){
-    QList<int> result;
 
-    return result;
+void TestResultModel::setTestid(int id){
+    Testid = id;
+    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(QString("select * from TestResult where Testid=%1").arg(Testid));
+
+    dataPos.clear();
+    while(query.next()){
+        TestResult result;
+        result.Resultid = query.value(0).toInt();
+        result.PosIndex = query.value(2).toInt();
+        result.Itemid = query.value(3).toInt();
+        result.cycle = query.value(4).toInt();
+        result.TestValue = query.value(5).toInt();
+        m_display_list<<result;
+        //qDebug()<<"setTestid,resultid="<<result.Resultid<<",PosIndex="<<result.PosIndex<<",Itemid="<<result.Itemid<<",cycle="<<result.cycle<<",TestValue="<<result.TestValue;
+        dataPos[result.PosIndex].push_back(Point(result.cycle*10,result.TestValue));
+    }
 }

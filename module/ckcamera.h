@@ -23,11 +23,12 @@ public:
     bool stopCamera();
     bool capture(QString fileName, int nCount);
     bool preview();
-    void *getyData(){return rawData;}
+    void *getyData();
 
     bool setabsExpose(int value);
     bool setGain(int value);
     bool setWhite(int value);
+    bool saveRaw(QString fileName);
 
     int imagetype;
     CaptureMode captureMode;
@@ -45,11 +46,14 @@ private:
     int count;
     bool stopping;
     uint8_t* rawData;
+    uint8_t* wtobRawData;
+    uint16_t* wRawData;
+    int rawImageType;
     unsigned int *sum;
     HANDLE m_hCamera;
     uint32_t CKGetFrame();
     int process_image(int index, uint8_t *data, uint32_t datalength);
-    void saveRaw(uint8_t *data, uint32_t datalength);    
+    void saveRaw(void *data, uint32_t datalength);
     bool waitStop();
 };
 
