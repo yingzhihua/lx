@@ -21,7 +21,8 @@ QString ExGlobal::AdminPassword = "123456";
 int ExGlobal::LanguageCode = 1;
 int ExGlobal::PanelBoxIndex = 1;
 
-QString ExGlobal::t_version = "V2.35";
+QString ExGlobal::t_version = "V1";
+QString ExGlobal::build_version = "V1.0.2(build20200730)";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
@@ -107,6 +108,11 @@ ExGlobal::ExGlobal(QObject *parent) : QObject(parent)
 void ExGlobal::GlobalMessage(int code){
     qDebug()<<"GlobalMessage:"<<code;
     exglobalMessage(code);
+}
+
+int ExGlobal::SysCommand(QString command){
+    qDebug()<<"SysCommand"<<command;
+    return system(command.toLatin1().data());
 }
 
 void ExGlobal::exClose(){

@@ -14,7 +14,7 @@ Page {
         font.pixelSize: 40
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.horizontalCenterOffset: -100
-        y:100
+        y:10
     }
     Image {
         id: printIco

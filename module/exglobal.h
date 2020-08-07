@@ -22,6 +22,7 @@ class ExGlobal : public QObject
     Q_PROPERTY(QString sysLanguageName READ sysLanguageName NOTIFY sysLanguageNameChanged)
     Q_PROPERTY(int sysLanguageCode READ sysLanguageCode WRITE setSysLanguageCode NOTIFY sysLanguageCodeChanged)
     Q_PROPERTY(QString version READ version NOTIFY versionChanged)
+    Q_PROPERTY(QString buildversion READ buildversion NOTIFY versionChanged)
     Q_PROPERTY(QString tempversion READ tempversion NOTIFY versionChanged)
     Q_PROPERTY(QString ctrlversion READ ctrlversion NOTIFY versionChanged)    
     Q_PROPERTY(int lockTime READ lockTime WRITE setLockTime NOTIFY lockTimeChanged)
@@ -37,6 +38,7 @@ public:
     QString user() {return User;}
     void setUser(const QString &user){User = user;emit userChanged();}
     static QString panelName(){return t_panelName;}
+    static int SysCommand(QString command);
     static void setPanelName(const QString &panelName){t_panelName = panelName;}
     static QString panelCode(){return t_panelCode;}
     static QString panelCodeEx(){return "Lot# "+t_panelCode;}
@@ -58,6 +60,7 @@ public:
     int sysLanguageCode(){return LanguageCode;}
     void setSysLanguageCode(int code){updateCaliParam("LanguageCode",code);emit sysLanguageCodeChanged();}
     static QString version(){return t_version;}
+    static QString buildversion(){return build_version;}
     static QString tempversion(){return temp_version;}
     static QString ctrlversion(){return ctrl_version;}
     static void settempversion(const QString &version){temp_version = version;}
@@ -89,7 +92,7 @@ public:
 
     Q_INVOKABLE void qmlGlobalMessage(int code){GlobalMessage(code);}
 
-    Q_INVOKABLE static int projectMode(){return ProjectMode;} //0:临时版本；1：正式版本
+    Q_INVOKABLE static int projectMode(){return ProjectMode;} //0:临时版本；1：正式版本; 2:注册版本
     Q_INVOKABLE void panelBoxIndexAddOne();
     Q_INVOKABLE int dataEntry(){return DataEntry;}
     Q_INVOKABLE void setDataEntry(int entry){DataEntry = entry;}
@@ -193,6 +196,7 @@ private:
     static bool test;
 
     static QString t_version;
+    static QString build_version;
     static QString temp_version;
     static QString ctrl_version;
 

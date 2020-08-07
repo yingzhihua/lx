@@ -78,7 +78,7 @@ void QRcoder::run(){
 
     qDebug()<<"width:"<<cap.get(CAP_PROP_FRAME_WIDTH)<<" height:"<<cap.get(CAP_PROP_FRAME_HEIGHT)<<" Frame:"<<cap.get(CAP_PROP_FPS)<<" auto_expoure:"<<cap.get(CAP_PROP_AUTO_EXPOSURE)<<" exp:"<<cap.get(CAP_PROP_EXPOSURE);
 
-    strQr.clear();
+    strQr.clear();    
     for (;;) {
         Mat Frame;
         cap>>Frame;

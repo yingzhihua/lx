@@ -134,10 +134,16 @@ Page {
                 mainView.push("qrc:/HomeUI/Idle.qml");
             }
             else if(result == Sequence.Result_Test_finish){
-                headerMsg.text = "测试完成！";
-                mainView.pop();
-                mainView.push("qrc:/DataUI/DataView.qml");
-                ExGlobal.setDataEntry(1);
+                if (ExGlobal.projectMode() === 2){
+                    headerMsg.text = "测试完成！";
+                    closemsg.show(qsTr("测试完成，准备退出到待机！"))
+                }
+                else{
+                    headerMsg.text = "测试完成！";
+                    mainView.pop();
+                    mainView.push("qrc:/DataUI/DataView.qml");
+                    ExGlobal.setDataEntry(1);
+                }
             }
             else if(result == Sequence.Result_Test_unfinish){
                 headerMsg.text = "测试完成！";

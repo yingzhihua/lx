@@ -2,6 +2,7 @@
 #define PRINTMGR_H
 #include <QThread>
 #include <QMap>
+#include <QImage>
 
 class printmgr : public QThread
 {
@@ -22,9 +23,12 @@ signals:
     void finishPrint(QByteArray result);
 
 private:
+    QString printDir;
+    QImage flashdxIco;
+    QImage hospitalIco;
     bool printPDF();
     bool printPTP();
-
+    QString CreatePDF();
 };
 
 #endif // PRINTMGR_H

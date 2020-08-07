@@ -164,7 +164,7 @@ uint32_t CKCamera::CKGetFrame(){
 
     if (rawImageType == 1){
         for (int i = 0; i < 2592*1944; i++){
-            wtobRawData[i] = wRawData[i]*255/4095;
+            wtobRawData[i] = wRawData[i]>>4;
         }
     }
 
@@ -408,7 +408,7 @@ bool CKCamera::waitStop(){
 }
 
 void *CKCamera::getyData(){
-    if (rawImageType == 0)
+    //if (rawImageType == 0)
         return rawData;
-    return wtobRawData;
+    //return wtobRawData;
 }

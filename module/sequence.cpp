@@ -133,6 +133,8 @@ bool Sequence::sequenceDo(SequenceId id)
 {
     //QMetaEnum metaEnum = QMetaEnum::fromType<SequenceId>();
     qDebug()<<"sequenceDo,currSequenceId:"<<currSequenceId<<id;
+    //emit titleNotify(200,"正在测试，预计剩余31分钟");
+    //sequenceFinish(SequenceResult::Result_Test_finish);
     Log::LogWithTime(QString("sequenceDo:%1,currSequenceId:%2").arg(metaEnum.valueToKey(id)).arg(metaEnum.valueToKey(currSequenceId)));
     if (currSequenceId != SequenceId::Sequence_Idle)
     {
@@ -222,6 +224,9 @@ bool Sequence::actionDo(QString device, int value, int param1, int param2, int p
     if (currSequenceId != SequenceId::Sequence_Idle)
         return false;
     currSequenceId = SequenceId::Sequence_SimpleAction;
+    if (device == "Door" && value == 1){
+        param1 = ExGlobal::DoorOut;
+    }
     QByteArray send = ActionParser::ParamToByte(device,value,param1,param2,param3);
     currOrder = send[7];
     serialMgr->serialWrite(send);
@@ -394,9 +399,9 @@ void Sequence::ActionFinish(QByteArray data)
                     //*/
                     //*
                     if (currCameraCycle < 2)
-                        imageAna->FirstImage(camera->getyData(),camera->imagetype);
+                        imageAna->FirstImage(camera->getyData(),camera->getImageType());
                     else
-                        imageAna->AddImage(camera->getyData(),camera->imagetype);
+                        imageAna->AddImage(camera->getyData(),camera->getImageType());
                     //*/
 
                     imageProvider->anaMainImg = imageAna->getMainImg(0,1);
@@ -404,12 +409,18 @@ void Sequence::ActionFinish(QByteArray data)
                     QVector<int> item = imageAna->getItem();
                     QVector<int> value = imageAna->getValue();
                     QVector<int> posIndex = imageAna->getIndex();
+                    QVector<QVector<int>> PosValue = imageAna->getPosValueArr();
                     emit callQmlRefeshData(currCameraCycle,item,value);
 
                     SqliteMgr::sqlitemgrinstance->StartTransations();
+                    /*
                     for(int i = 0; i < item.size(); i++){
                         testMgr->InsertData(posIndex[i],item[i],currCameraCycle,value[i]);
                     }
+                    */
+                    for (int i = 0; i < PosValue.size(); i++)
+                        testMgr->InsertData(currCameraCycle,PosValue[i]);
+
                     SqliteMgr::sqlitemgrinstance->EndTransations();
 
                     /*
@@ -432,11 +443,11 @@ void Sequence::ActionFinish(QByteArray data)
                     //*/
                 }
                 else if(currCameraCaptureType == 1){
-                    dryMeanValue = imageAna->GetMeanLight(camera->getyData(),camera->imagetype);
+                    dryMeanValue = imageAna->GetMeanLight(camera->getyData(),camera->getImageType());
                     //Log::LogTime(QString("Dry Mean Value:%1").arg(dryMeanValue));
                 }
                 else if(currCameraCaptureType == 3){
-                    fillMeanValue = imageAna->GetMeanLight(camera->getyData(),camera->imagetype);
+                    fillMeanValue = imageAna->GetMeanLight(camera->getyData(),camera->getImageType());
                     //Log::LogTime(QString("Dry Mean Value:%1,Fill Mean Value:%2").arg(dryMeanValue).arg(fillMeanValue));
                     Log::LogCData(QString("Dry Value/Fill Value = %1/%2 = %3 (reference value > %4)").arg(dryMeanValue).arg(fillMeanValue).arg(dryMeanValue/fillMeanValue).arg(DRYPFILL));
                     if (dryMeanValue > 3 && fillMeanValue > 3 && dryMeanValue/fillMeanValue < DRYPFILL)
@@ -460,7 +471,7 @@ void Sequence::ActionFinish(QByteArray data)
             emit qrDecode(data.data());
         }
         else if(data[7] == '\xB1'){ //刺穿识别 1:识别出二维码;2:检查出刺穿孔;4:已刺穿;8:有试剂液体
-            if (ExGlobal::projectMode() == 2)
+            if (ExGlobal::projectMode() == 10)
                 emit sequenceFinish(SequenceResult::Result_Box_Valid);
             else if(data[2] == '\x0')
             {
@@ -524,7 +535,7 @@ void Sequence::ActionFinish(QByteArray data)
 
         if (durationState == TimeState::running && currSequenceId == SequenceId::Sequence_Test && bFocused == false && nDuration >= 200000)
         {
-            if (ExGlobal::projectMode() == 2)
+            if (ExGlobal::projectMode() == 10)
             {
                 Log::LogByFile("Focus.txt",QString("ActionFinish,nDuration:%1").arg(nDuration));
                 autoFocus();
@@ -602,8 +613,7 @@ void Sequence::FinishSequence()
         Log::setDir(QCoreApplication::applicationDirPath());
     }
     else if(currSequenceId == SequenceId::Sequence_Test)
-    {
-        //imageCapture->closeCamera();
+    {        
         camera->closeCamera();
         currSequenceId = SequenceId::Sequence_Idle;
         qDebug()<<"Itemsize"<<imageAna->getItem().size();

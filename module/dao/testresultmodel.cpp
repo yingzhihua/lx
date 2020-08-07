@@ -1,10 +1,11 @@
 #include "testresultmodel.h"
 #include "../sqlitemgr.h"
+#include "../datahandler.h"
+
 #include<QDebug>
 
 TestResultModel::TestResultModel(QObject *parent):QAbstractListModel (parent)
-{
-    roles[RolesResultid] = "Resultid";
+{    
     roles[RolesPosIndex] = "PosIndex";
     roles[RolesItemid] = "Itemid";
     roles[Rolecycle] = "cycle";
@@ -24,9 +25,7 @@ QVariant TestResultModel::data(const QModelIndex &index, int role) const
 
     const TestResult &result = m_display_list[index.row()];
 
-    if (role == RolesResultid)
-        return result.Resultid;
-    else if(role == RolesPosIndex)
+    if(role == RolesPosIndex)
         return result.PosIndex;
     else if(role == RolesItemid)
         return result.Itemid;
@@ -51,59 +50,16 @@ void TestResultModel::AddTest(const TestResult &result){
 void TestResultModel::setCurrItem(int id){
     currItemid = id;
     m_display_list.clear();
-    QString sql = "select * from TestResult where Testid="+QString::number(Testid)+" and Itemid="+QString::number(id);
-    qDebug()<<sql;
-    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(sql);
 
-    dataPos.clear();
-    while(query.next()){
-        TestResult result;
-        result.Resultid = query.value(0).toInt();
-        result.PosIndex = query.value(2).toInt();
-        result.Itemid = query.value(3).toInt();
-        result.cycle = query.value(4).toInt();
-        result.TestValue = query.value(5).toInt();
-        m_display_list<<result;        
-        //qDebug()<<"setTestid,resultid="<<result.Resultid<<",PosIndex="<<result.PosIndex<<",Itemid="<<result.Itemid<<",cycle="<<result.cycle<<",TestValue="<<result.TestValue;
-        dataPos[result.PosIndex].push_back(Point(result.cycle*10,result.TestValue));
-    }
-
-    foreach(int dataKey, dataPos.keys()){
-        qDebug()<<"key="<<dataKey<<",length="<<dataPos[dataKey].size();
-        if (dataPos[dataKey].size()>30){
-            vector<Point> points = dataPos[dataKey];
-            vector<Point> tempPoint;
-            int linebaseStart = 3;
-            int linebaseEnd = points.size()-1;
-            Vec4f line_para;
-            bool doLine = true;
-            while(doLine){
-                doLine = false;
-                tempPoint.assign(points.begin()+linebaseStart,points.begin()+linebaseEnd+1);
-                fitLine(tempPoint,line_para,cv::DIST_L2,0,1e-2,1e-2);
-                if (linebaseEnd > 20) {
-                    double dv = line_para[1]/line_para[0]*(points[linebaseEnd].x-line_para[2])+line_para[3];
-                    if (fabs(points[linebaseEnd].y-dv)>1)
-                    {
-                        linebaseEnd--;
-                        doLine = true;
-                    }
-                }
-                if (doLine == false && linebaseStart<10){
-                    double dv = line_para[1]/line_para[0]*(points[linebaseStart].x-line_para[2])+line_para[3];
-                    if (fabs(points[linebaseStart].y-dv)>1)
-                    {
-                        linebaseStart++;
-                        doLine = true;
-                    }
-                }
-            }
-            double k = line_para[1]/line_para[0];
-            double intercept = k*(0-line_para[2]) + line_para[3];
-            qDebug()<<"para[0]="<<line_para[0]<<",para[1]="<<line_para[1]<<",para[2]="<<line_para[2]<<",para[3]="<<line_para[3]<<",k="<<k<<",intercept="<<intercept<<",lineStart="<<linebaseStart<<",lineEnd="<<linebaseEnd;
-            for (int i = 0; i < dataPos[dataKey].size(); i++){
-                //qDebug()<<"\tvalue="<<a.y<<","<<(a.y - (a.x*k + intercept));
-                dataPos[dataKey][i].y = dataPos[dataKey][i].y - (dataPos[dataKey][i].x*k + intercept);
+    QHash<int,int> posItem = DataHandler::getPosItemid();
+    foreach(int posIndex,posItem.keys()){
+        if (posItem[posIndex] == id){
+            for (size_t i = 0; i < dataPos[posIndex].size(); i++){
+                TestResult result;
+                result.PosIndex = posIndex;
+                result.Itemid = id;
+                result.cycle = i+1;
+                m_display_list<<result;
             }
         }
     }
@@ -115,9 +71,7 @@ QVariant TestResultModel::getField(int row,QString field) const{
 
     const TestResult &result = m_display_list[row];
 
-    if (field == "Resultid")
-        return result.Resultid;
-    else if(field == "PosIndex")
+    if(field == "PosIndex")
         return result.PosIndex;
     else if(field == "Itemid")
         return result.Itemid;
@@ -131,21 +85,9 @@ QVariant TestResultModel::getField(int row,QString field) const{
     return QVariant();
 }
 
-
 void TestResultModel::setTestid(int id){
     Testid = id;
-    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(QString("select * from TestResult where Testid=%1").arg(Testid));
-
-    dataPos.clear();
-    while(query.next()){
-        TestResult result;
-        result.Resultid = query.value(0).toInt();
-        result.PosIndex = query.value(2).toInt();
-        result.Itemid = query.value(3).toInt();
-        result.cycle = query.value(4).toInt();
-        result.TestValue = query.value(5).toInt();
-        m_display_list<<result;
-        //qDebug()<<"setTestid,resultid="<<result.Resultid<<",PosIndex="<<result.PosIndex<<",Itemid="<<result.Itemid<<",cycle="<<result.cycle<<",TestValue="<<result.TestValue;
-        dataPos[result.PosIndex].push_back(Point(result.cycle*10,result.TestValue));
-    }
+    DataHandler::FillTestData(Testid,dataPos);
+    //DataHandler::RefPosFit(dataPos);
+    DataHandler::BaseLineFit(dataPos);
 }

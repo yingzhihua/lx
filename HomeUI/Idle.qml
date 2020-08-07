@@ -206,7 +206,7 @@ Page {
         else
             boxstate.text = qsTr("未检测到试剂盒");
 
-        if (ExGlobal.projectMode() === 1){
+        if (ExGlobal.projectMode() !== 0){
             btReady.visible = false;
             //btExit.visible = false;
         }

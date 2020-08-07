@@ -86,12 +86,15 @@ Rectangle {
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
-                    if (userModel.login(ExGlobal.user,login_password.text)){
+                    var loginresult = userModel.login(ExGlobal.user,login_password.text);
+                    console.log("lock",loginresult);
+                    if (loginresult === 0)
+                    {
                         console.log("unlock")
                         ExGlobal.qmlGlobalMessage(2);
                     }
                     else
-                        labelMessage.text = qsTr("密码错误！")
+                        labelMessage.text = qsTr("密码错误！");
                 }
             }
         }

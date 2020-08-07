@@ -86,7 +86,7 @@ V2.12\n1、增加自动对焦功能。\n\
     }
 
     Component.onCompleted: {
-        if (ExGlobal.projectMode() === 1){
+        if (ExGlobal.projectMode() !== 0){
             fun1.visible = false;
             fun2.visible = false;
             fun3.visible = false;

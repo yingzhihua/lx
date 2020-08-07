@@ -4,7 +4,7 @@
 #include <QThread>
 #include <QImage>
 
-#include "DVPCamera.h"
+//#include "DVPCamera.h"
 
 struct buffer
 {
@@ -82,7 +82,7 @@ private:
     bool stopping;
     int internal_stop_capturing();
     void recordParam();    
-#if 1
+#if 0
     int dvp_open_device();
     int dvp_close_device();
     int dvp_init_device();

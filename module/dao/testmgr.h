@@ -13,6 +13,7 @@ public:
     void LoopTestFinishCycle(int nCycle);
     int TestClose(int type);
     void InsertData(int posIndex,int Itemid,int cycle,int value);
+    void InsertData(int cycle, QVector<int> value);
     void CheckTest(int testid);
     int Testid;
 signals:

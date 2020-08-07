@@ -60,5 +60,6 @@
         <file>components/SecondConfirm.qml</file>
         <file>components/AutoCloseMsg.qml</file>
         <file>components/TwoBtnQuery.qml</file>
+        <file>SetupUI/Version2.qml</file>
     </qresource>
 </RCC>

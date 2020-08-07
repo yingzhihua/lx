@@ -24,7 +24,7 @@ Rectangle {
         ListElement{Eid: "TestSetup"; name:qsTr("测试设置");info:"";qrc_res:"qrc:/SetupUI/TestSetup.qml"}
         ListElement{Eid: "TestLoop"; name:qsTr("循环测试");info:"";qrc_res:"qrc:/SetupUI/TestLoop.qml"}
         ListElement{Eid: "SystemParam"; name:qsTr("系统参数");info:"";qrc_res:"qrc:/SetupUI/SystemParam.qml"}
-        ListElement{Eid: "Version"; name:qsTr("版本号");info:"";qrc_res:"qrc:/SetupUI/Version.qml"}
+        ListElement{Eid: "Version"; name:qsTr("关于");info:"";qrc_res:"qrc:/SetupUI/Version.qml"}
     }
 
     ScrollView{
@@ -91,17 +91,28 @@ Rectangle {
         setInfo("Language",ExGlobal.sysLanguageName);
         setInfo("Version",ExGlobal.version);
 
+        if (ExGlobal.user != "flashdx")
+            removeItem("SystemParam");
+
         if (ExGlobal.user != "admin"){
-            removeItem("User");
+            removeItem("SystemName");
+            removeItem("Wlan");
+            removeItem("TimeSet");
+            removeItem("LockTime");
+            removeItem("User");            
             setName("AdminPassword",qsTr("设置密码"))
         }
 
-        if (ExGlobal.projectMode() === 1){
-            //removeItem("LockTime");
-            removeItem("Language");
+        if (ExGlobal.projectMode() !== 0){            
+            //removeItem("Language");
             //removeItem("AdminPassword");
             //removeItem("Wlan");
+            removeItem("TestSetup");            
+            setRes("Version","qrc:/SetupUI/Version2.qml")
+            removeItem("Cali");
+            removeItem("Camera");
             removeItem("TestSetup");
+            removeItem("TestLoop");
         }
 
         //headerMsg.text = qsTr("设置");
@@ -163,6 +174,14 @@ Rectangle {
         for (var i = 0; i < setModel.count; i++){
             if (setModel.get(i).Eid === id){
                 setModel.get(i).name = name
+            }
+        }
+    }
+
+    function setRes(id,res){
+        for (var i = 0; i < setModel.count; i++){
+            if (setModel.get(i).Eid === id){
+                setModel.get(i).qrc_res = res
             }
         }
     }

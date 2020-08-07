@@ -16,8 +16,7 @@ class TestResultModel : public QAbstractListModel
 
 public:
     enum LineInfo_Roles{
-        RolesResultid = Qt::UserRole + 1,
-        RolesPosIndex,
+        RolesPosIndex = Qt::UserRole + 1,
         RolesItemid,
         Rolecycle,
         RoleTestValue

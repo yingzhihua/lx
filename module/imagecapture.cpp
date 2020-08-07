@@ -154,7 +154,7 @@ ImageCapture::ImageCapture(QObject *parent) : QThread(parent),io(IO_METHOD_MMAP)
 {    
     cameraType = CAMERA_V4L2;
     //cameraType = CAMERA_DVP;
-    dvp_handle = 0;
+    //dvp_handle = 0;
 
     filename = "undefine";
 
@@ -1449,7 +1449,7 @@ double ImageCapture::getDefinition2(){
 /*************************
  * DVP CAMERA
  * ***********************/
-#if 1
+#if 0
 int ImageCapture::dvp_open_device(){
     dvpStatus status;
     dvpUint32 i,n = 0;

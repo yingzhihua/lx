@@ -38,9 +38,9 @@ SOURCES += \
     module/dao/wifimodel.cpp \
     module/cvcapture.cpp \
     module/printmgr.cpp \
-    module/cameraplayer.cpp \
     module/tcamera.cpp \
-    module/ckcamera.cpp
+    module/ckcamera.cpp \
+    module/datahandler.cpp
 
 RESOURCES += qml.qrc
 
@@ -82,9 +82,9 @@ HEADERS += \
     module/dao/wifimodel.h \
     module/cvcapture.h \
     module/printmgr.h \
-    module/cameraplayer.h \
     module/tcamera.h \
-    module/ckcamera.h
+    module/ckcamera.h \
+    module/datahandler.h
 
 if(contains(DEFINES,PLUTFORM_ARM)){
 INCLUDEPATH += /opt/opencv-4.1.1/include \
@@ -104,8 +104,8 @@ LIBS += /opt/opencv-4.1.1/lib/libopencv_highgui.so \
 INCLUDEPATH += /opt/zbar-0.10/include
 LIBS += /opt/zbar-0.10/lib/libzbar.so
 
-INCLUDEPATH += /opt/DVPCamera
-LIBS += /opt/DVPCamera/libdvp.so
+#INCLUDEPATH += /opt/DVPCamera
+#LIBS += /opt/DVPCamera/libdvp.so
 
 INCLUDEPATH += /opt/CKCameraL/include
 LIBS += /opt/CKCamera/libCKCameraSDK_aarch64.so
@@ -139,4 +139,3 @@ LIBS += /opt/CKCameraL/libCKCameraSDK_x64.so
 INCLUDEPATH += /opt/KPOSL/include_zh
 LIBS += /opt/KPOSL/libCsnPrinterLibs.so
 }
-

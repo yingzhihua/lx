@@ -30,6 +30,7 @@ public:
     QVector<int> getItem(){return posItem;}
     QVector<int> getValue(){return posValue;}
     QVector<int> getIndex(){return posIndex;}
+    QVector<QVector<int>> getPosValueArr(){return PosValue;}
     int getImageCount(){return imageCount;}
     void paramSet(int posWidth, int posSpace, int bgWidth, int bgSpace){mpp = posWidth;subsize=posSpace;md2=bgWidth;md1=bgSpace;}
 
@@ -53,19 +54,18 @@ private:
 
     vector<int> x,y;
     QVector<int> posItem,posValue,posIndex;
+    QVector<QVector<int>> PosValue;
 
     void SpotMask(Mat &img,std::vector<int>& x,std::vector<int>& y,int subsize);
     void FindPeaks(int *number, int numberLen, int mpp, std::vector<int>& pos);
-    void FindGrid(Mat img, int mpp, std::vector<int>& x, std::vector<int>& y);
-    int SpotCal(int x, int y);
-    int SpotCal(int x, int y, Point& offset);
-    int subImageHandle(bool debug, size_t x, size_t y, Mat &img, Mat &subimg, int thrsh,vector<vector<Point>> &contours,Point &centerPoint);
+    void FindGrid(Mat img, int mpp, std::vector<int>& x, std::vector<int>& y);    
+    int SpotCal(int x, int y, Mat &img, Point& offset, QVector<int> &value);
+    void pushData(Mat &img, Point offset);
+    int subImageHandle(bool debug, size_t x, size_t y, Mat &img, Mat &subimg,vector<vector<Point>> &contours,Point &centerPoint);
     void subImageRemoveBound(Mat &subimg, int thrsh);
     void UpdateMask(int index, int top, int left, vector<vector<Point>> &contours, int center);
     void EllipseMask(int index, int top, int left, vector<Point> &contour);
 
-    int refPoint = -1;
-    int refValue,refValue0;
 signals:
 
 public slots:

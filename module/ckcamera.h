@@ -24,6 +24,7 @@ public:
     bool capture(QString fileName, int nCount);
     bool preview();
     void *getyData();
+    int getImageType(){return rawImageType;}
 
     bool setabsExpose(int value);
     bool setGain(int value);

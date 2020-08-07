@@ -18,6 +18,7 @@ public:
     bool capture(QString fileName, int nCount);
     bool preview();
     void *getyData();
+    int getImageType();
 
     int getabsExpose();
     bool setabsExpose(int value);

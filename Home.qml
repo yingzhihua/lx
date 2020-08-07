@@ -12,7 +12,6 @@ Page {
         id: stackView
         anchors.fill: parent
         initialItem: ExGlobal.debug?"./HomeUI/Login.qml":"./HomeUI/Startup.qml"
-        //initialItem: "./HomeUI/Idle.qml"
     }
     onTitlemsgChanged: {
         testCompleted.width = 0;

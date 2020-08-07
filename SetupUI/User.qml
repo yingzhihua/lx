@@ -61,7 +61,8 @@ Rectangle {
         Rectangle{
             width: widthx
             height: itemheight
-            color: "#f34b08"
+            //color: "#f34b08"
+            color:"azure"
             radius: 5
             border.width: 1
             border.color: "#60f50a"
@@ -118,6 +119,7 @@ Rectangle {
         anchors.leftMargin: 60
         anchors.verticalCenter: inputName.verticalCenter
         font.pixelSize: 40
+        visible: ExGlobal.projectMode()===2?false:true
         text: qsTr("审核权限")
     }
 

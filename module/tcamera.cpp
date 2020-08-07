@@ -66,6 +66,11 @@ bool TCamera::preview(){
     return false;
 }
 
+int TCamera::getImageType(){
+    if (cameraType == CAMERA_TYPE_CK)
+        return ckCamera->getImageType();
+    return 0;
+}
 void *TCamera::getyData()
 {
     if (cameraType == CAMERA_TYPE_CK)

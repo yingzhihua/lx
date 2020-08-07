@@ -61,6 +61,14 @@ void TestMgr::InsertData(int posIndex,int Itemid,int cycle,int value){
     }
 }
 
+void TestMgr::InsertData(int cycle, QVector<int> value){
+    if (Testid != -1){
+        QString sql = QString("insert into TestResult(Testid,PosIndex,Itemid,cycle,TestValue,PosValue,PosNum,BgValue,BgNum) values(%1,%2,%3,%4,%5,%6,%7,%8,%9)")
+                .arg(Testid).arg(value[6]).arg(value[5]).arg(cycle).arg(value[4]).arg(value[0]).arg(value[1]).arg(value[2]).arg(value[3]);
+        SqliteMgr::sqlitemgrinstance->execute(sql);
+    }
+}
+
 int TestMgr::TestClose(int type){
     int result = Testid;
     if (Testid != -1){

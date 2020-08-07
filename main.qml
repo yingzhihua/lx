@@ -42,7 +42,7 @@ ApplicationWindow {
             when: inputPanel.active
             PropertyChanges {
                 target: inputPanel
-                y: window.height - inputPanel.height -100
+                y: window.height - inputPanel.height -150
             }
         }
         transitions: Transition {
@@ -234,6 +234,7 @@ ApplicationWindow {
         id: mainView
         anchors.fill: parent
         initialItem: ExGlobal.debug?"./HomeUI/Login.qml":"./HomeUI/Startup.qml"
+        //initialItem: "./HomeUI/Startup.qml"
     }
 /*/
     SwipeView {
