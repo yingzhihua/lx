@@ -144,6 +144,8 @@ bool Sequence::sequenceDo(SequenceId id)
         return false;
     }
     this->currSequenceId = id;
+    lampDo(LampState::Lamp_Light_green);
+    qDebug()<<"Lamp1";
     QDomElement root = doc.documentElement();    
     if (id == SequenceId::Sequence_Test)
     {
@@ -364,7 +366,7 @@ void Sequence::ActionFinish(QByteArray data)
                     else if (i == 9)
                         logstr += QString("前置散热器B温度：\t%1\n").arg(ftemp);
                     else if (i == 10)
-                        logstr += QString("环境温度：\t%1\n").arg(ftemp);
+                        logstr += QString("环境温度：\t1%1\n").arg(ftemp);
                     else if (i == 11)
                         logstr += QString("预设1温度：\t%1\n").arg(ftemp);
                     else if (i == 12)
@@ -574,7 +576,8 @@ void Sequence::errFinish(QByteArray data){
 
         emit errOccur(errStr+" \n\n错误码："+QString::number(errCode,16));
         Log::Logdb(LOGTYPE_ERR,errCode,errStr);
-
+        lampDo(LampState::Lamp_Light_orange);
+        qDebug()<<"Lamp3";
         sequenceCancel();
     }
 }
@@ -649,6 +652,8 @@ void Sequence::FinishSequence()
         }
     }
     currSequenceId = SequenceId::Sequence_Idle;
+    lampDo(LampState::Lamp_Light_blue);
+    qDebug()<<"Lamp4";
     if (out != SequenceResult::Result_NULL)
         emit sequenceFinish(out);
 }
@@ -1159,6 +1164,8 @@ void Sequence::errReceive(ERROR_CODE code){
     else if(code == ERROR_CODE_DISK_FULL)
         errStr = "磁盘已满！";
     emit errOccur(errStr+" \n\n错误码："+QString::number(code,16));
+    lampDo(LampState::Lamp_Light_orange);
+    qDebug()<<"Lamp5";
 }
 
 int Sequence::getAbs(){
@@ -1195,25 +1202,19 @@ void test(const char *str){
     qDebug()<<QString::number(str[0],16)<<QString::number(str[1],16)<<QString::number(str[2],16)<<QString::number(str[3],16)<<QString::number(str[4],16)<<QString::number(str[5],16);
 }
 
-static int tempInt = 8;
+static int tempInt = 1;
 void Sequence::lxDebug(){
     qDebug()<<"lxDebug";    
-    tempInt++;
-    //*
-    //if (tempInt > 69 || tempInt < 64)
-    //    tempInt = 64;
 
-    if (tempInt > 2)
+    if (tempInt == 1)
+    {
+        lampDo(LampState::Lamp_Light_green);
         tempInt = 0;
-    serialMgr->serialWrite(ActionParser::ParamToByte("Lamp",1,tempInt,200,200));
-//*/
-
-    //serialMgr->serialWrite(ActionParser::ParamToByte("Door",7,0,0,0));
-    return;
-    serialMgr->serialWrite(ActionParser::ParamToByte("Light",4,0,0,0));
-    cvcap->setCurrCamera(0);
-    cvcap->setImageCount(3);
-    cvcap->start();
+    }
+    else {
+        lampDo(LampState::Lamp_Light_orange);
+        tempInt = 1;
+    }
 }
 
 void Sequence::showAnaImg(int type, int light){
@@ -1485,4 +1486,18 @@ QStringList Sequence::getLoopTestList(){
             test<<e.attribute("PanelName");
     }
     return test;
+}
+
+void Sequence::lampDo(LampState state){
+    switch (state) {
+    case LampState::Lamp_Light_blue:
+        serialMgr->CtrlDirectWrite(ActionParser::ParamToByte("Lamp",1,1,65535,0));
+        break;
+    case LampState::Lamp_Light_green:
+        serialMgr->CtrlDirectWrite(ActionParser::ParamToByte("Lamp",1,2,65535,0));
+        break;
+    case LampState::Lamp_Light_orange:
+        serialMgr->CtrlDirectWrite(ActionParser::ParamToByte("Lamp",1,0,65535,0));
+        break;
+    }
 }

@@ -71,10 +71,18 @@ public:
     };
     Q_ENUM(TimeState)
 
+    enum class LampState{
+        Lamp_Light_blue,
+        Lamp_Light_green,
+        Lamp_Light_orange
+    };
+    Q_ENUM(LampState)
+
     Q_PROPERTY(bool door READ readDoorState NOTIFY doorStateChanged)
     Q_PROPERTY(bool box READ readBoxState NOTIFY boxStateChanged)    
 
     Q_INVOKABLE bool sequenceDo(SequenceId id);
+    Q_INVOKABLE void lampDo(LampState state);
     Q_INVOKABLE QString getCurrTestTime();
     Q_INVOKABLE bool actionDo(QString device, int value, int param1, int param2, int param3);
     Q_INVOKABLE void sequenceCancel();

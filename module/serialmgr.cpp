@@ -300,3 +300,7 @@ bool SerialMgr::serialWrite(QByteArray wData)
     qDebug()<<"serialWrite end";
     return true;
 }
+
+void SerialMgr::CtrlDirectWrite(QByteArray wData){
+    serialCtrl.write(wData);
+}

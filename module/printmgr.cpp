@@ -13,6 +13,7 @@
 #include "PrinterLibs.h"
 #include "log.h"
 
+static bool loadlogo = false;
 printmgr::printmgr(QObject *parent) : QThread(parent)
 {
     printDir = QCoreApplication::applicationDirPath()+"/report";
@@ -20,6 +21,8 @@ printmgr::printmgr(QObject *parent) : QThread(parent)
     if (!dir.exists())
         dir.mkpath(printDir);
     printDir += "/";
+    loadlogo = flashdxlogo.load(QCoreApplication::applicationDirPath()+"/Dxlogo.png");
+    qDebug()<<"load logo"<<loadlogo;
 
 }
 
@@ -40,7 +43,7 @@ void printmgr::run(){
         msleep(1000);
     }
     else {
-        int result = ExGlobal::SysCommand(QString("lp -d HP_LaserJet_Professional_P1106 %1").arg(filename));
+        int result = ExGlobal::SysCommand(QString("lp -d dxprinter %1").arg(filename));
         qDebug()<<"print result = "<<result;
     }
 
@@ -269,7 +272,7 @@ bool printmgr::printPTP(){
 #define ITEMHEADLINEX 20
 #define ITEMHEADLINEY INNERREFY+20
 #define ITEMHEADLINELENGTH 760
-#define ITEMENDLINEY ITEMHEADLINEY+320
+#define ITEMENDLINEY ITEMHEADLINEY+340
 
 #define ITEMHEIGHT 20
 #define ITEMINDEXPOS ITEMHEADLINEX+10
@@ -286,6 +289,8 @@ QString printmgr::CreatePDF(){
     const static QRect OuterFrame(OUTERX,OUTERY,OUTERWIDTH,OUTERHEIGHT);
     const static QRect TitleRect((OUTERX+OUTERWIDTH-TITLEWIDTH)>>1,OUTERY+10,TITLEWIDTH,TITLEHEIGHT);
     const static QRect HospitalRect(OUTERX+10,OUTERY+10,200,TITLEHEIGHT);
+    //const static QRect dxLogoRect(SAMPLECODEX+570,OUTERY+8,117,28);
+    const static QRect dxLogoRect(SAMPLECODEX+570,OUTERY+8,94,22);
     const static QRect SampleCodeRect(SAMPLECODEX,SAMPLECODEY,300,20);
     const static QRect SampleInfoRect(SAMPLECODEX,SAMPLECODEY+20,300,20);
     const static QRect SampleTypeRect(SAMPLECODEX,SAMPLECODEY+40,300,20);
@@ -297,7 +302,7 @@ QString printmgr::CreatePDF(){
     const static QRect SystemNameDateRect(INNERREFX+650,INNERREFY,150,20);
     const static QRect ItemRemarkRect(ITEMHEADLINEX+10,ITEMENDLINEY-20,ITEMHEADLINELENGTH,20);
     const static QRect TestTimeRect(ITEMHEADLINEX+10,ITEMENDLINEY+4,200,20);
-    const static QRect ReportTimeRect(ITEMHEADLINEX+10,ITEMENDLINEY+30,200,20);
+    const static QRect ReportTimeRect(ITEMHEADLINEX+10,ITEMENDLINEY+22,200,20);
     const static QRect UserRect(ITEMHEADLINEX+250,ITEMENDLINEY+4,100,20);
     const static QRect CheckerRect(ITEMHEADLINEX+500,ITEMENDLINEY+4,100,20);
     const static QRect CopyRightRect((OUTERX+OUTERWIDTH-TITLEWIDTH)>>1,OUTERY+OUTERHEIGHT-20,TITLEWIDTH,20);
@@ -327,7 +332,7 @@ QString printmgr::CreatePDF(){
 
     qDebug()<<printer.pageRect().width()<<printer.pageRect().height()<<printer.pageRect().x()<<printer.pageRect().y();
 
-    painter->drawRect(OuterFrame);
+    //painter->drawRect(OuterFrame);
 #if 0
     painter->drawRect(TitleRect);
     painter->drawRect(SampleCodeRect);
@@ -337,7 +342,8 @@ QString printmgr::CreatePDF(){
     painter->drawRect(InnerRefRect);
 #endif
     painter->drawText(TitleRect,Qt::AlignCenter,"多重呼吸道病原体辅助测试报告");
-
+    if (flashdxlogo.load(QCoreApplication::applicationDirPath()+"/Dxlogo.png"))
+        painter->drawImage(dxLogoRect,flashdxlogo);
     font.setPointSize(12);
     painter->setFont(font);
     painter->drawText(HospitalRect,Qt::AlignCenter,"深圳南山闪量医院");
@@ -346,7 +352,7 @@ QString printmgr::CreatePDF(){
     painter->setFont(font);
     painter->drawText(SampleCodeRect,Qt::AlignVCenter,QString("样本编号：")+sampCode);
     painter->drawText(SampleInfoRect,Qt::AlignVCenter,QString("样本信息：")+sampInfo);
-    painter->drawText(SampleTypeRect,Qt::AlignVCenter,"样本类型：");
+    painter->drawText(SampleTypeRect,Qt::AlignVCenter,QString("样本类型：")+"鼻咽拭子");
     painter->drawText(SampleRemarkRect,Qt::AlignVCenter,"样本备注：");
     font.setPointSize(8);
     painter->setFont(font);
@@ -358,7 +364,7 @@ QString printmgr::CreatePDF(){
 
     painter->drawLine(QLine(QPoint(ITEMHEADLINEX,ITEMHEADLINEY),QPoint(ITEMHEADLINEX+ITEMHEADLINELENGTH,ITEMHEADLINEY)));
     painter->drawLine(QLine(QPoint(ITEMHEADLINEX,ITEMENDLINEY),QPoint(ITEMHEADLINEX+ITEMHEADLINELENGTH,ITEMENDLINEY)));
-    painter->drawText(ItemRemarkRect,Qt::AlignLeft,"备注：本报告仅对此标本负责，结果供医师参考：阴性不能排除该病原体感染，阳性清结合临床考虑，可疑建议再次采样。");
+    painter->drawText(ItemRemarkRect,Qt::AlignLeft,"备注：本报告仅对此标本负责，结果供医师参考：阴性不能排除该病原体感染，阳性请结合临床考虑，可疑建议再次采样。");
     painter->drawText(TestTimeRect,Qt::AlignLeft,QString("检测时间：")+testTime);
     painter->drawText(ReportTimeRect,Qt::AlignLeft,QString("报告时间：")+QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
     painter->drawText(UserRect,Qt::AlignLeft,QString("检验者：")+user);

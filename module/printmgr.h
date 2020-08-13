@@ -24,8 +24,8 @@ signals:
 
 private:
     QString printDir;
-    QImage flashdxIco;
-    QImage hospitalIco;
+    QImage flashdxlogo;
+    QImage hospitallogo;
     bool printPDF();
     bool printPTP();
     QString CreatePDF();

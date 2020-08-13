@@ -16,6 +16,7 @@ public:
     explicit SerialMgr(QObject *parent = nullptr);
     static int SerialInit();
     static bool serialWrite(QByteArray wData);
+    static void CtrlDirectWrite(QByteArray wData);
 
 signals:
     void finishAction(QByteArray result);
