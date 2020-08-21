@@ -339,7 +339,9 @@ int ImageAnalysis::subImageHandle(bool debug, size_t posX, size_t posY, Mat &img
 
     //imclose
     Mat element = getStructuringElement(MORPH_ELLIPSE,Size(9,9));
+    morphologyEx(subimg,subimg,MORPH_OPEN,element);
     morphologyEx(subimg,subimg,MORPH_CLOSE,element);
+    //morphologyEx(subimg,subimg,MORPH_CLOSE,element);
     //morphologyEx(subimg,subimg,MORPH_OPEN,element);
     if (debug)
     {
@@ -380,7 +382,7 @@ int ImageAnalysis::subImageHandle(bool debug, size_t posX, size_t posY, Mat &img
             double l = arcLength(contours[z],true);
             if (debug)
                 qDebug()<<"s"<<s<<"l"<<l<<4*3.14*s/l/l;
-            if (s>600 && s<10000 && (4*3.14*s/l/l)>0.7)
+            if (s>1000 && s<10000 && (4*3.14*s/l/l)>0.65)
             {
                 if (center == -1)
                 {

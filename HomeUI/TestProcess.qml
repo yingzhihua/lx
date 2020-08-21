@@ -6,7 +6,8 @@ import Dx.Global 1.0
 
 import "../components"
 Page {
-    id: boxready_page
+    id: test_page
+    /*
     Image {
         id: startbutton
         anchors.centerIn: parent
@@ -53,41 +54,47 @@ Page {
         anchors.verticalCenter: startbutton.verticalCenter
         anchors.verticalCenterOffset: +40
     }    
+*/
+    Rectangle{
+        anchors.fill: parent
+        color: "#f5f5f5"
 
-    Text{
-        id: message
-        height: 100
-        width: parent.width - 40
-        text:"ExGlobal.s"
-        font.pixelSize: 20
-        anchors.left: parent.left
-        anchors.leftMargin: 20
-        anchors.top: sampleInfo.bottom
-        anchors.topMargin: 40
-        wrapMode: Text.Wrap
-    }
-    Text{
-        id: userName
+        ThreeMessage{
+            x:358
+            y:224
+            text1: ExGlobal.panelName
+            text3: ExGlobal.boxSerial()
+        }
 
-        text:ExGlobal.user
-        font.pixelSize: 30
-        anchors.left: parent.left
-        anchors.leftMargin: 20
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 20
-    }
-
-    Button {
-        id: btCannel
-        font.pixelSize: 30
-        width: 200
-        text: qsTr("取消测试")
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 50
-        anchors.right: parent.right
-        anchors.rightMargin: 20
-        onClicked: {
-            testcancelDialog.show(1)
+        ThreeMessage{
+            x:1159
+            y:224
+            text1: ExGlobal.sampleCode
+            text2: ExGlobal.sampleInfo
+        }
+        Rectangle{
+            anchors.horizontalCenter: parent.horizontalCenter
+            y:240
+            width: 2
+            height: 400
+            color: "#d9d9d9"
+        }
+        Image {
+            id: btQuit
+            x: 1450
+            y: 754
+            height: 106
+            width: 299
+            fillMode: Image.Pad
+            source: "qrc:/images/TestCancel.png"
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    testcancelDialog.show(1)
+                }
+                onPressed: parent.x += 10
+                onReleased: parent.x -= 10
+            }
         }
     }
 
@@ -110,8 +117,7 @@ Page {
         }
     }
 
-    Component.onCompleted: {
-        message.visible = false;
+    Component.onCompleted: {        
         Sequence.sequenceDo(Sequence.Sequence_Test);
     }
 

@@ -30,8 +30,7 @@ int main(int argc, char *argv[])
     font.setPixelSize(30);
     app.setFont(font);
 
-    exGlobal = new ExGlobal();
-    app.global = exGlobal;
+    app.global = ExGlobal::getPtr();
 
     SqliteMgr::sqlitemgrinstance = new SqliteMgr();
     ExGlobal::pTestModel = new TestModel();
@@ -40,17 +39,15 @@ int main(int argc, char *argv[])
     ExGlobal::pWifiModel = new WifiModel();
 
     SqliteMgr::sqlitemgrinstance->conn(Log::getDir()+"/data.db","sa","123456");
-    //init dao manager
-    //sqlitemgrinstance->init();
+
     ExGlobal::exInit();
 
-    sequence = new Sequence();
     usermgrinstance = new UserMgr();
     if (argc > 1 && strcmp(argv[1],"debug")==0)
         ExGlobal::setDebug(true);
 
-    qmlRegisterSingletonType<ExGlobal>("Dx.Global",1,0,"ExGlobal",exglobal_provider);
-    qmlRegisterSingletonType<Sequence>("Dx.Sequence",1,0,"Sequence",sequence_provider);
+    qmlRegisterSingletonType<ExGlobal>("Dx.Global",1,0,"ExGlobal",ExGlobal::exglobal_provider);
+    qmlRegisterSingletonType<Sequence>("Dx.Sequence",1,0,"Sequence",Sequence::sequence_provider);
     qmlRegisterSingletonType<UserMgr>("Dx.UserMgr",1,0,"UserMgr",usermgr_provider);
 
     QQmlApplicationEngine engine;
@@ -68,7 +65,7 @@ int main(int argc, char *argv[])
 
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
-    engine.addImageProvider("CodeImg",sequence->imageProvider);
+    engine.addImageProvider("CodeImg",Sequence::getPtr()->imageProvider);
 
     if (engine.rootObjects().isEmpty())
         return -1;

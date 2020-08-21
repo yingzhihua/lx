@@ -11,7 +11,7 @@ QString ExGlobal::t_panelName = "上呼吸道测试";
 QString ExGlobal::t_sampleCode = "SLX 01079";
 QString ExGlobal::t_sampleInfo = "华山11";
 QString ExGlobal::t_BoxSerial = "Lot# 000001";
-QString ExGlobal::User = "NotLoggedIn";
+QString ExGlobal::User = "";
 int ExGlobal::UserType = 0;
 QString ExGlobal::t_ReagentBox = "204";
 bool ExGlobal::test = false;
@@ -94,11 +94,27 @@ TestResultModel * ExGlobal::pTestResultModel = nullptr;
 UserModel * ExGlobal::pUserModel = nullptr;
 WifiModel * ExGlobal::pWifiModel = nullptr;
 
-QHash<int, QByteArray> ExGlobal::AssayItem;
+QHash<int, QString> ExGlobal::AssayItem;
 QHash<int, int> ExGlobal::ItemCT;
 
 unsigned char * ExGlobal::bufrgb = nullptr;
 unsigned char * ExGlobal::hbufrgb = nullptr;
+
+static ExGlobal *exGlobal = nullptr;
+QObject *ExGlobal::exglobal_provider(QQmlEngine *engine, QJSEngine *scriptEngine){
+    Q_UNUSED(engine);
+    Q_UNUSED(scriptEngine);
+    if (exGlobal == nullptr)
+        exGlobal = new ExGlobal();
+    return exGlobal;
+}
+
+ExGlobal *ExGlobal::getPtr()
+{
+    if (exGlobal == nullptr)
+        exGlobal = new ExGlobal();
+    return exGlobal;
+}
 
 ExGlobal::ExGlobal(QObject *parent) : QObject(parent)
 {
@@ -131,10 +147,85 @@ QString ExGlobal::getIP(){
     return "127.0.0.1";
 }
 
+QStringList ExGlobal::getNetWork(){
+    QStringList netArr;
+    netArr<<""<<""<<""<<""<<""<<""<<""<<""<<""<<""<<""<<"";
+    QFile file("/etc/network/interfaces.d/eth0");
+    if (file.open(QIODevice::ReadOnly)){
+        if (file.size()>0){
+            QTextStream in(&file);
+            QString line = in.readLine();
+            while(!line.isEmpty())
+            {
+                qDebug()<<line;
+                int addressIndex;
+
+                if ((addressIndex = line.indexOf("address")) >= 0)
+                {
+                    QStringList strArr = line.mid(addressIndex+7).trimmed().split('.');
+                    netArr[0] = strArr[0];
+                    netArr[1] = strArr[1];
+                    netArr[2] = strArr[2];
+                    netArr[3] = strArr[3];
+                }
+                else if((addressIndex = line.indexOf("gateway")) >= 0)
+                {
+                    QStringList strArr = line.mid(addressIndex+7).trimmed().split('.');
+                    netArr[4] = strArr[0];
+                    netArr[5] = strArr[1];
+                    netArr[6] = strArr[2];
+                    netArr[7] = strArr[3];
+                }
+                else if((addressIndex = line.indexOf("netmask")) >= 0)
+                {
+                    QStringList strArr = line.mid(addressIndex+7).trimmed().split('.');
+                    netArr[8] = strArr[0];
+                    netArr[9] = strArr[1];
+                    netArr[10] = strArr[2];
+                    netArr[11] = strArr[3];
+                }
+
+                line = in.readLine();
+            }
+        }
+        file.close();
+    }
+    foreach(const QHostAddress& hostAddress,QNetworkInterface::allAddresses())
+        if(hostAddress != QHostAddress::LocalHost && hostAddress.toIPv4Address())
+        {
+            QStringList strArr = hostAddress.toString().split('.');
+            netArr[0] = strArr[0];
+            netArr[1] = strArr[1];
+            netArr[2] = strArr[2];
+            netArr[3] = strArr[3];
+            break;
+        }
+    return netArr;
+}
+
+void ExGlobal::setNetWork(const QString &ip, const QString &mask, const QString &gate){
+    QFile file("/etc/network/interfaces.d/eth0");
+    if (file.open(QIODevice::WriteOnly|QIODevice::Text))
+    {
+        QTextStream text(&file);
+        text<<"auto eth0"<<endl<<"iface eth0 inet static"<<endl;
+        text<<"address "<<ip<<endl;
+        text<<"gateway "<<gate<<endl;
+        text<<"netmask "<<mask<<endl;
+        text<<"dns-nameservers "<<gate<<endl;
+        text.flush();
+        file.close();
+
+        if (getIP() != ip)
+            system("/etc/init.d/networking restart");
+    }
+    qDebug()<<"setNetWork"<<ip<<mask<<gate;
+}
 bool ExGlobal::setTime(QString time){
     QString order = "date -s '"+time+"'";
     int result = system(order.toLatin1().data());
     qDebug()<<"setTime,result="<<result;
+    system("hwclock --systohc");
     return true;
 }
 
@@ -199,7 +290,7 @@ void ExGlobal::CaliParamInit()
     query = SqliteMgr::sqlitemgrinstance->select(sql);
     while(query.next()){
         //qDebug()<<"Itemid:"<<query.value(0).toInt()<<"ItemName:"<<query.value(1).toString()<<"ItemCT:"<<query.value(2).toInt();
-        AssayItem[query.value(0).toInt()] = query.value(1).toString().toLatin1();
+        AssayItem[query.value(0).toInt()] = query.value(1).toString();
         ItemCT[query.value(0).toInt()] = query.value(2).toInt();
     }
 

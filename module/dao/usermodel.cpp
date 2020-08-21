@@ -108,6 +108,7 @@ int UserModel::login(QString name, QString password){
     {        
         ExGlobal::UserType = query.value(4).toInt();
         Log::Logdb(LOGTYPE_LOGIN,0,name);
+        ExGlobal::getPtr()->userChanged();
         return 0;
     }
 
@@ -115,6 +116,7 @@ int UserModel::login(QString name, QString password){
     {
         ExGlobal::UserType = 3;
         Log::Logdb(LOGTYPE_LOGIN,0,name);
+        ExGlobal::getPtr()->userChanged();
         return 0;
     }
 
@@ -122,6 +124,7 @@ int UserModel::login(QString name, QString password){
     {
         ExGlobal::UserType = 9;
         Log::Logdb(LOGTYPE_LOGIN,0,name);
+        ExGlobal::getPtr()->userChanged();
         return 0;
     }
 
@@ -130,6 +133,7 @@ int UserModel::login(QString name, QString password){
         if (name.length() == 0)
             ExGlobal::User = "user";
         ExGlobal::UserType = 1;
+        ExGlobal::getPtr()->userChanged();
         return 0;
     }
 

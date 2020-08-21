@@ -33,6 +33,8 @@ class ExGlobal : public QObject
 
 public:
     explicit ExGlobal(QObject *parent = nullptr);
+    static QObject *exglobal_provider(QQmlEngine *engine, QJSEngine *scriptEngine);
+    static ExGlobal *getPtr();
     static void exInit();
 
     QString user() {return User;}
@@ -82,6 +84,8 @@ public:
     Q_INVOKABLE static void updateTextParam(const QString &caliName, QString caliValue);
     Q_INVOKABLE static QString getTextParam(const QString &caliName);
     Q_INVOKABLE static QString getIP();
+    Q_INVOKABLE static QStringList getNetWork();
+    Q_INVOKABLE static void setNetWork(const QString &ip,const QString &mask,const QString &gate);
     Q_INVOKABLE static bool setTime(QString time);
     Q_INVOKABLE static void exClose();
     Q_INVOKABLE static QStringList getPosNameArray();
@@ -149,7 +153,7 @@ public:
     static UserModel *pUserModel;
     static WifiModel *pWifiModel;
 
-    static QHash<int, QByteArray> AssayItem;
+    static QHash<int, QString> AssayItem;
     static QHash<int, int> ItemCT;
 
     static QString AdminPassword;
@@ -208,12 +212,4 @@ public:
     void GlobalMessage(int code);
 };
 
-static ExGlobal *exGlobal;
-static QObject *exglobal_provider(QQmlEngine *engine, QJSEngine *scriptEngine)
-{
-    Q_UNUSED(engine);
-    Q_UNUSED(scriptEngine);
-    //ExGlobal *exGlobal = new ExGlobal();
-    return exGlobal;
-}
 #endif // EXGLOBAL_H

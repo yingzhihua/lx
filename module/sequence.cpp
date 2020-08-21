@@ -25,6 +25,23 @@ static int currCameraCaptureType = 0;
 static int currCameraCycle = 0;
 static QDateTime testStartTime;
 static QMetaEnum metaEnum = QMetaEnum::fromType<Sequence::SequenceId>();
+
+static Sequence *sequence = nullptr;
+QObject *Sequence::sequence_provider(QQmlEngine *engine, QJSEngine *scriptEngine){
+    Q_UNUSED(engine);
+    Q_UNUSED(scriptEngine);
+    if (sequence == nullptr)
+        sequence = new Sequence();
+    return sequence;
+}
+
+Sequence *Sequence::getPtr()
+{
+    if (sequence == nullptr)
+        sequence = new Sequence();
+    return sequence;
+}
+
 Sequence::Sequence(QObject *parent) : QObject(parent)
 {    
     ExGlobal::bufrgb = (unsigned char *)malloc(2592 * 1944 * 3);

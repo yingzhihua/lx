@@ -61,5 +61,44 @@
         <file>components/AutoCloseMsg.qml</file>
         <file>components/TwoBtnQuery.qml</file>
         <file>SetupUI/Version2.qml</file>
+        <file>images/data.png</file>
+        <file>images/databt.png</file>
+        <file>images/home.png</file>
+        <file>images/homebt.png</file>
+        <file>images/logo.png</file>
+        <file>images/setup.png</file>
+        <file>images/setupbt.png</file>
+        <file>images/title_startup.png</file>
+        <file>images/title_login.png</file>
+        <file>images/confirm.png</file>
+        <file>images/cancelbt.png</file>
+        <file>images/title_boxready.png</file>
+        <file>images/TestStart.png</file>
+        <file>images/TestCancel.png</file>
+        <file>images/SampleInput.png</file>
+        <file>components/ThreeQuery.qml</file>
+        <file>images/title_setup.png</file>
+        <file>images/setupmenu_wifi.png</file>
+        <file>images/setupmenu_user.png</file>
+        <file>images/setupmenu_time.png</file>
+        <file>images/setupmenu_system.png</file>
+        <file>images/setupmenu_password.png</file>
+        <file>images/setupmenu_net.png</file>
+        <file>images/setupmenu_lock.png</file>
+        <file>images/setupmenu_lauguage.png</file>
+        <file>images/setupmenu_about.png</file>
+        <file>images/row2.png</file>
+        <file>images/row1.png</file>
+        <file>DataUI/DataMenu2.qml</file>
+        <file>images/lockarrow.png</file>
+        <file>images/back.png</file>
+        <file>components/ThreeMessage.qml</file>
+        <file>SetupUI/NetWork.qml</file>
+        <file>images/title_idle.png</file>
+        <file>images/loginquit.png</file>
+        <file>images/login_logo.png</file>
+        <file>images/idle_nobox.png</file>
+        <file>images/idle_box.png</file>
+        <file>images/shutdownbt.png</file>
     </qresource>
 </RCC>

@@ -8,19 +8,19 @@ Page {
     property int titleChange: 0
     property bool pagequit: false
     id: start_page
+
     Image {
         id: appicon
         anchors.centerIn: parent
-        scale: 2.4
-
-        source: "qrc:/image/Dxlogo.png"
+        anchors.verticalCenterOffset: -100
+        source: "qrc:/images/logo.png"
     }
+
     Component.onCompleted: {
-        changeTimer.stop();
-        //headerMsg.text=qsTr("检测试剂盒");
+        changeTimer.stop();        
         changeTimer.start();
-        tabBar.enabled = false;
-        //appicon.visible = false;
+        //tabBar.enabled = false;
+        Sequence.updateFooter(false,false,false);
         openDoor.visible = false;
         boxTips.visible = false;
         Sequence.sequenceInit();

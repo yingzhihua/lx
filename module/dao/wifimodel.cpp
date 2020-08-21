@@ -5,7 +5,7 @@
 #include "wifimodel.h"
 
 #define WIFINUM 15
-static bool openWifiFunc = false;
+static bool openWifiFunc = true;
 
 WifiModel::WifiModel(QObject *parent):QAbstractListModel (parent)
 {

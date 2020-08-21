@@ -134,14 +134,15 @@ Page {
         anchors.right: parent.right
         anchors.rightMargin: 20
         //onClicked: ExGlobal.exClose()
-        onClicked: confirmDlg.show(qsTr("确认关机？"))
+        onClicked: confirmDlg.show(qsTr("您将关机？"))
     }
 
     Component.onCompleted: {
         //home_page.titlemsg=qsTr("登录");
         //home_page.enableTabBar = false;
         headerMsg.text = qsTr("登录");
-        tabBar.enabled = false;
+        //tabBar.enabled = false;
+        Sequence.updateFooter(false,false,false);
         labelMessage.text = "";
         console.log("Login Completed");
     }

@@ -10,48 +10,50 @@ Rectangle {
 
     Rectangle{
         z:2
-        width: 700
-        height: 400
+        width: 838
+        height: 404
         anchors.centerIn: parent
         border.color: "darkgray"
-        radius: 50
+        radius: 30
 
         Text{
             id:title
-            y:100
+            y:115
             anchors.horizontalCenter: parent.horizontalCenter
-            font.pixelSize: 40
+            font.pixelSize: 60
         }
 
-        Button {
-            id: btConfirm
-            text: qsTr("确定")
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 50
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.horizontalCenterOffset: -150
-            width: 200
-            height: 80
-            font.pixelSize: 40
-            onClicked: {
-                queryDialog.visible = false;
-                queryAck("confirm")
+        Image {
+            id: btQuit
+            x: 67
+            y: 277
+            height: 84
+            width: 214
+            fillMode: Image.Pad
+            source: "qrc:/images/cancelbt.png"
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    queryDialog.visible = false;
+                    queryAck("cancel")
+                }
             }
         }
 
-        Button {
-            id: btQuit
-            text: qsTr("取消")
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 50
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.horizontalCenterOffset: 150
-            width: 200
-            height: 80
-            font.pixelSize: 40
-            onClicked: {
-                queryDialog.visible = false;
-                queryAck("cancel")
+        Image {
+            id: btConfirm
+            x: 556
+            y: 277
+            height: 84
+            width: 214
+            fillMode: Image.Pad
+            source: "qrc:/images/confirm.png"
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    queryDialog.visible = false;
+                    queryAck("confirm")
+                }
             }
         }
     }

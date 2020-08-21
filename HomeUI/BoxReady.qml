@@ -7,136 +7,110 @@ import Dx.Global 1.0
 import "../components"
 Page {
     id: boxready_page
+    Rectangle{
+        anchors.fill: parent
+        color: "#f5f5f5"
 
-    Image {
-        id: startbutton
-        width: 200
-        height: 200
-        anchors.centerIn: parent
+        Image {
+            id: startbutton
+            width: 220
+            height: 224
+            x:850
+            y:287
+            fillMode: Image.Pad
 
-        source: "qrc:/image/start.png"
-        MouseArea{
-            anchors.fill: parent
-            onClicked: {
-                //Sequence.sequenceDo(Sequence.Sequence_Test);
-                if (ExGlobal.diskCheck() === 1){
-                    testcancelDialog.show(2)
+            source: "qrc:/images/TestStart.png"
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    //Sequence.sequenceDo(Sequence.Sequence_Test);
+                    if (ExGlobal.diskCheck() === 1){
+                        testcancelDialog.show(2)
+                    }
+                    else {
+                        mainView.pop();
+                        if (ExGlobal.projectMode() === 0)
+                            mainView.push("qrc:/HomeUI/TestProcessT.qml");
+                        else
+                            mainView.push("qrc:/HomeUI/TestProcess.qml");
+                    }
                 }
-                else {
-                    mainView.pop();
-                    if (ExGlobal.projectMode() === 0)
-                        mainView.push("qrc:/HomeUI/TestProcessT.qml");
-                    else
-                        mainView.push("qrc:/HomeUI/TestProcess.qml");
-                }
+                onPressed: parent.x += 10
+                onReleased: parent.x -= 10
             }
         }
-    }
-    Text{
-        id: panelName
-
-        text:ExGlobal.panelName
-        font.pixelSize: 30
-        anchors.horizontalCenter: startbutton.horizontalCenter
-        anchors.horizontalCenterOffset: -300
-        anchors.verticalCenter: startbutton.verticalCenter
-        anchors.verticalCenterOffset: -30
-    }
-    Text{
-        id: panelLot
-
-        text:ExGlobal.boxSerial()
-        font.pixelSize: 30
-        anchors.horizontalCenter: startbutton.horizontalCenter
-        anchors.horizontalCenterOffset: -300
-        anchors.verticalCenter: startbutton.verticalCenter
-        anchors.verticalCenterOffset: +30
-    }
-
-    Rectangle{
-        width: 400
-        height: 200
-        anchors.horizontalCenter: startbutton.horizontalCenter
-        anchors.horizontalCenterOffset: +300
-        anchors.verticalCenter: startbutton.verticalCenter
-        //border.color: "black"
         Text{
-            id: sampleNo
-            anchors.top: parent.top
-            anchors.topMargin: 50
-            anchors.left: parent.left
-            anchors.leftMargin: 100
-            text:ExGlobal.sampleCode
-            font.pixelSize: 30
+            font.pixelSize: 45
+            font.bold: true
+            anchors.top: startbutton.bottom
+            anchors.topMargin: 28
+            anchors.horizontalCenter: startbutton.horizontalCenter
+            text: qsTr("开始测试")
         }
-        Text{
-            id: sampleInfo
 
-            text:ExGlobal.sampleInfo
-            font.pixelSize: 30
-            anchors.horizontalCenter: sampleNo.horizontalCenter
-            anchors.top: sampleNo.bottom
-            anchors.topMargin: 20
+        ThreeMessage{
+            x:358
+            y:224
+            text1: ExGlobal.panelName
+            text3: ExGlobal.boxSerial()
         }
+
+        ThreeMessage{
+            x:1159
+            y:224
+            text1: ExGlobal.sampleCode
+            text2: ExGlobal.sampleInfo
+        }
+
         Image {
             id: editsample
-            anchors.left: sampleNo.right
-            anchors.leftMargin: 70
-            anchors.top: sampleNo.top
-            anchors.topMargin: 30
-            scale: 2
-            source: "qrc:/image/editInfo.png"
+            x: 1621
+            y: 606
+            height: 75
+            width: 70
+            fillMode: Image.Pad
+            source: "qrc:/images/SampleInput.png"
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    queryDlg.show()
+                }
+            }
         }
-        MouseArea{
+
+        ThreeQuery{
+            id: queryDlg
+            qtitle: qsTr("输入样本信息")
+            qlable1: qsTr("样本号")
+            qlable2: qsTr("样本信息")
+            qlable3: qsTr("样本备注")
+            qtext1: ExGlobal.sampleCode
+            qtext2: ExGlobal.sampleInfo
             anchors.fill: parent
-            onClicked: {
-                queryDlg.show(sampleInfo.text)
+            onQueryAck: {
+                console.log(res1,res2);
+                ExGlobal.sampleCode = res1;
+                ExGlobal.sampleInfo = res2;
+            }
+        }
+
+        Image {
+            id: btQuit
+            x: 1450
+            y: 754
+            height: 106
+            width: 299
+            fillMode: Image.Pad
+            source: "qrc:/images/TestCancel.png"
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    testcancelDialog.show(0)
+                }
             }
         }
     }
 
-    TwoQuery{
-        id: queryDlg
-        qtitle: qsTr("输入样本信息")
-        qlable1: qsTr("样本号：")
-        qlable2: qsTr("样本信息：")
-        qtext1: sampleNo.text
-        qtext2: sampleInfo.text
-        anchors.fill: parent
-        onQueryAck: {
-            console.log(res1,res2);
-            ExGlobal.sampleCode = res1;
-            ExGlobal.sampleInfo = res2;
-        }
-    }
-
-    Text{
-        id: userName
-
-        text:ExGlobal.user
-        font.pixelSize: 30
-        anchors.left: parent.left
-        anchors.leftMargin: 20
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 20
-    }
-
-    Button {
-        id: btCannel
-        font.pixelSize: 30
-        width: 200
-        text: qsTr("取消测试")
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 50
-        anchors.right: parent.right
-        anchors.rightMargin: 20
-        onClicked: {
-            //mainView.pop();
-            //mainView.push("qrc:/HomeUI/Idle.qml");
-            //mainView.push("qrc:/HomeUI/TestCancel.qml");
-            testcancelDialog.show(0)
-        }
-    }
 
     TestExitConfirm{
         id: testcancelDialog        

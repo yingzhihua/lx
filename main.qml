@@ -72,79 +72,68 @@ ApplicationWindow {
     menuBar: Rectangle{
         id:headerRec
         width: parent.width
-        height: 100
-        color: "darkslateblue"
+        height: 150
+        color: "#59cddf"
         Rectangle{
-            id:testCompleted
+            id:testunCompleted
             x:0
             y:0
             height: parent.height
             width:0
-            color:"darkturquoise"
+            color:"white"
         }
-        Rectangle{
-            id:testunCompleted
-            x:parent.width*0.5
-            y:0
-            height: parent.height
-            width:0
-            color:"gainsboro"
+
+        Image {
+            id: titleico
+            x: 69
+            y: 42
+            height: 66
+            width: 66
+            fillMode: Image.Pad
+            source: "qrc:/images/title_startup.png"
         }
         Text {
             id: headerMsg
-            anchors.left: parent.left
+            anchors.left: titleico.right
             anchors.leftMargin: 20
             anchors.verticalCenter: parent.verticalCenter
-            font.pixelSize: parent.height*0.5
-            color: "white"
+            font.pixelSize: 60
+            color: "#323232"
             text: qsTr("系统启动");
         }
         Text {
             id: headerTitle
             anchors.right: parent.right
-            anchors.rightMargin: 10
+            anchors.rightMargin: 70
             anchors.verticalCenter: parent.verticalCenter
-            font.pixelSize: parent.height*0.5
-            color: "white"
+            font.pixelSize: 60
+            color: "#323232"
             text: ExGlobal.sysName
         }
     }
 
-    /*
     header:Rectangle{
         id:headerdatetime
-        height: 60
+        //height: 100
+        height: 0
         width: parent.width
-        //color:"gainsboro"
+
         Text{
-            id:headertime
+            id:headeruser
+            color: "#1c205b"
             anchors.left: parent.left
-            anchors.leftMargin: 10
-            anchors.bottom: parent.bottom
-            font.pixelSize: 40
-            text:qsTr("17:22:14")
+            anchors.leftMargin: 50
+            anchors.top: parent.top
+            anchors.topMargin: 20
+            font.pixelSize: 50
+            text:ExGlobal.user
         }
-
-        Text {
-            id: headerdate
-            anchors.right: parent.right
-            anchors.rightMargin: 10
-            anchors.bottom: parent.bottom
-            font.pixelSize: 40
-            text: qsTr("2020-03-12")
-        }
-    }
-*/
-    header:Rectangle{
-        id:headerdatetime
-        height: 100
-        width: parent.width
 
         Text{
             id:headertime
-            color: "gray"
+            color: "#b5b5b5"
             anchors.right: parent.right
-            anchors.rightMargin: 60
+            anchors.rightMargin: 70
             anchors.top: parent.top
             anchors.topMargin: 10
             font.pixelSize: 60
@@ -153,7 +142,7 @@ ApplicationWindow {
 
         Text {
             id: headerdate
-            color: "gray"
+            color: "#b5b5b5"
             anchors.top: headertime.bottom
             anchors.topMargin: -10
             anchors.horizontalCenter: headertime.horizontalCenter
@@ -162,108 +151,90 @@ ApplicationWindow {
         }
     }
 
-    footer: TabBar{
-        id:tabBar
-        height:80
-        width:parent.width
-        currentIndex: 1
+    footer: Rectangle{
+        width: parent.width
+        height: 150
+        color: "#313131"
 
-        background: Image{
-            anchors.fill: parent
-            smooth: true
-            source:"qrc:/image/footerbk.jpg"
-        }
-
-        ListModel{
-            id:footerModel
-            ListElement{modelText:"设置";modelImgP:"qrc:";modelImg:"qrc";}
-            ListElement{modelText:"主页";modelImgP:"qrc:";modelImg:"qrc";}
-            ListElement{modelText:"数据";modelImgP:"qrc:";modelImg:"qrc";}
-            //ListElement{modelText:"串口";modelImgP:"qrc:";modelImg:"qrc";}
-        }
-        Repeater{
-            model:footerModel
-            TabButton{
-                height: tabBar.height
-                contentItem: Text{
-                    text:modelText
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    font.pixelSize: tabBar.height*0.6
-                    color:(model.index===tabBar.currentIndex)?"#148014":"#000000"
-                }
-                background: Rectangle{
-                    height: 0
-                }
+        Image {
+            id: setupbt
+            x: 161
+            y: 14
+            height: 123
+            width: 318
+            fillMode: Image.Pad
+            source: "qrc:/images/setup.png"
+            MouseArea{
+                anchors.fill: parent
+                onClicked: btclick(0)
             }
         }
-
-        onCurrentIndexChanged: {
-            mainView.clear()
-            if (currentIndex == 0)
-            {
-                mainView.push("qrc:/SetupUI/SetupMenu.qml");
-                headerRec.visible = false;
-                headerdatetime.visible = false;
+        Image {
+            id: homebt
+            x: 801
+            y: 14
+            height: 123
+            width: 318
+            fillMode: Image.Pad
+            source: "qrc:/images/homebt.png"
+            MouseArea{
+                anchors.fill: parent
+                onClicked: btclick(1)
             }
-            else if(currentIndex == 1)
-            {
-                if (Sequence.isTesting()){
-                    if (ExGlobal.projectMode() === 0)
-                        mainView.push("qrc:/HomeUI/TestProcessT.qml");
-                    else
-                        mainView.push("qrc:/HomeUI/TestProcess.qml");
-                }
-                else
-                    mainView.push("qrc:/HomeUI/Idle.qml");
-                headerRec.visible = true;
-                headerdatetime.visible = true;
+        }
+        Image {
+            id: databt
+            x: 1440
+            y: 14
+            height: 123
+            width: 318
+            fillMode: Image.Pad
+            source: "qrc:/images/data.png"
+            MouseArea{
+                anchors.fill: parent
+                onClicked: btclick(2)
             }
-            else if(currentIndex == 2)
-            {
-                mainView.push("qrc:/DataUI/DataMenu.qml");
-                headerRec.visible = true;
-                headerdatetime.visible = true;
-            }
-
-            console.debug("currIndex",currentIndex)
         }
     }
-//*
+
     StackView{
         id: mainView
         anchors.fill: parent
-        initialItem: ExGlobal.debug?"./HomeUI/Login.qml":"./HomeUI/Startup.qml"
-        //initialItem: "./HomeUI/Startup.qml"
+        initialItem: ExGlobal.debug?"qrc:/HomeUI/Idle.qml":"qrc:/HomeUI/Startup.qml"
     }
-/*/
-    SwipeView {
-        id: swipeView
-        anchors.fill: parent
-        currentIndex: tabBar.currentIndex
 
-        Setup {
-            id:setupPage
+    function btclick(index){
+        mainView.clear()
+        if (index === 0){
+            setupbt.source = "qrc:/images/setupbt.png"
+            homebt.source = "qrc:/images/home.png"
+            databt.source = "qrc:/images/data.png"
+            mainView.push("qrc:/SetupUI/SetupMenu.qml");
+            headerdatetime.visible = false
         }
-
-        Home {
-            id:homePage
+        else if(index === 1){
+            setupbt.source = "qrc:/images/setup.png"
+            homebt.source = "qrc:/images/homebt.png"
+            databt.source = "qrc:/images/data.png"
+            if (Sequence.isTesting()){
+                if (ExGlobal.projectMode() === 0)
+                    mainView.push("qrc:/HomeUI/TestProcessT.qml");
+                else
+                    mainView.push("qrc:/HomeUI/TestProcess.qml");
+            }
+            else
+                mainView.push("qrc:/HomeUI/Idle.qml");
+            headerdatetime.visible = true
         }
-
-        Data {
-            id:dataPage
-        }
-
-        onCurrentIndexChanged: {
-            if (currentIndex == 0)
-                headerMsg.text = setupPage.titlemsg
-            else if(currentIndex == 1)
-                headerMsg.text = homePage.titlemsg
-            else if(currentIndex == 2)
-                headerMsg.text = dataPage.titlemsg
+        else{
+            setupbt.source = "qrc:/images/setup.png"
+            homebt.source = "qrc:/images/home.png"
+            databt.source = "qrc:/images/databt.png"
+            mainView.push("qrc:/DataUI/DataMenu.qml");
+            headerdatetime.visible = false
         }
     }
-//*/
+
     ErrPage{
         id:err
         visible: false
@@ -281,16 +252,6 @@ ApplicationWindow {
         onTriggered: {
             headertime.text = Qt.formatTime(new Date(),"hh:mm:ss")
             headerdate.text = Qt.formatDate(new Date(),"yyyy年MM月dd日")
-            /*
-            if (timeinited == false){
-                timeinited = true;
-                starttime.text = Qt.formatTime(new Date(),"hh:mm:ss");
-            }
-            else{
-                t_runtime++;
-                runtime.text = t_runtime;
-            }
-            */
         }
     }
 
@@ -298,36 +259,57 @@ ApplicationWindow {
         target: Sequence
         onErrOccur:{
             console.log("main.qml,result:"+error);
-            if (ExGlobal.debug == false){
+            if (ExGlobal.debug === false){
                 err.errText = error;
                 err.visible = true;
-                tabBar.enabled = false;
+                setupbt.enabled = false;
+                homebt.enabled = false;
+                databt.enabled = false;
             }
         }
 
         onTitleNotify:{
             console.log("onTitleNotify:"+titleparam+","+title);
-            if (titleparam == 0){
-                testCompleted.width = 0;
-                testunCompleted.width = 0;
+            if (titleparam == 0){                              
                 headerMsg.text = title;
             }
             else if (titleparam == 1){
-                headerRec.visible = false;
+                //headerRec.visible = false;
                 headerdatetime.visible = false;
             }
             else if(titleparam == 2)
             {
-                headerRec.visible = true;
+                //headerRec.visible = true;
                 headerdatetime.visible = true;
+            }
+            else if(titleparam == 3){
+                headerRec.color = title;
+            }
+            else if(titleparam == 4){
+                headerRec.color = "#59cddf";
             }
             else if (titleparam >= 100){
                 var finish = titleparam - 100;
-                testCompleted.width = finish*headerRec.width/1000;
-                testunCompleted.x = testCompleted.width;
-                testunCompleted.width = (1000-finish)*headerRec.width/1000;
+                testunCompleted.x = finish*headerRec.width/1000;
+                testunCompleted.width = headerRec.width - testunCompleted.x;
                 headerMsg.text = title;
             }
+        }
+
+        onFooterNotify:{
+            if (setup === true)
+                setupbt.enabled = true
+            else
+                setupbt.enabled = false
+            if (home === true)
+                homebt.enabled = true
+            else
+                homebt.enabled = false
+            if (data === true)
+                databt.enabled = true
+            else
+                databt.enabled = false
+
         }
     }
 
@@ -337,13 +319,15 @@ ApplicationWindow {
             if (code == 1 && ExGlobal.user != "NotLoggedIn"){
                 console.log("onExglobalMessage",code)
                 lockDialog.show()
-                tabBar.enabled = false
+                //tabBar.enabled = false
+                Sequence.updateFooter(false,false,false);
             }
             else if(code == 2)
             {
                 console.log("main.qml exit",code)
                 lockDialog.exit()
-                tabBar.enabled = true
+                //tabBar.enabled = true
+                Sequence.updateFooter(true,true,true);
                 //inputPanel.active = false
             }
         }

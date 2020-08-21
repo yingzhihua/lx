@@ -64,12 +64,28 @@ Page {
         }
     }
 
-
+/*
     TwoQuery{
         id: queryDlg
         qtitle: qsTr("输入样本信息")
         qlable1: qsTr("样本号：")
         qlable2: qsTr("样本信息：")
+        qtext1: ExGlobal.sampleCode
+        qtext2: ExGlobal.sampleInfo
+        anchors.fill: parent
+        onQueryAck: {
+            console.log(res1,res2);
+            ExGlobal.sampleCode = res1;
+            ExGlobal.sampleInfo = res2;
+        }
+    }
+*/
+    ThreeQuery{
+        id: queryDlg
+        qtitle: qsTr("输入样本信息")
+        qlable1: qsTr("样本号")
+        qlable2: qsTr("样本信息")
+        qlable3: qsTr("样本备注")
         qtext1: ExGlobal.sampleCode
         qtext2: ExGlobal.sampleInfo
         anchors.fill: parent
@@ -98,17 +114,6 @@ Page {
                 Sequence.sequenceDo(Sequence.Sequence_OpenBox);
             }
         }
-    }
-
-    Text{
-        id: userName
-
-        text:ExGlobal.user
-        font.pixelSize: 40
-        anchors.left: parent.left
-        anchors.leftMargin: 20
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 20
     }
 
     SecondConfirm{
@@ -192,7 +197,8 @@ Page {
 
     Component.onCompleted: {        
         Sequence.changeTitle(qsTr("待机"));
-        tabBar.enabled = true;
+        //tabBar.enabled = true;
+        Sequence.updateFooter(true,true,true);
 
         Sequence.actionDo("Query",3,0,0,0);        
         //*

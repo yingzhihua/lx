@@ -22,6 +22,8 @@ class Sequence : public QObject
     Q_OBJECT
 public:
     explicit Sequence(QObject *parent = nullptr);
+    static QObject *sequence_provider(QQmlEngine *engine, QJSEngine *scriptEngine);
+    static Sequence *getPtr();
     enum SequenceId{
         Sequence_Idle,
         Sequence_SelfCheck,
@@ -126,6 +128,7 @@ public:
     Q_INVOKABLE bool isTesting(){return currSequenceId == SequenceId::Sequence_Test;}
     Q_INVOKABLE void changeTitle(QString title);
     Q_INVOKABLE void hideTitle(bool hide);
+    Q_INVOKABLE void updateFooter(bool setup, bool home, bool data){emit footerNotify(setup,home,data);}
 
     Q_INVOKABLE bool loopTest(QString testName, int count);
     Q_INVOKABLE bool isLoopTesting(){return currSequenceId == SequenceId::Sequence_LoopTest;}
@@ -151,6 +154,7 @@ signals:
     void fan3SpeedChanged();
     void autoFocusNotify(int status, int value);
     void titleNotify(int titleparam, QString title);
+    void footerNotify(bool setup, bool home, bool data);
 
 public slots:
     void SequenceTimeout();
@@ -238,12 +242,4 @@ private:
     double dryMeanValue,fillMeanValue;
 };
 
-static Sequence *sequence;
-static QObject *sequence_provider(QQmlEngine *engine, QJSEngine *scriptEngine)
-{
-    Q_UNUSED(engine);
-    Q_UNUSED(scriptEngine);
-    //Sequence *sequence = new Sequence();
-    return sequence;
-}
 #endif // SEQUENCE_H

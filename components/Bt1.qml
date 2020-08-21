@@ -5,27 +5,30 @@ Rectangle {
     property alias text: label.text
     signal clicked
 
-    width: 180
-    height: 70
+    width: 299
+    height: 106
     //border.color: "orange"
-    //color: "olivedrab"
+    color: Qt.rgba(0,0,0,0)
     Image {
         id: img
         x:3
         y:3
-        width: 64
-        height: 64
-        source: "qrc:/image/quit.png"
+        width: 299
+        height: 106
+        source: "qrc:/images/back.png"
     }
+
     Text{
         id:label
         anchors.left: img.right
         anchors.leftMargin: 10
         anchors.verticalCenter: img.verticalCenter
         font.pixelSize: 40
+        visible: false
         //color: "powderblue"
         text:qsTr("返回")
     }
+
 
     MouseArea{
         anchors.fill: parent

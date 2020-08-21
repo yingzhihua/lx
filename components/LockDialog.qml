@@ -13,76 +13,46 @@ Rectangle {
     color: Qt.rgba(0.5,0.5,0.5,0.8)
     Rectangle{
         z:2
-        width: 800
-        height: 400
+        width: 675
+        height: 404
         anchors.centerIn: parent
-        border.color: "darkgray"
-        radius: 50
-
-        Text{
-            id:labelName
-            anchors.verticalCenter : parent.verticalCenter
-            anchors.verticalCenterOffset: -80
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.horizontalCenterOffset: -220
-            width: 80
-            height: 30
-            text: qsTr("用户名：")
-            horizontalAlignment: Text.AlignRight
-            verticalAlignment: Text.AlignVCenter
-            font.pixelSize: 40
-        }
+        //border.color: "darkgray"
+        radius: 22
 
         Text{
             id: labelUser
-            anchors.verticalCenter: labelName.verticalCenter
-            anchors.left: labelName.right
-            anchors.leftMargin: 50
-            width: 300
-            height: 30
+            anchors.horizontalCenter: parent.horizontalCenter
+            y:70
             text: ExGlobal.user
-            horizontalAlignment: Text.AlignLeft
-            verticalAlignment: Text.AlignVCenter
-            font.pixelSize: 40
-        }
-
-        Text {
-            id:labelPassword
-            anchors.right: labelName.right
-            anchors.rightMargin: 0
-            anchors.top: labelName.bottom
-            anchors.topMargin: 80
-            width:80
-            height:30
-            text: qsTr("密码：")
-            verticalAlignment: Text.AlignVCenter
-            horizontalAlignment: Text.AlignRight
-            font.pixelSize: 40
+            //horizontalAlignment: Text.AlignLeft
+            //verticalAlignment: Text.AlignVCenter
+            font.pixelSize: 50
         }
 
         TextField{
             id:login_password
-            anchors.verticalCenter: labelPassword.verticalCenter
-            anchors.left: labelPassword.right
-            anchors.leftMargin: 50
-            width: 300
-            height: 50            
+            anchors.top: labelUser.top
+            anchors.topMargin: 84
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: 404
+            height: 70
             echoMode: TextInput.Password
-
-            placeholderText: qsTr("请输入密码")
+            font.pixelSize: 40
+            placeholderText: qsTr("输入密码")
             background: Rectangle{
-                border.color: "darkgray"
+                //border.color: "darkgray"
+                color: "#e6e6e6"
                 radius: 5
             }
         }
 
         Image {
             id: unlock
-            anchors.bottom: login_password.bottom
-            anchors.bottomMargin: -10
-            anchors.left: login_password.right
-            anchors.leftMargin: 50
-            source: "qrc:/image/unlock.png"
+            anchors.horizontalCenter: parent.horizontalCenter
+            y:275
+            width: 67
+            height: 67
+            source: "qrc:/images/lockarrow.png"
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
