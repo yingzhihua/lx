@@ -7,8 +7,7 @@ Page {
     Text {
         id: dep
         anchors.centerIn: parent
-        font.pixelSize: 30
-        text: qsTr("text")
+        font.pixelSize: 30        
     }
 
     Button {

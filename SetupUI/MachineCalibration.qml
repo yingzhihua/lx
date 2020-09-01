@@ -18,7 +18,7 @@ Rectangle {
             spacing: 10
             RadioButton{
                 id:rb1
-                text:qsTr("1")
+                text:"1"
                 onClicked: {
                     dev1Sp.stepSize=1
                     dev2Sp.stepSize=1
@@ -30,7 +30,7 @@ Rectangle {
             }
             RadioButton{
                 id:rb2
-                text:qsTr("10")
+                text:"10"
                 onClicked: {
                     dev1Sp.stepSize=10
                     dev2Sp.stepSize=10
@@ -43,7 +43,7 @@ Rectangle {
             RadioButton{
                 id:rb3
                 checked: true
-                text: qsTr("100")
+                text: "100"
                 onClicked: {
                     dev1Sp.stepSize=100
                     dev2Sp.stepSize=100
@@ -55,7 +55,7 @@ Rectangle {
             }
             RadioButton{
                 id:rb4
-                text: qsTr("500")
+                text: "500"
                 onClicked: {
                     dev1Sp.stepSize=500
                     dev2Sp.stepSize=500
@@ -67,7 +67,7 @@ Rectangle {
             }
             RadioButton{
                 id:rb5
-                text: qsTr("1000")
+                text: "1000"
                 onClicked: {
                     dev1Sp.stepSize=1000
                     dev2Sp.stepSize=1000

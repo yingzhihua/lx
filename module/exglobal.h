@@ -16,6 +16,7 @@ class ExGlobal : public QObject
     Q_PROPERTY(QString panelCode READ panelCodeEx NOTIFY panelCodeChanged)    
     Q_PROPERTY(QString sampleCode READ sampleCode WRITE setSampleCode NOTIFY sampleCodeChanged)
     Q_PROPERTY(QString sampleInfo READ sampleInfo WRITE setSampleInfo NOTIFY sampleInfoChanged)
+    Q_PROPERTY(QString sampleRemark READ sampleRemark WRITE setSampleRemark NOTIFY sampleRemarkChanged)
     Q_PROPERTY(QStringList serialPort READ serialPort NOTIFY serialPortChanged)
     Q_PROPERTY(bool debug READ isDebug WRITE setDebug NOTIFY debugChanged)
     Q_PROPERTY(QString sysName READ sysName WRITE setSysName NOTIFY sysNameChanged)
@@ -49,8 +50,10 @@ public:
     void setSampleCode(const QString &sampleCode){t_sampleCode = sampleCode;emit sampleCodeChanged();}
     static QString sampleInfo(){return t_sampleInfo;}
     void setSampleInfo(const QString &sampleInfo){t_sampleInfo = sampleInfo;emit sampleInfoChanged();}
-    static QString reagentBox(){return t_ReagentBox;}
-    static void setReagentBox(const QString &reagentBoxType){t_ReagentBox = reagentBoxType;}
+    static QString sampleRemark(){return t_sampleRemark;}
+    void setSampleRemark(const QString &sampleRemark){t_sampleRemark = sampleRemark;emit sampleRemarkChanged();}
+    static QString reagentBox();
+    static void setReagentBox(const QString &reagentBoxType);
     static QStringList serialPort();
     static bool isDebug(){return test;}
     static void setDebug(bool debug){test = debug;}
@@ -76,9 +79,8 @@ public:
     int qrCode(){return QrCode;}
     void setQrCode(int set){updateCaliParam("QrCode",set);emit qrCodeChanged();}
 
-    static uchar* getReagentBox(QString BoxCode);
+    static uchar* getReagentBox(QString boxCode);
     Q_INVOKABLE static QString getPosName(int pos);
-    static void addTest();
     Q_INVOKABLE static void updateCaliParam(const QString &caliName, int caliValue);
     Q_INVOKABLE static int getCaliParam(const QString &caliName);
     Q_INVOKABLE static void updateTextParam(const QString &caliName, QString caliValue);
@@ -89,10 +91,8 @@ public:
     Q_INVOKABLE static bool setTime(QString time);
     Q_INVOKABLE static void exClose();
     Q_INVOKABLE static QStringList getPosNameArray();
-    Q_INVOKABLE static int getItemCT(int Itemid);
-    Q_INVOKABLE static int getItemResult(int Testid, int Itemid);
+    Q_INVOKABLE static int getItemCT(int Itemid);    
     Q_INVOKABLE static QList<int> getBoxItemList();
-    Q_INVOKABLE static QList<int> getCurrItemResult();
 
     Q_INVOKABLE void qmlGlobalMessage(int code){GlobalMessage(code);}
 
@@ -104,6 +104,8 @@ public:
     static void setBoxSerial(QString serial){t_BoxSerial = serial;}
     Q_INVOKABLE static int diskCheck();
 
+    static void setLogin(){bLogin = true;}
+    Q_INVOKABLE static bool login(){return bLogin;}
     static int V1WorkX;
     static int V2WorkX;
     static int V3WorkX;
@@ -153,7 +155,7 @@ public:
     static UserModel *pUserModel;
     static WifiModel *pWifiModel;
 
-    static QHash<int, QString> AssayItem;
+    static QMap<int, QString> AssayItem;
     static QHash<int, int> ItemCT;
 
     static QString AdminPassword;
@@ -175,6 +177,7 @@ signals:
     void panelCodeChanged();
     void sampleCodeChanged();
     void sampleInfoChanged();
+    void sampleRemarkChanged();
     void serialPortChanged();
     void debugChanged();
     void projectModeChanged();
@@ -194,7 +197,8 @@ private:
     static QString t_panelName;
     static QString t_sampleCode;
     static QString t_sampleInfo;    
-    static QString t_ReagentBox;
+    static QString t_sampleRemark;
+    static QString BoxCode;
     static QString t_BoxSerial;
 
     static bool test;
@@ -203,10 +207,12 @@ private:
     static QString build_version;
     static QString temp_version;
     static QString ctrl_version;
+    static bool bLogin;
 
     static void CaliParamInit();
     static void SetCaliParam(const QString &caliName, int caliValue);
     static void SetTextParam(const QString &textName, QString textValue);
+    static void LoadReagentBox();
 
 public:
     void GlobalMessage(int code);

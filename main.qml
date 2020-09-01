@@ -17,7 +17,18 @@ ApplicationWindow {
     visible: true
     width: screen.width
     height: screen.height
-    title: qsTr("闪量-华山")
+    title: "闪量-华山"
+
+    ListModel{
+        id:titleModel
+        ListElement{Eid: "login"; img:"qrc:/images/title_login.png"; name:qsTr("登录");color:"#59cddf"}
+        ListElement{Eid: "idle"; img:"qrc:/images/title_idle.png"; name:qsTr("待机");color:"#59cddf"}
+        ListElement{Eid: "boxready"; img:"qrc:/images/title_boxready.png"; name:qsTr("试剂盒就绪");color:"#59cddf"}
+        ListElement{Eid: "setup"; img:"qrc:/images/title_setup.png"; name:qsTr("设置");color:"#59cddf"}
+        ListElement{Eid: "startup"; img:"qrc:/images/title_startup.png"; name:qsTr("系统自检");color:"#59cddf"}
+        ListElement{Eid: "startup_error"; img:"qrc:/images/title_startup.png"; name:qsTr("系统启动");color:"#fc7050"}
+        ListElement{Eid: "datamenu"; img:"qrc:/images/title_startup.png"; name:qsTr("历史数据");color:"#59cddf"}
+    }
 
     LanguageDialog{
         id: languageDialog        
@@ -137,7 +148,7 @@ ApplicationWindow {
             anchors.top: parent.top
             anchors.topMargin: 10
             font.pixelSize: 60
-            text:qsTr("17:22:14")
+            text:"17:22:14"
         }
 
         Text {
@@ -147,7 +158,7 @@ ApplicationWindow {
             anchors.topMargin: -10
             anchors.horizontalCenter: headertime.horizontalCenter
             font.pixelSize: 30
-            text: qsTr("2020-03-12")
+            text: "2020-03-12"
         }
     }
 
@@ -163,11 +174,20 @@ ApplicationWindow {
             height: 123
             width: 318
             fillMode: Image.Pad
-            source: "qrc:/images/setup.png"
+            source: "qrc:/images/setuprelease.png"
             MouseArea{
                 anchors.fill: parent
                 onClicked: btclick(0)
             }
+        }
+        Text {
+            id: setuptext
+            anchors.centerIn: setupbt
+            anchors.horizontalCenterOffset: 40
+            anchors.verticalCenterOffset: -4
+            font.pixelSize: 60
+            color: "#A7A7A7"
+            text: qsTr("设置")
         }
         Image {
             id: homebt
@@ -176,11 +196,20 @@ ApplicationWindow {
             height: 123
             width: 318
             fillMode: Image.Pad
-            source: "qrc:/images/homebt.png"
+            source: "qrc:/images/homerelease.png"
             MouseArea{
                 anchors.fill: parent
                 onClicked: btclick(1)
             }
+        }
+        Text {
+            id: hometext
+            anchors.centerIn: homebt
+            anchors.horizontalCenterOffset: 40
+            anchors.verticalCenterOffset: -4
+            font.pixelSize: 60
+            color: "#A7A7A7"
+            text: qsTr("主页")
         }
         Image {
             id: databt
@@ -189,11 +218,20 @@ ApplicationWindow {
             height: 123
             width: 318
             fillMode: Image.Pad
-            source: "qrc:/images/data.png"
+            source: "qrc:/images/datarelease.png"
             MouseArea{
                 anchors.fill: parent
                 onClicked: btclick(2)
             }
+        }
+        Text {
+            id: datatext
+            anchors.centerIn: databt
+            anchors.horizontalCenterOffset: 40
+            anchors.verticalCenterOffset: -4
+            font.pixelSize: 60
+            color: "#A7A7A7"
+            text: qsTr("数据")
         }
     }
 
@@ -206,16 +244,22 @@ ApplicationWindow {
     function btclick(index){
         mainView.clear()
         if (index === 0){
-            setupbt.source = "qrc:/images/setupbt.png"
-            homebt.source = "qrc:/images/home.png"
-            databt.source = "qrc:/images/data.png"
+            setupbt.source = "qrc:/images/setuppress.png"
+            homebt.source = "qrc:/images/homerelease.png"
+            databt.source = "qrc:/images/datarelease.png"
+            setuptext.color = "#ffffff"
+            hometext.color = "#a7a7a7"
+            datatext.color = "#a7a7a7"
             mainView.push("qrc:/SetupUI/SetupMenu.qml");
             headerdatetime.visible = false
         }
         else if(index === 1){
-            setupbt.source = "qrc:/images/setup.png"
-            homebt.source = "qrc:/images/homebt.png"
-            databt.source = "qrc:/images/data.png"
+            setupbt.source = "qrc:/images/setuprelease.png"
+            homebt.source = "qrc:/images/homepress.png"
+            databt.source = "qrc:/images/datarelease.png"
+            setuptext.color = "#a7a7a7"
+            hometext.color = "#ffffff"
+            datatext.color = "#a7a7a7"
             if (Sequence.isTesting()){
                 if (ExGlobal.projectMode() === 0)
                     mainView.push("qrc:/HomeUI/TestProcessT.qml");
@@ -227,9 +271,12 @@ ApplicationWindow {
             headerdatetime.visible = true
         }
         else{
-            setupbt.source = "qrc:/images/setup.png"
-            homebt.source = "qrc:/images/home.png"
-            databt.source = "qrc:/images/databt.png"
+            setupbt.source = "qrc:/images/setuprelease.png"
+            homebt.source = "qrc:/images/homerelease.png"
+            databt.source = "qrc:/images/datapress.png"
+            setuptext.color = "#a7a7a7"
+            hometext.color = "#a7a7a7"
+            datatext.color = "#ffffff"
             mainView.push("qrc:/DataUI/DataMenu.qml");
             headerdatetime.visible = false
         }
@@ -288,6 +335,20 @@ ApplicationWindow {
             else if(titleparam == 4){
                 headerRec.color = "#59cddf";
             }
+            else if(titleparam == 5){
+                if (!Sequence.isTesting())
+                {
+                    testunCompleted.width = 0;
+                    for(var i = 0; i < titleModel.count; i++){
+                        if (titleModel.get(i).Eid === title){
+                            titleico.source = titleModel.get(i).img;
+                            headerRec.color = titleModel.get(i).color;
+                            headerMsg.text = titleModel.get(i).name;
+                        }
+                    }
+                }
+
+            }
             else if (titleparam >= 100){
                 var finish = titleparam - 100;
                 testunCompleted.x = finish*headerRec.width/1000;
@@ -316,7 +377,7 @@ ApplicationWindow {
     Connections{
         target: ExGlobal
         onExglobalMessage:{
-            if (code == 1 && ExGlobal.user != "NotLoggedIn"){
+            if (code == 1 && ExGlobal.login()){
                 console.log("onExglobalMessage",code)
                 lockDialog.show()
                 //tabBar.enabled = false

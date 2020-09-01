@@ -5,6 +5,7 @@
 #include "actionparser.h"
 #include "imageanalysis.h"
 #include "sqlitemgr.h"
+#include "datahandler.h"
 
 #define AUTOFOCUS_MIN 2600
 #define AUTOFOCUS_MAX 7000
@@ -431,7 +432,7 @@ void Sequence::ActionFinish(QByteArray data)
                     QVector<QVector<int>> PosValue = imageAna->getPosValueArr();
                     emit callQmlRefeshData(currCameraCycle,item,value);
 
-                    SqliteMgr::sqlitemgrinstance->StartTransations();
+                    SqliteMgr::StartTransations();
                     /*
                     for(int i = 0; i < item.size(); i++){
                         testMgr->InsertData(posIndex[i],item[i],currCameraCycle,value[i]);
@@ -440,7 +441,7 @@ void Sequence::ActionFinish(QByteArray data)
                     for (int i = 0; i < PosValue.size(); i++)
                         testMgr->InsertData(currCameraCycle,PosValue[i]);
 
-                    SqliteMgr::sqlitemgrinstance->EndTransations();
+                    SqliteMgr::EndTransations();
 
                     /*
                     QString saveStr;
@@ -641,8 +642,9 @@ void Sequence::FinishSequence()
         {
             int testid = testMgr->TestClose(2);
             qDebug()<<"testid"<<testid;
-            ExGlobal::addTest();            
+            ExGlobal::pTestModel->AddTest(testid);
             ExGlobal::pTestResultModel->setTestid(testid);
+            DataHandler::SaveData(testid);
             out = SequenceResult::Result_Test_finish;
         }
         else
@@ -1423,7 +1425,8 @@ bool Sequence::printTest(){
     int testID = ExGlobal::pTestResultModel->getTestid();
     //qDebug()<<"printTest:"<<item.length()<<","<<testID;
     for(int i = 0; i < item.length(); i++){
-        printer->itemMap[ExGlobal::getPosName(item[i])] = ExGlobal::getItemResult(testID,item[i]);
+        //printer->itemMap[ExGlobal::getPosName(item[i])] = ExGlobal::getItemResult(testID,item[i]);
+        printer->itemMap[ExGlobal::getPosName(item[i])] = ExGlobal::pTestResultModel->getItemResult(testID,item[i]);
         //qDebug()<<ExGlobal::getPosName(item[i])<<","<<ExGlobal::getItemResult(testID,item[i]);
     }
     printer->start();
@@ -1433,6 +1436,10 @@ bool Sequence::printTest(){
 void Sequence::changeTitle(QString title){
     if (!isTesting() && !isLoopTesting())
         emit titleNotify(0, title);
+}
+
+void Sequence::setTitle(QString titleid){
+    emit titleNotify(5,titleid);
 }
 
 void Sequence::hideTitle(bool hide){

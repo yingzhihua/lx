@@ -270,8 +270,7 @@ int ImageCapture::init_device(){
     struct v4l2_capability cap;
     struct v4l2_cropcap cropcap;
     struct v4l2_crop crop;
-    struct v4l2_format fmt;
-    struct v4l2_streamparm streamparam;
+    struct v4l2_format fmt;    
     unsigned int min;
 
     if (-1 == xioctl(fd,VIDIOC_QUERYCAP,&cap))

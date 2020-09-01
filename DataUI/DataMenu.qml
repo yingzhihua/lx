@@ -42,7 +42,7 @@ Rectangle {
                     //spacing: 10
                     Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:100;text:Testid}
                     Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:200;text:SerialNo}
-                    Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:500;text:SampleInfo;clip:true}
+                    Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:500;text:SampleInfo;clip:true;elide:Text.ElideRight}
                     Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:300;text:SampleId}
                     Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:200;text:User}
                     Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:200;text:Checker}
@@ -60,6 +60,7 @@ Rectangle {
                     Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:50;text:Checker!=""?"√":""}
                     */
                 }
+
                 MouseArea{
                     anchors.fill: parent
                     onPressed: {
@@ -71,17 +72,33 @@ Rectangle {
 
                     onClicked: {
                         if (ExGlobal.projectMode() !== 2){
+                            busyIndicator.running = true;
                             console.log("click:"+index);
                             testModel.setCurrTest(index);
                             mainView.push("qrc:/DataUI/DataView.qml");
                             ExGlobal.setDataEntry(0);
+                            busyIndicator.running = false;
                         }
                     }
                 }
             }
         }
     }
+
+    BusyIndicator{
+        id:busyIndicator
+        anchors.centerIn: parent
+        implicitWidth: 200
+        implicitHeight: 200
+        opacity: 1.0
+        running: false
+        MouseArea{
+            anchors.fill: parent
+            enabled: busyIndicator.running?true:false
+        }
+    }
+
     Component.onCompleted: {
-        Sequence.changeTitle(qsTr("历史数据"));
+        Sequence.setTitle("datamenu");
     }
 }

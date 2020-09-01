@@ -21,7 +21,7 @@ bool UserModel::Exist(int id){
 }
 
 void UserModel::LoadUser(){
-    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select("select * from User");
+    QSqlQuery query = SqliteMgr::select("select * from User");
     while(query.next())
     {
         MUser user;
@@ -73,10 +73,10 @@ bool UserModel::addUser(QString name, QString password, QString displayName, int
     //QString sql = "INSERT INTO User (Name, Password, UserType) VALUES ('"+name+"', '"+ password+"', 1)";
     QString sql = QString("INSERT INTO User (Name, Password, DisplayName, UserType) VALUES ('%1', '%2', '%3', %4)").arg(name).arg(password).arg(displayName).arg(type);
     qDebug()<<"addUser:"<<sql;
-    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select("SELECT * FROM User WHERE Name = '"+name+"' COLLATE NOCASE");
+    QSqlQuery query = SqliteMgr::select("SELECT * FROM User WHERE Name = '"+name+"' COLLATE NOCASE");
     if (query.next())
         return false;
-    bool result = SqliteMgr::sqlitemgrinstance->execute(sql);
+    bool result = SqliteMgr::execute(sql);
 
     if (result){
         beginInsertRows(QModelIndex(),rowCount(),rowCount());
@@ -89,7 +89,7 @@ bool UserModel::addUser(QString name, QString password, QString displayName, int
 bool UserModel::deleteUser(int row){
     if (row < 0 || row >= m_display_list.count())
         return false;
-    bool result = SqliteMgr::sqlitemgrinstance->execute("delete from User where Userid = "+QString::number(m_display_list[row].Userid));
+    bool result = SqliteMgr::execute("delete from User where Userid = "+QString::number(m_display_list[row].Userid));
     if (result){
         beginRemoveRows(QModelIndex(),row,row);
         m_display_list.removeAt(row);
@@ -100,7 +100,7 @@ bool UserModel::deleteUser(int row){
 
 int UserModel::login(QString name, QString password){
     QString sql = "SELECT * FROM User WHERE Name = '"+name+"' COLLATE NOCASE AND Password = '"+password+"'";
-    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(sql);
+    QSqlQuery query = SqliteMgr::select(sql);
     qDebug()<<"login:"<<sql;
 
     ExGlobal::User = name;
@@ -109,6 +109,7 @@ int UserModel::login(QString name, QString password){
         ExGlobal::UserType = query.value(4).toInt();
         Log::Logdb(LOGTYPE_LOGIN,0,name);
         ExGlobal::getPtr()->userChanged();
+        ExGlobal::setLogin();
         return 0;
     }
 
@@ -117,6 +118,7 @@ int UserModel::login(QString name, QString password){
         ExGlobal::UserType = 3;
         Log::Logdb(LOGTYPE_LOGIN,0,name);
         ExGlobal::getPtr()->userChanged();
+        ExGlobal::setLogin();
         return 0;
     }
 
@@ -125,6 +127,7 @@ int UserModel::login(QString name, QString password){
         ExGlobal::UserType = 9;
         Log::Logdb(LOGTYPE_LOGIN,0,name);
         ExGlobal::getPtr()->userChanged();
+        ExGlobal::setLogin();
         return 0;
     }
 
@@ -134,10 +137,11 @@ int UserModel::login(QString name, QString password){
             ExGlobal::User = "user";
         ExGlobal::UserType = 1;
         ExGlobal::getPtr()->userChanged();
+        ExGlobal::setLogin();
         return 0;
     }
 
-    query = SqliteMgr::sqlitemgrinstance->select("SELECT * FROM User WHERE Name = '"+name+"' COLLATE NOCASE");
+    query = SqliteMgr::select("SELECT * FROM User WHERE Name = '"+name+"' COLLATE NOCASE");
     Log::Logdb(LOGTYPE_LOGIN,1,name,password);
     if (query.next())
         return 1;
@@ -155,11 +159,11 @@ bool UserModel::updatePassword(QString oldpassword, QString newpassword){
     }
     else{
         QString sql = "SELECT * FROM User WHERE Name = '"+ExGlobal::User+"' AND Password = '"+oldpassword+"'";
-        QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(sql);
+        QSqlQuery query = SqliteMgr::select(sql);
 
         while(query.next())
         {
-            if (SqliteMgr::sqlitemgrinstance->execute("update User set Password = '"+newpassword+"' where Name = '"+ExGlobal::User+"'"))
+            if (SqliteMgr::execute("update User set Password = '"+newpassword+"' where Name = '"+ExGlobal::User+"'"))
                 return true;
             else
                 return false;

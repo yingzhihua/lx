@@ -1,8 +1,10 @@
 #include "testresultmodel.h"
 #include "../sqlitemgr.h"
 #include "../datahandler.h"
+#include "../exglobal.h"
 
 #include<QDebug>
+static QHash<int,int> PosId;
 
 TestResultModel::TestResultModel(QObject *parent):QAbstractListModel (parent)
 {    
@@ -87,7 +89,40 @@ QVariant TestResultModel::getField(int row,QString field) const{
 
 void TestResultModel::setTestid(int id){
     Testid = id;
-    DataHandler::FillTestData(Testid,dataPos);
-    //DataHandler::RefPosFit(dataPos);
-    DataHandler::BaseLineFit(dataPos);
+    DataHandler::HandleData(Testid,dataPos);
+    PosId = DataHandler::getPosItemid();
+}
+
+int TestResultModel::getItemResult(int testid, int itemid){
+    if (testid == Testid)
+    {
+        foreach(int dataKey, PosId.keys()){
+            if (PosId[dataKey] == itemid && dataPos[dataKey].size()>20){
+                for(int i = 10; i < dataPos[dataKey].size(); i++)
+                    if (dataPos[dataKey][i].y > ExGlobal::getItemCT(itemid))
+                        return i;
+            }
+        }
+    }
+    return 0;
+}
+
+QList<int> TestResultModel::getCurrItemResult(){
+    QList<int> result;
+    foreach(int dataKey, PosId.keys()){
+        if (PosId[dataKey] == currItemid && dataPos[dataKey].size()>20){
+            int t_result = 0;
+            int ct = ExGlobal::getItemCT(currItemid);
+            for(int i = 10; i < dataPos[dataKey].size(); i++)
+                if (dataPos[dataKey][i].y > ct)
+                {
+                    t_result = i;
+                    break;
+                }
+            t_result += dataKey*1000;
+            result<<t_result;
+        }
+    }
+    std::sort(result.begin(),result.end());
+    return result;
 }

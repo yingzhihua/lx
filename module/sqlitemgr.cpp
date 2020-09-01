@@ -5,6 +5,7 @@
 #include <QSqlError>
 #include <QFile>
 #include <QCoreApplication>
+#include <QSqlDatabase>
 
 static QString path = "";
 
@@ -12,7 +13,7 @@ static QString userName;
 
 static QString password;
 
-SqliteMgr *SqliteMgr::sqlitemgrinstance = nullptr;
+static QSqlDatabase database;
 
 SqliteMgr::SqliteMgr()
 {
@@ -57,12 +58,12 @@ bool SqliteMgr::clear(QString tableName)
     bool success = query.exec("DELETE FROM "+tableName);
     if(success)
     {
-        qDebug()<<QObject::tr("sql delete success!");
+        qDebug()<<"sql delete success!";
         return true;
     }
     else
     {
-        qDebug()<<QObject::tr("sql delete fail!");
+        qDebug()<<"sql delete fail!";
         return false;
     }
 }
@@ -73,12 +74,12 @@ bool SqliteMgr::create(QString sql)
     bool success = query.exec(sql);
     if(success)
     {
-        qDebug()<<QObject::tr("sql create success!");
+        qDebug()<<"sql create success!";
         return true;
     }
     else
     {
-        qDebug()<<QObject::tr("sql create fail!");
+        qDebug()<<"sql create fail!";
         return false;
     }
 }
@@ -98,13 +99,13 @@ bool SqliteMgr::execute(QString sql)
     bool success = query.exec(sql);
     if(success)
     {
-        qDebug()<<QObject::tr("sql execute success!");
+        qDebug()<<"sql execute success!";
         return true;
     }
     else
     {
         QSqlError lastError = query.lastError();
-        qDebug()<<QObject::tr("sql execute fail")<<lastError.text();
+        qDebug()<<"sql execute fail"<<lastError.text();
         return false;
     }
 }
@@ -136,39 +137,4 @@ bool SqliteMgr::EndTransations(){
         return false;
     }
     return true;
-}
-
-bool SqliteMgr::init()
-{
-    qDebug()<<"sqlite init: " + path+ " "+ userName +" "+password;
-    if(!QString(path).isEmpty())
-    {
-        this->close();
-
-        QFile file;
-        if(file.remove(path))
-        {
-            qDebug()<<"remove file success " + path;
-
-        }
-        else {
-            qDebug()<<"remove file fail " + path;
-
-        }
-
-        this->conn(path,userName, password);
-        create("CREATE TABLE Assay(Assayid INTEGER PRIMARY KEY NOT NULL , AssayName TEXT NOT NULL, Panelid INT NOT NULL)");
-        create("CREATE TABLE AssayItem(Itemid INTEGER PRIMARY KEY NOT NULL , Assayid INT NOT NULL, ItemName TEXT NOT NULL, ResultUnit TEXT NOT NULL, RefValueMin INT NOT NULL, RefValueMax INT NOT NULL)");
-        create("CREATE TABLE Log(Logid INTEGER PRIMARY KEY NOT NULL , LogTime TEXT NOT NULL, UserName TEXT NOT NULL, LogType INT NOT NULL, Parm TEXT NOT NULL)");
-        create("CREATE TABLE Panel(Panelid INTEGER PRIMARY KEY NOT NULL , PanelName TEXT NOT NULL, PanelCode TEXT NOT NULL)");
-        create("CREATE TABLE PanelTest(Testid INTEGER PRIMARY KEY NOT NULL , PanelCode TEXT NOT NULL, SerialNo TEXT NOT NULL, ExpirationDate TEXT NOT NULL, SampleCode TEXT, SampleInfo TEXT, TestTime TEXT, UserName TEXT, ResultType INT)");
-        create("CREATE TABLE Parm(Paramid INTEGER PRIMARY KEY NOT NULL , ParmKey TEXT NOT NULL, ParmValue TEXT NOT NULL)");
-        create("CREATE TABLE TestResult(Resultid INTEGER PRIMARY KEY NOT NULL , Testid INT NOT NULL, Itemid INT NOT NULL, ResultIndex INT NOT NULL, ResultValue INT NOT NULL)");
-        create("CREATE TABLE User(Userid INTEGER PRIMARY KEY NOT NULL , Name TEXT NOT NULL, Password TEXT, UserType INT NOT NULL)");
-        create("CREATE TABLE CaliParam(ParamName TEXT NOT NULL, ParamValue INT NOT NULL)");
-        return false;
-    }
-    else {
-        return false;
-    }
 }

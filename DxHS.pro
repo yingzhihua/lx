@@ -26,9 +26,7 @@ SOURCES += \
     module/sequence.cpp \
     module/serialmgr.cpp \
     module/sqlitemgr.cpp \
-    module/v4l.cpp \
     main.cpp \   
-    module/dao/usermgr.cpp \
     module/qrcoder.cpp \
     module/dao/testmgr.cpp \
     module/dao/testmodel.cpp \
@@ -44,7 +42,7 @@ SOURCES += \
 
 RESOURCES += qml.qrc
 
-include(QZXing/QZXing.pri)
+#include(QZXing/QZXing.pri)
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
@@ -67,9 +65,7 @@ HEADERS += \
     module/sequence.h \
     module/serialmgr.h \
     module/sqlitemgr.h \
-    module/v4l.h \
     module/entity/User.h \
-    module/dao/usermgr.h \
     module/qrcoder.h \
     module/entity.h \
     module/dao/testmgr.h \

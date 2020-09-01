@@ -6,14 +6,17 @@
 #include "serialmgr.h"
 #include <QNetworkInterface>
 
+#define BOXCODE_DEFAULT "204"
+
 QString ExGlobal::t_panelCode = "012315";
 QString ExGlobal::t_panelName = "上呼吸道测试";
 QString ExGlobal::t_sampleCode = "SLX 01079";
 QString ExGlobal::t_sampleInfo = "华山11";
+QString ExGlobal::t_sampleRemark = "";
 QString ExGlobal::t_BoxSerial = "Lot# 000001";
 QString ExGlobal::User = "";
 int ExGlobal::UserType = 0;
-QString ExGlobal::t_ReagentBox = "204";
+QString ExGlobal::BoxCode = "";
 bool ExGlobal::test = false;
 
 QString ExGlobal::SysName = "样机02";
@@ -22,9 +25,11 @@ int ExGlobal::LanguageCode = 1;
 int ExGlobal::PanelBoxIndex = 1;
 
 QString ExGlobal::t_version = "V1";
-QString ExGlobal::build_version = "V1.0.2(build20200730)";
+QString ExGlobal::build_version = "V1.0.4(build20200824)";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
+
+bool ExGlobal::bLogin = false;
 
 int ExGlobal::V1WorkX = 9166;
 int ExGlobal::V2WorkX = 8178;
@@ -94,7 +99,7 @@ TestResultModel * ExGlobal::pTestResultModel = nullptr;
 UserModel * ExGlobal::pUserModel = nullptr;
 WifiModel * ExGlobal::pWifiModel = nullptr;
 
-QHash<int, QString> ExGlobal::AssayItem;
+QMap<int, QString> ExGlobal::AssayItem;
 QHash<int, int> ExGlobal::ItemCT;
 
 unsigned char * ExGlobal::bufrgb = nullptr;
@@ -273,7 +278,7 @@ void ExGlobal::exInit()
 void ExGlobal::CaliParamInit()
 {
     QString sql = "SELECT * FROM CaliParam";
-    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(sql);
+    QSqlQuery query = SqliteMgr::select(sql);
 
     while(query.next())
     {
@@ -281,36 +286,36 @@ void ExGlobal::CaliParamInit()
     }
 
     sql = "select * from TextParam";
-    query = SqliteMgr::sqlitemgrinstance->select(sql);
+    query = SqliteMgr::select(sql);
     while(query.next()){
         SetTextParam(query.value(0).toString(),query.value(1).toString());
     }
 
     sql = "select * from AssayItem order by Itemid";
-    query = SqliteMgr::sqlitemgrinstance->select(sql);
+    query = SqliteMgr::select(sql);
     while(query.next()){
         //qDebug()<<"Itemid:"<<query.value(0).toInt()<<"ItemName:"<<query.value(1).toString()<<"ItemCT:"<<query.value(2).toInt();
         AssayItem[query.value(0).toInt()] = query.value(1).toString();
         ItemCT[query.value(0).toInt()] = query.value(2).toInt();
     }
 
-    addTest();
+    pTestModel->InitTest();
     pUserModel->LoadUser();
     pWifiModel->LoadData();
     Log::Logdb(LOGTYPE_POWERON);
 }
 
-uchar* ExGlobal::getReagentBox(QString BoxCode){
-    QString sql = "SELECT * FROM ReagentPos where BoxCode='"+BoxCode+"'";
-    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(sql);
-    memset(ReagentBox,0,sizeof(ReagentBox));
-    while(query.next()){
-        if (query.value(1).toInt() < 121)
-            ReagentBox[query.value(1).toInt()] = static_cast<uchar>(query.value(2).toInt());
-
+uchar* ExGlobal::getReagentBox(QString boxCode){
+    if (boxCode == "")
+        boxCode = BOXCODE_DEFAULT;
+    if (boxCode != BoxCode)
+    {
+        BoxCode = boxCode;
+        LoadReagentBox();
     }
     return ReagentBox;
 }
+
 void ExGlobal::SetCaliParam(const QString &name, int caliValue)
 {
     if (name == "V1WorkX")
@@ -504,12 +509,12 @@ int ExGlobal::getCaliParam(const QString &caliName)
 void ExGlobal::updateCaliParam(const QString &caliName, int caliValue)
 {
     QString sql = "SELECT * FROM CaliParam WHERE ParamName = '"+caliName+"'";
-    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(sql);
+    QSqlQuery query = SqliteMgr::select(sql);
     if (query.next())
         sql = "UPDATE CaliParam SET ParamValue = "+ QString::number(caliValue)+" WHERE ParamName = '"+ caliName +"'";
     else
         sql = "INSERT INTO CaliParam (ParamName, ParamValue) VALUES ('"+caliName+"', "+ QString::number(caliValue)+")";
-    SqliteMgr::sqlitemgrinstance->execute(sql);
+    SqliteMgr::execute(sql);
     SetCaliParam(caliName,caliValue);
 }
 
@@ -531,7 +536,7 @@ QString ExGlobal::getTextParam(const QString &caliName){
 
 void ExGlobal::updateTextParam(const QString &textName, QString textValue){
     QString sql = QString("replace into TextParam(ParamName,ParamValue) values('%1','%2')").arg(textName).arg(textValue);
-    SqliteMgr::sqlitemgrinstance->execute(sql);
+    SqliteMgr::execute(sql);
     SetTextParam(textName,textValue);
 }
 
@@ -549,131 +554,19 @@ QStringList ExGlobal::serialPort(){
     return port;
 }
 
-QStringList ExGlobal::getPosNameArray(){
-    QStringList nameArr;
-
-    QString sql = "SELECT * FROM ReagentPos where BoxCode='"+t_ReagentBox+"'";
-    qDebug()<<"getPosNameArray"<<t_ReagentBox<<AssayItem;
-    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(sql);
-    while(query.next())
-    {
-        if (query.value(2).toInt()<2)
-            continue;
-        QString name = AssayItem[query.value(2).toInt()];
-        bool findit = false;
-        for (int i = 0; i < nameArr.size(); i++){
-            if(nameArr[i] == name){
-                findit = true;
-                break;
-            }
-        }
-        if (findit == false)
-            nameArr<<name;
-    }
-    return nameArr;
-}
-
 QString ExGlobal::getPosName(int pos){
     return AssayItem[pos];
 }
 
 int ExGlobal::getItemCT(int Itemid){
     qDebug()<<"getItemCT,Itemid="<<Itemid<<",CT="<<ItemCT[Itemid];
-    return ItemCT[Itemid];
-}
-
-int ExGlobal::getItemResult(int Testid, int Itemid){
-    int result = 0;
-    int resultLength = 0;
-    QString sql = "select cycle from AnalysisResult where Testid="+QString::number(Testid)+" and Itemid="+QString::number(Itemid);
-    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(sql);
-    while(query.next()){
-        resultLength++;
-        if (query.value(0).toInt() > result)
-            result = query.value(0).toInt();
-    }
-
-    if(resultLength == 0) {
-        sql = "select * from TestResult where Testid="+QString::number(Testid)+" and Itemid="+QString::number(Itemid);
-        query = SqliteMgr::sqlitemgrinstance->select(sql);
-        QHash<int, vector<Point>> dataPos;
-        while(query.next()){
-            dataPos[query.value(2).toInt()].push_back(Point(query.value(4).toInt()*10,query.value(5).toInt()));
-        }
-
-        foreach(int dataKey, dataPos.keys()){
-            qDebug()<<"key="<<dataKey<<",length="<<dataPos[dataKey].size();
-            if (dataPos[dataKey].size()>22){
-                vector<Point> points = dataPos[dataKey];
-                vector<Point> tempPoint;
-                int linebaseStart = 3;
-                int linebaseEnd = points.size()-1;
-                Vec4f line_para;
-                bool doLine = true;
-                while(doLine){
-                    doLine = false;
-                    tempPoint.assign(points.begin()+linebaseStart,points.begin()+linebaseEnd+1);
-                    fitLine(tempPoint,line_para,cv::DIST_L2,0,1e-2,1e-2);
-                    if (linebaseEnd > 20) {
-                        double dv = line_para[1]/line_para[0]*(points[linebaseEnd].x-line_para[2])+line_para[3];
-                        if (fabs(points[linebaseEnd].y-dv)>1)
-                        {
-                            linebaseEnd--;
-                            doLine = true;
-                        }
-                    }
-                    if (doLine == false && linebaseStart<10){
-                        double dv = line_para[1]/line_para[0]*(points[linebaseStart].x-line_para[2])+line_para[3];
-                        if (fabs(points[linebaseStart].y-dv)>1)
-                        {
-                            linebaseStart++;
-                            doLine = true;
-                        }
-                    }
-                }
-
-                double k = line_para[1]/line_para[0];
-                double intercept = k*(0-line_para[2]) + line_para[3];
-                //qDebug()<<"para[0]="<<line_para[0]<<",para[1]="<<line_para[1]<<",para[2]="<<line_para[2]<<",para[3]="<<line_para[3]<<",k="<<k<<",intercept="<<intercept<<",lineStart="<<linebaseStart<<",lineEnd="<<linebaseEnd;
-                int t_result = 0;
-                for (int i = 10; i < dataPos[dataKey].size(); i++){
-                    dataPos[dataKey][i].y = dataPos[dataKey][i].y - (dataPos[dataKey][i].x*k + intercept);
-                    if (dataPos[dataKey][i].y >= ItemCT[ReagentBox[dataKey]]){
-                        if(i == 10)
-                            t_result = 100;
-                        else if (dataPos[dataKey][i].y==dataPos[dataKey][i-1].y)
-                            t_result= (i+1)*10;
-                        else
-                            t_result = (i+1)*10+((dataPos[dataKey][i].y-ItemCT[ReagentBox[dataKey]])*10/(dataPos[dataKey][i].y-dataPos[dataKey][i-1].y));
-                        break;
-                    }
-                }
-                sql = QString("insert into AnalysisResult(Testid,PosIndex,cycle,Itemid) values(%1,%2,%3,%4)").arg(Testid).arg(dataKey).arg(t_result).arg(Itemid);
-                SqliteMgr::sqlitemgrinstance->execute(sql);
-                if (t_result > result)
-                    result = t_result;
-            }
-        }
-    }
-    return result;
-}
-
-QList<int> ExGlobal::getCurrItemResult(){
-    QList<int> result;
-    int Testid = pTestResultModel->getTestid();
-    int Itemid = pTestResultModel->getCurrItemId();
-    QString sql = "select cycle,PosIndex from AnalysisResult where Testid="+QString::number(Testid)+" and Itemid="+QString::number(Itemid);
-    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(sql);
-    while(query.next()){
-        result<<(query.value(1).toInt()*1000+query.value(0).toInt());
-    }
-    sort(result.begin(),result.end());
-    return result;
+    return 200;
+    //return ItemCT[Itemid];
 }
 
 QList<int> ExGlobal::getBoxItemList(){
     QList<int> result;
-    getReagentBox(t_ReagentBox);
+    getReagentBox(reagentBox());
     for (int i = 0; i < 121; i++)
         if (ReagentBox[i] > 2){
             bool find = false;
@@ -692,30 +585,54 @@ QList<int> ExGlobal::getBoxItemList(){
     return result;
 }
 
-void ExGlobal::addTest(){
-    //QString sql = "select * from PanelTest";
-    QString sql = "select * from PanelTest where ResultType = 2 order by Testid DESC";
-    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(sql);
-    while(query.next()){
-        Test test;
-        test.Testid = query.value(0).toInt();
-        test.PanelCode = query.value(1).toString();
-        test.SerialNo = query.value(2).toString();
-        test.TestTime = query.value(4).toString();
-        test.SampleInfo = query.value(5).toString();
-        test.SampleId = query.value(6).toString();
-        test.User = query.value(7).toString();
-        test.Checker = query.value(8).toString();
-        test.ResultType = query.value(9).toInt();
-        if (!pTestModel->ExistTest(test.Testid))
-        {            
-            pTestModel->AddTest(test);            
+QStringList ExGlobal::getPosNameArray(){
+    QStringList nameArr;
+    getReagentBox(reagentBox());
+    for (int i = 0; i < 121; i++)
+        if (ReagentBox[i] > 1){
+            QString name = AssayItem[ReagentBox[i]];
+            bool findit = false;
+            for (int i = 0; i < nameArr.size(); i++){
+                if(nameArr[i] == name){
+                    findit = true;
+                    break;
+                }
+            }
+            if (findit == false)
+                nameArr<<name;
         }
-    }
+
+    return nameArr;
 }
 
 void ExGlobal::panelBoxIndexAddOne(){
     updateCaliParam("PanelBoxIndex",PanelBoxIndex + 1);
     t_BoxSerial = QString("Lot# %1").arg(PanelBoxIndex, 6, 10, QChar('0'));
     //t_sampleCode = QString("SLX %1").arg(PanelBoxIndex, 6, 10, QChar('0'));
+}
+
+QString ExGlobal::reagentBox(){
+    if (BoxCode == "")
+    {
+        BoxCode = BOXCODE_DEFAULT;
+        LoadReagentBox();
+    }
+    return BoxCode;
+}
+
+void ExGlobal::setReagentBox(const QString &reagentBoxType){
+    if (reagentBoxType != BoxCode){
+        BoxCode = reagentBoxType;
+        LoadReagentBox();
+    }
+}
+
+void ExGlobal::LoadReagentBox(){
+    QString sql = "SELECT * FROM ReagentPos where BoxCode='"+BoxCode+"'";
+    QSqlQuery query = SqliteMgr::select(sql);
+    memset(ReagentBox,0,sizeof(ReagentBox));
+    while(query.next()){
+        if (query.value(1).toInt() < 121)
+            ReagentBox[query.value(1).toInt()] = static_cast<uchar>(query.value(2).toInt());
+    }
 }

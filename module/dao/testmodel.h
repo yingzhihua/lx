@@ -6,10 +6,11 @@
 class Test{
 public:
     Test(){}
-    Test(int Testid_, QString PanelCode_, QString SerialNo_, QString TestTime_, QString SampleInfo_, QString User_, QString Checker_, int ResultType_){
+    Test(int Testid_, QString PanelCode_, QString SerialNo_, QString BoxCode_, QString TestTime_, QString SampleInfo_, QString User_, QString Checker_, int ResultType_){
         Testid = Testid_;
         PanelCode = PanelCode_;
         SerialNo = SerialNo_;
+        BoxCode = BoxCode_;
         TestTime = TestTime_;
         SampleInfo = SampleInfo_;
         User = User_;
@@ -19,6 +20,7 @@ public:
     int Testid;
     QString PanelCode;
     QString SerialNo;
+    QString BoxCode;
     QString TestTime;
     QString SampleInfo;
     QString SampleId;
@@ -35,6 +37,7 @@ public:
         RolesTestid = Qt::UserRole + 1,
         RolesPanelCode,
         RolesSerialNo,
+        RolesBoxCode,
         RoleTestTime,
         RoleSampleInfo,
         RoleSampleId,
@@ -46,8 +49,9 @@ public:
     explicit TestModel(QObject *parent = nullptr);
     int rowCount(const QModelIndex & parent = QModelIndex()) const;
     QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
-    void AddTest(const Test &test);
+    void AddTest(int testid);
     bool ExistTest(int Testid);
+    void InitTest();
     QString getCurrTestDateTime(){return m_display_list[currTestIndex].TestTime;}
     QString getCurrTestCode(){return m_display_list[currTestIndex].SampleId;}
     QString getCurrTestSerial(){return m_display_list[currTestIndex].SerialNo;}

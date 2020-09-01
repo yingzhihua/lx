@@ -152,37 +152,37 @@ void Log::LogCData(QString log)
 
 bool Log::Logdb(LOGTYPE logType){
     QString sql = QString("INSERT INTO Log (LogType, LogTime) VALUES(%1, '%2')").arg(logType).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
-    return SqliteMgr::sqlitemgrinstance->execute(sql);
+    return SqliteMgr::execute(sql);
 }
 
 bool Log::Logdb(LOGTYPE logType, int param1){
     QString sql = QString("INSERT INTO Log (LogType, iParam1, LogTime) VALUES(%1, %2, '%3')").arg(logType).arg(param1).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
-    return SqliteMgr::sqlitemgrinstance->execute(sql);
+    return SqliteMgr::execute(sql);
 }
 
 bool Log::Logdb(LOGTYPE logType, int param1, int param2){
     QString sql = QString("INSERT INTO Log (LogType, LogTime, iParam1, iParam2) VALUES(%1, '%2', %3, %4)").arg(logType).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")).arg(param1).arg(param2);
     qDebug()<<"logdb2"<<sql;
-    return SqliteMgr::sqlitemgrinstance->execute(sql);
+    return SqliteMgr::execute(sql);
 }
 
 bool Log::Logdb(LOGTYPE logType, int param1, QString param2){
     QString sql = QString("INSERT INTO Log (LogType, LogTime, iParam1, tParam1) VALUES(%1, '%2', %3, '%4')").arg(logType).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")).arg(param1).arg(param2);
     qDebug()<<"logdb3"<<sql;
-    return SqliteMgr::sqlitemgrinstance->execute(sql);
+    return SqliteMgr::execute(sql);
 }
 
 bool Log::Logdb(LOGTYPE logType, int param1, int param2, QString param3){
     QString sql = QString("INSERT INTO Log (LogType, LogTime, iParam1, iParam2, tParam1) VALUES(%1, '%2', %3, %4, '%5')").arg(logType).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")).arg(param1).arg(param2).arg(param3);
-    return SqliteMgr::sqlitemgrinstance->execute(sql);
+    return SqliteMgr::execute(sql);
 }
 
 bool Log::Logdb(LOGTYPE logType, int param1, QString param2, QString param3){
     QString sql = QString("INSERT INTO Log (LogType, LogTime, iParam1, tParam1, tParam2) VALUES(%1, '%2', %3, '%4', '%5')").arg(logType).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")).arg(param1).arg(param2).arg(param3);
-    return SqliteMgr::sqlitemgrinstance->execute(sql);
+    return SqliteMgr::execute(sql);
 }
 
 bool Log::Logdb(LOGTYPE logType, int param1, int param2, QString param3, QString param4){
     QString sql = QString("INSERT INTO Log (LogType, LogTime, iParam1, iParam2, tParam1, tParam2) VALUES(%1, '%2', %3, %4, '%5', '%6')").arg(logType).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")).arg(param1).arg(param2).arg(param3).arg(param4);
-    return SqliteMgr::sqlitemgrinstance->execute(sql);
+    return SqliteMgr::execute(sql);
 }

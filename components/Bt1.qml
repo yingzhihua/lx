@@ -9,23 +9,21 @@ Rectangle {
     height: 106
     //border.color: "orange"
     color: Qt.rgba(0,0,0,0)
+
     Image {
         id: img
         x:3
         y:3
         width: 299
         height: 106
-        source: "qrc:/images/back.png"
+        source: "qrc:/images/btexit.png"
     }
 
     Text{
         id:label
-        anchors.left: img.right
-        anchors.leftMargin: 10
-        anchors.verticalCenter: img.verticalCenter
-        font.pixelSize: 40
-        visible: false
-        //color: "powderblue"
+        x:130
+        y:26
+        font.pixelSize: 40        
         text:qsTr("返回")
     }
 

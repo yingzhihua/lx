@@ -13,13 +13,13 @@ Page {
 
         Image {
             id: startbutton
-            width: 220
+            width: 219
             height: 224
             x:850
             y:287
             fillMode: Image.Pad
 
-            source: "qrc:/images/TestStart.png"
+            source: "qrc:/images/StartTest.png"
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
@@ -45,6 +45,7 @@ Page {
             anchors.top: startbutton.bottom
             anchors.topMargin: 28
             anchors.horizontalCenter: startbutton.horizontalCenter
+            color: "#4c4c4c"
             text: qsTr("开始测试")
         }
 
@@ -60,6 +61,7 @@ Page {
             y:224
             text1: ExGlobal.sampleCode
             text2: ExGlobal.sampleInfo
+            text3: ExGlobal.sampleRemark
         }
 
         Image {
@@ -69,7 +71,7 @@ Page {
             height: 75
             width: 70
             fillMode: Image.Pad
-            source: "qrc:/images/SampleInput.png"
+            source: "qrc:/images/Pen.png"
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
@@ -80,34 +82,33 @@ Page {
 
         ThreeQuery{
             id: queryDlg
-            qtitle: qsTr("输入样本信息")
+            qtitle: qsTr("样本信息录入")
             qlable1: qsTr("样本号")
             qlable2: qsTr("样本信息")
             qlable3: qsTr("样本备注")
             qtext1: ExGlobal.sampleCode
             qtext2: ExGlobal.sampleInfo
+            qtext3: ExGlobal.sampleRemark
             anchors.fill: parent
             onQueryAck: {
-                console.log(res1,res2);
+                console.log(res1,res2,res3);
                 ExGlobal.sampleCode = res1;
                 ExGlobal.sampleInfo = res2;
+                ExGlobal.sampleRemark = res3;
             }
         }
 
-        Image {
-            id: btQuit
-            x: 1450
-            y: 754
+        Bt2{
+            x:1450
+            y:754
             height: 106
             width: 299
-            fillMode: Image.Pad
-            source: "qrc:/images/TestCancel.png"
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-                    testcancelDialog.show(0)
-                }
-            }
+            textoffsetx: 20
+            textoffsety: -4
+            image: "qrc:/images/CancelTest.png"
+            text: qsTr("取消测试")
+            textcolor: "#323232"
+            onClicked: testcancelDialog.show(0)
         }
     }
 
@@ -131,15 +132,13 @@ Page {
     }
 
     Component.onCompleted: {
-        headerMsg.text=qsTr("试剂盒就绪");
+        Sequence.setTitle("boxready");
     }
 
     Connections{
         target: Sequence
         onPanelNameChanged:{
             panelName.text = ExGlobal.panelName;
-            //panelLot.text = ExGlobal.panelCode;
-            //panelLot.text = "Lot# " + ExGlobal.getCaliParam("PanelBoxIndex");
         }
     }
 

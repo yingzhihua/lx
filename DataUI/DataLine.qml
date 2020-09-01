@@ -31,23 +31,23 @@ Page {
 
         CategoryAxis{
             id:axisY
-            min:-10
-            max:30
+            min:-100
+            max:1100
             CategoryRange{
                 label:"0"
                 endValue: 0
             }
             CategoryRange{
-                label:ExGlobal.getItemCT(testResultModel.getCurrItemId())/2
-                endValue: ExGlobal.getItemCT(testResultModel.getCurrItemId())/2
-            }
-            CategoryRange{
-                label:"CT "+ExGlobal.getItemCT(testResultModel.getCurrItemId())
+                label:ExGlobal.getItemCT(testResultModel.getCurrItemId())
                 endValue: ExGlobal.getItemCT(testResultModel.getCurrItemId())
             }
             CategoryRange{
-                label:ExGlobal.getItemCT(testResultModel.getCurrItemId())*2
-                endValue: ExGlobal.getItemCT(testResultModel.getCurrItemId())*2
+                label:"500"
+                endValue: 500
+            }
+            CategoryRange{
+                label:"5000"
+                endValue: 5000
             }
             labelsPosition: CategoryAxis.AxisLabelsPositionOnValue
         }
@@ -113,7 +113,7 @@ Page {
     }
 
     Component.onCompleted: {
-        itemList = ExGlobal.getCurrItemResult()
+        itemList = testResultModel.getCurrItemResult()
         setChart()
     }
 }

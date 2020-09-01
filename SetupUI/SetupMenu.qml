@@ -3,10 +3,8 @@ import QtQuick.Controls 2.5
 import Dx.Global 1.0
 import Dx.Sequence 1.0
 
-Rectangle {
-    //property string titlemsg: qsTr("设置")
-    id: setup_menu
-    //anchors.fill: parent
+Rectangle {    
+    id: setup_menu    
     color: "#f5f5f5"
     ListModel{
         id:setModel
@@ -79,10 +77,8 @@ Rectangle {
 
                     MouseArea{
                         anchors.fill: parent
-                        onPressed: {
-                            parent.color = "#DDDDDD"
-                        }
-
+                        onPressed: parent.color = "#DDDDDD"
+                        onCanceled: parent.color = "#f5f5f5"
                         onReleased: {
                             parent.color = "#f5f5f5"
                             if (qrc_res != "")
@@ -126,8 +122,8 @@ Rectangle {
             removeItem("TestLoop");
         }
 
-        //headerMsg.text = qsTr("设置");
-        Sequence.changeTitle(qsTr("设置"));
+        //Sequence.changeTitle(qsTr("设置"));
+        Sequence.setTitle("setup");
         //Sequence.hideTitle(true);
     }
 

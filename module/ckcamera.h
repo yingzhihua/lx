@@ -53,7 +53,7 @@ private:
     unsigned int *sum;
     HANDLE m_hCamera;
     uint32_t CKGetFrame();
-    int process_image(int index, uint8_t *data, uint32_t datalength);
+    int process_image(int index, uint32_t datalength);
     void saveRaw(void *data, uint32_t datalength);
     bool waitStop();
 };

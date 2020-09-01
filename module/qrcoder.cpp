@@ -1,5 +1,5 @@
 #include "qrcoder.h"
-#include "QZXing.h"
+//#include "QZXing.h"
 #include "log.h"
 #include "exglobal.h"
 
@@ -44,8 +44,7 @@ bool QRcoder::OpenCamera(int index, VideoCapture &cap){
 
 void QRcoder::run(){
     int count = 0;
-    QString result;
-    int nresult = 0;    
+    QString result;       
     VideoCapture cap;
 
     QByteArray res;

@@ -5,10 +5,10 @@ Rectangle{
     property alias text2: message2.text
     property alias text3: message3.text
     width: 368
-    height: 452
+    height: 457
     radius: 22
     clip: true
-
+/*
     Rectangle{
         x: parent.width/2-11
         y: 11-parent.width/2
@@ -34,6 +34,10 @@ Rectangle{
         width: parent.width-16
         height: 2
         color: "#a5a5a5"
+    }
+*/
+    Image {
+        source: "qrc:/images/ThreeMessageBG.png"
     }
 
     Text{

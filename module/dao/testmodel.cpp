@@ -9,6 +9,7 @@ TestModel::TestModel(QObject *parent):QAbstractListModel (parent)
     roles[RoleChecker] = "Checker";
     roles[RoleTestTime] = "TestTime";
     roles[RolesSerialNo] = "SerialNo";
+    roles[RolesBoxCode] = "BoxCode";
     roles[RoleResultType] = "ResultType";
     roles[RoleSampleInfo] = "SampleInfo";
     roles[RoleSampleId] = "SampleId";
@@ -38,6 +39,8 @@ QVariant TestModel::data(const QModelIndex &index, int role) const
         return test.TestTime;
     else if(role == RolesSerialNo)
         return test.SerialNo;
+    else if(role == RolesBoxCode)
+        return test.BoxCode;
     else if(role == RoleResultType)
         return test.ResultType;
     else if(role == RoleSampleInfo)
@@ -55,13 +58,48 @@ QHash<int, QByteArray> TestModel::roleNames() const
     return roles;
 }
 
-void TestModel::AddTest(const Test &test){
-    beginInsertRows(QModelIndex(),rowCount(),rowCount());
-    m_display_list<<test;
-    currTestIndex = m_display_list.count() - 1;
-    currTestid = m_display_list[currTestIndex].Testid;
-    endInsertRows();
-    //emit dataChanged(createIndex(index,0),createIndex(index,0));
+void TestModel::InitTest(){
+    m_display_list.clear();
+    QString sql = "select * from PanelTest where ResultType = 2 order by Testid DESC";
+    QSqlQuery query = SqliteMgr::select(sql);
+    while(query.next()){
+        Test test;
+        test.Testid = query.value(0).toInt();
+        test.PanelCode = query.value(1).toString();
+        test.SerialNo = query.value(2).toString();
+        test.BoxCode = query.value(3).toString();
+        test.TestTime = query.value(4).toString();
+        test.SampleInfo = query.value(5).toString();
+        test.SampleId = query.value(6).toString();
+        test.User = query.value(7).toString();
+        test.Checker = query.value(8).toString();
+        test.ResultType = query.value(9).toInt();
+        m_display_list<<test;
+    }
+}
+void TestModel::AddTest(int testid){
+    if (!ExistTest(testid)){
+        QString sql = QString("select * from PanelTest where ResultType = 2 and Testid = %1 order by Testid DESC").arg(testid);
+        QSqlQuery query = SqliteMgr::select(sql);
+        beginInsertRows(QModelIndex(),rowCount(),rowCount());
+        if (query.next()){
+            Test test;
+            test.Testid = query.value(0).toInt();
+            test.PanelCode = query.value(1).toString();
+            test.SerialNo = query.value(2).toString();
+            test.BoxCode = query.value(3).toString();
+            test.TestTime = query.value(4).toString();
+            test.SampleInfo = query.value(5).toString();
+            test.SampleId = query.value(6).toString();
+            test.User = query.value(7).toString();
+            test.Checker = query.value(8).toString();
+            test.ResultType = query.value(9).toInt();
+            m_display_list<<test;
+        }
+        currTestIndex = m_display_list.count() - 1;
+        currTestid = m_display_list[currTestIndex].Testid;
+        endInsertRows();
+    }
 }
 
 bool TestModel::ExistTest(int Testid){
@@ -92,22 +130,22 @@ bool TestModel::haveCheck(){
 }
 
 void TestModel::checkTest(){    
-    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(QString("select * from PanelTest where Testid=%1").arg(currTestid));
+    QSqlQuery query = SqliteMgr::select(QString("select * from PanelTest where Testid=%1").arg(currTestid));
     if (query.next())
     {
         QString sql = QString("update PanelTest set Checker='%1' where Testid=%2").arg(ExGlobal::User).arg(currTestid);
-        SqliteMgr::sqlitemgrinstance->execute(sql);
+        SqliteMgr::execute(sql);
         m_display_list[currTestIndex].Checker = ExGlobal::User;
     }
     emit dataChanged(createIndex(currTestIndex,0),createIndex(currTestIndex,0));
 }
 
 void TestModel::uncheckTest(){
-    QSqlQuery query = SqliteMgr::sqlitemgrinstance->select(QString("select * from PanelTest where Testid=%1").arg(currTestid));
+    QSqlQuery query = SqliteMgr::select(QString("select * from PanelTest where Testid=%1").arg(currTestid));
     if (query.next())
     {
         QString sql = QString("update PanelTest set Checker='' where Testid=%1").arg(currTestid);
-        SqliteMgr::sqlitemgrinstance->execute(sql);
+        SqliteMgr::execute(sql);
         m_display_list[currTestIndex].Checker = "";
     }
     emit dataChanged(createIndex(currTestIndex,0),createIndex(currTestIndex,0));

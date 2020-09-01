@@ -31,7 +31,9 @@ public:
     Q_INVOKABLE int getTestid(){return Testid;}
     Q_INVOKABLE void setCurrItem(int id);
     Q_INVOKABLE int getCurrItemId(){return currItemid;}
-    //Q_INVOKABLE QList<int> getItemValue(int posIndex);
+    Q_INVOKABLE int getItemResult(int testid, int itemid);
+    Q_INVOKABLE QList<int> getCurrItemResult();
+
 protected:
     QHash<int, QByteArray> roleNames() const;
 

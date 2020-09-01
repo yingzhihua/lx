@@ -63,7 +63,7 @@ Item {
         anchors.left: btTest.right
         anchors.leftMargin: 100
         anchors.verticalCenter: btLoad.verticalCenter
-        text: "记录子图像"
+        text: qsTr("记录子图像")
         checked: ExGlobal.childImage
         onClicked: {
             ExGlobal.childImage = cbChildImage.checked;
@@ -199,7 +199,7 @@ Item {
         anchors.left: btQr.right
         anchors.leftMargin: 30
         anchors.verticalCenter: btQr.verticalCenter
-        text: qsTr("Message")
+        text: "Message"
         horizontalAlignment : Text.AlignHCenter
         verticalAlignment :Text.AlignVCenter
     }
@@ -284,7 +284,7 @@ Item {
                 text:qsTr("左上角坐标")
             }
             Text{
-                text:qsTr("X：")
+                text:"X："
             }
             SpinBox{
                 id:x1
@@ -297,7 +297,7 @@ Item {
                 onValueChanged: ExGlobal.updateCaliParam("QrX1",x1.value)
             }
             Text{
-                text:qsTr("Y：")
+                text:"Y："
             }
             SpinBox{
                 id:y1
@@ -314,7 +314,7 @@ Item {
                 text:qsTr("右上角坐标")
             }
             Text{
-                text:qsTr("X：")
+                text:"X："
             }
             SpinBox{
                 id:x2
@@ -327,7 +327,7 @@ Item {
                 onValueChanged: ExGlobal.updateCaliParam("QrX2",x2.value)
             }
             Text{
-                text:qsTr("Y：")
+                text:"Y："
             }
             SpinBox{
                 id:y2
@@ -344,7 +344,7 @@ Item {
                 text:qsTr("右下角坐标")
             }
             Text{
-                text:qsTr("X：")
+                text:"X："
             }
             SpinBox{
                 id:x3
@@ -357,7 +357,7 @@ Item {
                 onValueChanged: ExGlobal.updateCaliParam("QrX3",x3.value)
             }
             Text{
-                text:qsTr("Y：")
+                text:"Y："
             }
             SpinBox{
                 id:y3
@@ -374,7 +374,7 @@ Item {
                 text:qsTr("左下角坐标")
             }
             Text{
-                text:qsTr("X：")
+                text:"X："
             }
             SpinBox{
                 id:x4
@@ -387,7 +387,7 @@ Item {
                 onValueChanged: ExGlobal.updateCaliParam("QrX4",x4.value)
             }
             Text{
-                text:qsTr("Y：")
+                text:"Y："
             }
             SpinBox{
                 id:y4

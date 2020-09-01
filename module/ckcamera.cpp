@@ -184,7 +184,7 @@ uint32_t CKCamera::CKGetFrame(){
     return imageInfo.TotalBytes;
 }
 
-int CKCamera::process_image(int index, uint8_t *data, uint32_t datalength){
+int CKCamera::process_image(int index, uint32_t datalength){
     QString dirName = "CK";
     int width = 2592;
     int height = 1944;
@@ -377,7 +377,7 @@ void CKCamera::run(){
             else if (captureMode == CaptureMode::Capture)
             {
                 nFrame++;
-                process_image(nFrame,rawData,dataLength);
+                process_image(nFrame,dataLength);
                 elapse = time.elapsed();
                 qDebug()<<"CKCamera::run,elapse="<<elapse<<"Frame="<<nFrame;
                 int nFrameMs = ExGlobal::CamAbs + 400;

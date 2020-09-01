@@ -13,13 +13,13 @@ Page {
         id: appicon
         anchors.centerIn: parent
         anchors.verticalCenterOffset: -100
-        source: "qrc:/images/logo.png"
+        source: "qrc:/images/startup_logo.png"
     }
 
     Component.onCompleted: {
         changeTimer.stop();        
-        changeTimer.start();
-        //tabBar.enabled = false;
+        //changeTimer.start();
+        Sequence.setTitle("startup");
         Sequence.updateFooter(false,false,false);
         openDoor.visible = false;
         boxTips.visible = false;
@@ -32,29 +32,31 @@ Page {
             Sequence.actionDo("Query",3,0,0,0);
     }
 
-    Text {
-        id: boxTips
-        anchors.centerIn: parent
-        anchors.verticalCenterOffset: -200
-        font.pixelSize: 50
-        text: qsTr("请取出机器内试剂盒，然后关闭舱门")
-    }
-
     Image {
         id: openDoor
-        width: 200
-        height: 200
-        anchors.horizontalCenter: boxTips.horizontalCenter
-        anchors.top: boxTips.bottom
-        anchors.topMargin: 100
-
-        source: "qrc:/image/openDoor.png"
+        width: 219
+        height: 224
+        anchors.centerIn: parent
+        anchors.verticalCenterOffset: -100
+        source: "qrc:/images/opendoor.png"
         MouseArea{
             anchors.fill: parent
             onClicked: {
                 switchDoor()
             }
         }
+    }
+
+    Text {
+        id: boxTips
+        anchors.horizontalCenter: openDoor.horizontalCenter
+        anchors.top: openDoor.bottom
+        anchors.topMargin: 40
+        font.pixelSize: 45
+        width: 300
+        horizontalAlignment: Text.AlignHCenter
+        wrapMode: Text.WrapAnywhere
+        text: qsTr("请取出机器内试剂盒，然后关闭舱门")
     }
 
     BusyIndicator{
@@ -74,8 +76,7 @@ Page {
         anchors.horizontalCenter: busyIndicator.horizontalCenter
         anchors.top: busyIndicator.bottom
         anchors.topMargin: 20
-        visible: false
-        text: qsTr("text")
+        visible: false        
     }
 
     Connections{
@@ -103,9 +104,11 @@ Page {
             }
             else if (result == Sequence.Result_Simple_ok){
                 if (Sequence.box){
-                    boxTips.text = qsTr("请取出机器内试剂盒，然后关闭舱门")
+                    Sequence.setTitle("startup_error")
+                    boxTips.text = qsTr("请取出试剂盒 然后关闭舱门")
                 }
                 else if (Sequence.door){
+                    Sequence.setTitle("startup_error")
                     boxTips.text = qsTr("请关闭舱门")
                 }
 
@@ -118,6 +121,7 @@ Page {
                     appicon.visible = true;
                     openDoor.visible = false;
                     boxTips.visible = false;
+                    Sequence.setTitle("startup")
                     Sequence.sequenceDo(Sequence.Sequence_SelfCheck);
                     changeTimer.start();
                 }
@@ -157,20 +161,19 @@ Page {
         interval: 500
         running: true
         onTriggered: {
-            if (titleChange == 0)
-                headerMsg.text=qsTr("系统启动");
-            else if(titleChange == 1)
-                headerMsg.text=qsTr("系统启动.");
+            headerMsg.text=qsTr("系统启动");
+            if(titleChange == 1)
+                headerMsg.text+=".";
             else if(titleChange == 2)
-                headerMsg.text=qsTr("系统启动..");
+                headerMsg.text+="..";
             else if(titleChange == 3)
-                headerMsg.text=qsTr("系统启动...");
+                headerMsg.text+="...";
             else if(titleChange == 4)
-                headerMsg.text=qsTr("系统启动....");
+                headerMsg.text+="....";
             else if(titleChange == 5)
-                headerMsg.text=qsTr("系统启动.....");
+                headerMsg.text+=".....";
             else
-                headerMsg.text=qsTr("系统启动......");
+                headerMsg.text+="......";
             titleChange++;
             if (titleChange>6)
                 titleChange = 0;

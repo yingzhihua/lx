@@ -10,23 +10,38 @@ Page {
 
     Image {
         id: openDoor
-        width: 150
-        height: 150
+        width: 219
+        height: 224
         anchors.centerIn: parent
-        anchors.verticalCenterOffset: -60
-
-        source: "qrc:/image/openDoor.png"
+        anchors.verticalCenterOffset: -100
+        source: "qrc:/images/opendoor.png"
+        MouseArea{
+            anchors.fill: parent
+            onClicked: {
+                switchDoor()
+            }
+        }
+    }
+    /*
+    AnimatedImage{
+        id:openDoor
+        y:280
+        width: 230
+        height: 230
+        anchors.horizontalCenter: parent.horizontalCenter
+        source: "qrc:/images/opendoor.gif"
         MouseArea{
             anchors.fill: parent
             onClicked: switchDoor()
         }
     }
+    */
 
     Text{
         id: boxstate
 
         text:qsTr("未检测到试剂盒")
-        font.pixelSize: 30
+        font.pixelSize: 45
         anchors.top: openDoor.bottom
         anchors.topMargin: 30
         anchors.horizontalCenter: openDoor.horizontalCenter
@@ -39,6 +54,7 @@ Page {
         anchors.bottom: openDoor.bottom
         anchors.bottomMargin: 30
         scale: 2
+        visible: false
         source: "qrc:/image/editInfo.png"
 
         MouseArea{
@@ -56,6 +72,7 @@ Page {
         anchors.left: editsample.right
         anchors.leftMargin: 30
         anchors.verticalCenter: editsample.verticalCenter
+        visible: false
         MouseArea{
             anchors.fill: parent
             onClicked: {
@@ -64,22 +81,6 @@ Page {
         }
     }
 
-/*
-    TwoQuery{
-        id: queryDlg
-        qtitle: qsTr("输入样本信息")
-        qlable1: qsTr("样本号：")
-        qlable2: qsTr("样本信息：")
-        qtext1: ExGlobal.sampleCode
-        qtext2: ExGlobal.sampleInfo
-        anchors.fill: parent
-        onQueryAck: {
-            console.log(res1,res2);
-            ExGlobal.sampleCode = res1;
-            ExGlobal.sampleInfo = res2;
-        }
-    }
-*/
     ThreeQuery{
         id: queryDlg
         qtitle: qsTr("输入样本信息")
@@ -116,57 +117,48 @@ Page {
         }
     }
 
-    SecondConfirm{
-        id: confirmDlg
-        anchors.fill: parent
-        onQueryAck: {
-            if (res == "confirm")
-                ExGlobal.exClose()
-        }
-    }
-
-    Button {
-        id: btClose        
-        font.pixelSize: 30
+    Bt2{
+        id: btClose
+        y: 754
+        x: 1450
+        height: 106
+        width: 299
+        textoffsetx: 50
+        textoffsety: -4
+        image: "qrc:/images/btclose.png"
         text: qsTr("关机")
-        width: 200
-        height: 70
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 50
-        anchors.right: parent.right
-        anchors.rightMargin: 20
-        onClicked: confirmDlg.show(qsTr("确认关机？"))
+        onClicked: confirmDlg.show(qsTr("您将关机？"))
     }
 
-    Button {
-        id: btExit        
-        font.pixelSize: 30
-        width: 200
-        height: 70
-        text: qsTr("退出登录")
+    Bt2{
+        id: btExit
         anchors.bottom: btClose.top
-        anchors.bottomMargin: 60
-        anchors.right: parent.right
-        anchors.rightMargin: 20        
+        anchors.bottomMargin: 30
+        anchors.horizontalCenter: btClose.horizontalCenter
+        height: 106
+        width: 299
+        textoffsetx: 30
+        textoffsety: -4
+        image: "qrc:/images/loginquit.png"
+        text:qsTr("退出登录")
         onClicked: {
             mainView.pop();
             mainView.push("qrc:/HomeUI/Login.qml");
         }
     }
 
-    Button {
+    Bt2{
         id: btReady
-        font.pixelSize: 30
-        visible: true
-        width: 200
-        height: 70
-        text: qsTr("试剂盒就绪")
         anchors.bottom: btExit.top
-        anchors.bottomMargin: 60
-        anchors.right: parent.right
-        anchors.rightMargin: 20
+        anchors.bottomMargin: 30
+        anchors.horizontalCenter: btExit.horizontalCenter
+        height: 106
+        width: 299
+        textoffsetx: 36
+        textoffsety: -4
+        image: "qrc:/images/loginquit.png"
+        text:qsTr("试剂盒就绪")
         onClicked: {
-            ExGlobal.panelBoxIndexAddOne();
             mainView.pop();
             mainView.push("qrc:/HomeUI/BoxReady.qml");
         }
@@ -191,12 +183,21 @@ Page {
         anchors.top: busyIndicator.bottom
         anchors.topMargin: 40
         font.pixelSize: 30
-        visible: false
-        text: qsTr("text")
+        visible: false        
+    }
+
+    SecondConfirm{
+        id: confirmDlg
+        anchors.fill: parent
+        onQueryAck: {
+            if (res == "confirm")
+                ExGlobal.exClose()
+        }
     }
 
     Component.onCompleted: {        
-        Sequence.changeTitle(qsTr("待机"));
+        //Sequence.changeTitle(qsTr("待机"));
+        Sequence.setTitle("idle");
         //tabBar.enabled = true;
         Sequence.updateFooter(true,true,true);
 

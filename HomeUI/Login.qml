@@ -2,146 +2,122 @@ import QtQuick 2.12
 import QtQuick.Controls 2.5
 
 import Dx.Sequence 1.0
-import Dx.UserMgr 1.0
 import Dx.Global 1.0
 
 import "../components"
 Page {
     id: login_page
     Rectangle{
-        width: 400
-        height: 600
-        anchors.centerIn: parent
-
-        Image {
-            id:login_logo
-            anchors.top: parent.top
-            anchors.horizontalCenter: parent.horizontalCenter
-            scale: 3
-            source: "qrc:/image/LOGO.png"
-        }
-//*
-        Text{
-            x:47
-            anchors.top: login_logo.bottom
-            anchors.topMargin: 120
-            width: 80
-            height: 30
-            text: qsTr("用户名：")
-            horizontalAlignment: Text.AlignRight
-            verticalAlignment: Text.AlignVCenter
-            font.pixelSize: 40
-        }
-
-        TextField{
-            id:login_name
-            x:137
-            anchors.top: login_logo.bottom
-            anchors.topMargin: 120
-            width:300
-            height: 50
-            verticalAlignment: Text.AlignVCenter
-
-            placeholderText: qsTr("请输入用户名")
-            background: Rectangle{
-                border.color: "darkgray"
-                radius: 5
-            }
-        }
-
-        Text {
-            x:47
-            anchors.top: login_name.bottom
-            anchors.topMargin: 50
-            width:80
-            height:30
-            text: qsTr("密码：")
-            verticalAlignment: Text.AlignVCenter
-            horizontalAlignment: Text.AlignRight
-            font.pixelSize: 40
-        }
-
-        TextField{
-            id:login_password
-            x:137
-            anchors.top: login_name.bottom
-            anchors.topMargin: 50
-            width: 300
-            height: 50
-            echoMode: TextInput.Password
-
-            placeholderText: qsTr("请输入密码")
-            background: Rectangle{
-                border.color: "darkgray"
-                radius: 5
-            }
-        }
-
-        Button{
-            id:login_btlogin
-            x:150
-            anchors.top: login_password.bottom
-            anchors.topMargin: 80
-            width: 200
-            height: 80
-
-            contentItem: Text {
-                      text: qsTr("登录")
-                      color: "white"
-                      horizontalAlignment: Text.AlignHCenter
-                      verticalAlignment: Text.AlignVCenter
-                      elide: Text.ElideRight
-                      font.pixelSize: 50
-                  }
-            background: Rectangle{
-                color: "darkgray"
-                radius: 5
-            }
-            onClicked: login()
-        }
-
-        Text{
-            id:labelMessage
-            anchors.left: login_btlogin.right
-            anchors.leftMargin: 200
-            anchors.bottom: login_btlogin.bottom
-            anchors.bottomMargin: 0
-            width: 80
-            height: 30
-            text: ""
-            horizontalAlignment: Text.AlignRight
-            verticalAlignment: Text.AlignVCenter
-            font.pixelSize: 40
-        }
-    }
-
-    SecondConfirm{
-        id: confirmDlg
         anchors.fill: parent
-        onQueryAck: {
-            if (res == "confirm")
-                ExGlobal.exClose()
+        color: "#f5f5f5"
+
+        Rectangle{
+            width: 811
+            height: 485
+            radius: 22
+            anchors.centerIn: parent
+
+            Image {
+                anchors.fill: parent
+                source: "qrc:/images/loginbk.png"
+            }
+
+            Image {
+                id:login_logo
+                y:49
+                anchors.horizontalCenter: parent.horizontalCenter
+                source: "qrc:/images/loginlogo.png"
+            }
+
+            TextField{
+                id:login_name
+                y:141
+                anchors.horizontalCenter: parent.horizontalCenter
+                width:640
+                height: 70
+                verticalAlignment: Text.AlignVCenter
+
+                placeholderText: qsTr("用户名")
+                placeholderTextColor:"#ffffff"
+                background: Rectangle{
+                    //border.color: "darkgray"
+                    radius: 5
+                    color: "#e6e6e6"
+                }
+            }
+
+            TextField{
+                id:login_password
+                y:235
+                anchors.horizontalCenter: parent.horizontalCenter
+                width:640
+                height: 70
+                verticalAlignment: Text.AlignVCenter
+                echoMode: TextInput.Password
+                placeholderText: qsTr("密码")
+                placeholderTextColor:"#ffffff"
+                background: Rectangle{
+                    //border.color: "darkgray"
+                    radius: 5
+                    color: "#e6e6e6"
+                }
+            }
+
+            Bt2{
+                id: btlogin
+                y: 347
+                anchors.horizontalCenter: parent.horizontalCenter
+                height: 91
+                width: 315
+                image: "qrc:/images/loginbt.png"
+                text: qsTr("登录")
+                textcolor: "#ffffff"
+                textoffsetx: 35
+                textoffsety: -4
+                onClicked: login()
+            }
+
+            Text{
+                id:labelMessage
+                anchors.left: btlogin.right
+                anchors.leftMargin: 200
+                anchors.bottom: btlogin.bottom
+                anchors.bottomMargin: 0
+                width: 80
+                height: 30
+                text: ""
+                horizontalAlignment: Text.AlignRight
+                verticalAlignment: Text.AlignVCenter
+                font.pixelSize: 40
+            }
+        }
+
+        SecondConfirm{
+            id: confirmDlg
+            anchors.fill: parent
+            onQueryAck: {
+                if (res == "confirm")
+                    ExGlobal.exClose()
+            }
+        }
+
+        Bt2 {
+            id: btClose
+            y: 754
+            x: 1450
+            height: 106
+            width: 299
+            textoffsetx: 50
+            textoffsety: -4
+            image: "qrc:/images/btclose.png"
+            text: qsTr("关机")
+            onClicked: confirmDlg.show(qsTr("您将关机？"))
         }
     }
 
-    Button {
-        id: btClose
-        font.pixelSize: 30
-        text: qsTr("关机")
-        width: 200
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 50
-        anchors.right: parent.right
-        anchors.rightMargin: 20
-        //onClicked: ExGlobal.exClose()
-        onClicked: confirmDlg.show(qsTr("您将关机？"))
-    }
-
-    Component.onCompleted: {
-        //home_page.titlemsg=qsTr("登录");
-        //home_page.enableTabBar = false;
-        headerMsg.text = qsTr("登录");
-        //tabBar.enabled = false;
+    Component.onCompleted: {        
+        //headerMsg.text = qsTr("登录");
+        Sequence.setTitle("login");
         Sequence.updateFooter(false,false,false);
         labelMessage.text = "";
         console.log("Login Completed");

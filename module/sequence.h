@@ -127,6 +127,7 @@ public:
 
     Q_INVOKABLE bool isTesting(){return currSequenceId == SequenceId::Sequence_Test;}
     Q_INVOKABLE void changeTitle(QString title);
+    Q_INVOKABLE void setTitle(QString titleid);
     Q_INVOKABLE void hideTitle(bool hide);
     Q_INVOKABLE void updateFooter(bool setup, bool home, bool data){emit footerNotify(setup,home,data);}
 

@@ -10,52 +10,58 @@ Rectangle {
 
     Rectangle{
         z:2
-        width: 838
-        height: 404
+        width: 811
+        height: 485
         anchors.centerIn: parent
-        border.color: "darkgray"
-        radius: 30
+        //border.color: "darkgray"
+        radius: 22
 
+        Image {
+            anchors.fill: parent
+            source: "qrc:/images/loginbk.png"
+        }
         Text{
             id:title
-            y:115
+            y:162
             anchors.horizontalCenter: parent.horizontalCenter
-            font.pixelSize: 60
+            font.pixelSize: 55
+            font.bold: true
+            color: "#323232"
         }
 
-        Image {
+        Bt2{
             id: btQuit
-            x: 67
-            y: 277
-            height: 84
-            width: 214
-            fillMode: Image.Pad
-            source: "qrc:/images/cancelbt.png"
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-                    queryDialog.visible = false;
-                    queryAck("cancel")
-                }
+            x:43
+            y:354
+            width: 255
+            height: 85
+            textoffsetx: 30
+            textoffsety: -3
+            textcolor: "#464646"
+            text: qsTr("取消")
+            image: "qrc:/images/cancel.png"
+            onClicked: {
+                queryDialog.visible = false;
+                queryAck("cancel")
+            }
+        }
+        Bt2{
+            id: btConfirm
+            x:519
+            y:354
+            width: 255
+            height: 85
+            textoffsetx: 30
+            textoffsety: -3
+            textcolor: "#ffffff"
+            text: qsTr("确认")
+            image: "qrc:/images/confirm.png"
+            onClicked: {
+                queryDialog.visible = false;
+                queryAck("confirm")
             }
         }
 
-        Image {
-            id: btConfirm
-            x: 556
-            y: 277
-            height: 84
-            width: 214
-            fillMode: Image.Pad
-            source: "qrc:/images/confirm.png"
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-                    queryDialog.visible = false;
-                    queryAck("confirm")
-                }
-            }
-        }
     }
 
     function show(name){

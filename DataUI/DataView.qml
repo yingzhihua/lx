@@ -105,7 +105,7 @@ Page {
                 Image {
                     anchors.verticalCenter: parent.verticalCenter
                     x:10
-                    source: ExGlobal.getItemResult(testResultModel.getTestid(),(itemList[modelData])>0||modelData==2)?"qrc:/image/Positive.png":"qrc:/image/Negative.png"
+                    source: testResultModel.getItemResult(testResultModel.getTestid(),(itemList[modelData]))>0?"qrc:/image/Positive.png":"qrc:/image/Negative.png"
                 }
                 Text{
                     anchors.verticalCenter: parent.verticalCenter

@@ -12,7 +12,7 @@ GlobalApplication::~GlobalApplication(){
 void GlobalApplication::setWindowInstance(QWidget *wnd){
     widget = wnd;
 }
-static bool keyvalid = true;
+//static bool keyvalid = true;
 static QString sampleCode = "";
 static QString simpleKey = "";
 bool GlobalApplication::notify(QObject *obj, QEvent *e){
@@ -22,7 +22,7 @@ bool GlobalApplication::notify(QObject *obj, QEvent *e){
     if(e->type() == QEvent::MouseButtonRelease){
         qDebug()<<"clName:"<<clName.mid(0,28);
         if (clName.mid(0,28) == "QQuickApplicationWindow_QML_"){
-            QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(e);
+            //QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(e);
             //qDebug()<<"clName:"<<clName<<"mouse:"<<mouseEvent->x();
             if (timerid != -1)
                 this->killTimer(timerid);

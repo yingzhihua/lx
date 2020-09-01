@@ -18,17 +18,23 @@ Rectangle {
 
     Rectangle{
         z:2
-        width: 838
-        height: 561
+        width: 810
+        height: 565
         anchors.centerIn: parent
         border.color: "darkgray"
         radius: 22
 
+        Image {
+            id: name
+            source: "qrc:/images/ThrMessIBG.png"
+        }
         Text{
             id:title
-            y:40
+            y:20
             anchors.horizontalCenter: parent.horizontalCenter
-            font.pixelSize: 50
+            font.pixelSize: 45
+            font.bold: true
+            color: "#323232"
         }
 
         Text{
@@ -36,7 +42,7 @@ Rectangle {
             x:100
             width: 100
             anchors.top: title.bottom
-            anchors.topMargin: 50
+            anchors.topMargin: 70
             font.pixelSize: 40
             color: "#a7a7a7"
         }
@@ -85,36 +91,36 @@ Rectangle {
             width: 400
         }
 
-        Image {
-            id: btQuit
-            x: 68
-            y: 448
-            height: 84
-            width: 214
-            fillMode: Image.Pad
-            source: "qrc:/images/cancelbt.png"
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-                    queryDialog.visible = false;
-                }
+        Bt2{
+            x:42
+            y:434
+            width: 250
+            height: 85
+            image: "qrc:/images/cancel.png"
+            text: qsTr("取消")
+            textcolor: "#464646"
+            textoffsetx: 30
+            textoffsety: -3
+            onClicked: {
+                focus = true
+                queryDialog.visible = false
             }
         }
 
-        Image {
-            id: btConfirm
-            x: 557
-            y: 448
-            height: 84
-            width: 214
-            fillMode: Image.Pad
-            source: "qrc:/images/confirm.png"
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-                    queryDialog.visible = false;
-                    queryDialog.queryAck(ack1.text,ack2.text,ack3.text);
-                }
+        Bt2{
+            x:518
+            y:434
+            width: 250
+            height: 85
+            image: "qrc:/images/confirm.png"
+            text: qsTr("确认")
+            textcolor: "#ffffff"
+            textoffsetx: 30
+            textoffsety: -3
+            onClicked: {
+                focus = true
+                queryDialog.visible = false;
+                queryDialog.queryAck(ack1.text,ack2.text,ack3.text);
             }
         }
     }

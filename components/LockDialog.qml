@@ -5,7 +5,6 @@ import QtQuick.Window 2.12
 import QtQuick 2.0
 
 import Dx.Global 1.0
-import Dx.UserMgr 1.0
 
 Rectangle {
     id: lockDialog
@@ -14,10 +13,14 @@ Rectangle {
     Rectangle{
         z:2
         width: 675
-        height: 404
+        height: 409
         anchors.centerIn: parent
         //border.color: "darkgray"
         radius: 22
+
+        Image {
+            source: "qrc:/images/lockbg.png"
+        }
 
         Text{
             id: labelUser
@@ -31,17 +34,18 @@ Rectangle {
 
         TextField{
             id:login_password
-            anchors.top: labelUser.top
-            anchors.topMargin: 84
+            anchors.top: labelUser.bottom
+            anchors.topMargin: 30
             anchors.horizontalCenter: parent.horizontalCenter
-            width: 404
+            width: 405
             height: 70
             echoMode: TextInput.Password
             font.pixelSize: 40
+            placeholderTextColor: "#ffffff"
             placeholderText: qsTr("输入密码")
             background: Rectangle{
                 //border.color: "darkgray"
-                color: "#e6e6e6"
+                color: "#e5e5e5"
                 radius: 5
             }
         }
@@ -90,6 +94,7 @@ Rectangle {
         lockDialog.visible = true
     }
     function exit(){
+        login_password.focus = false;
         lockDialog.visible = false;
     }
     MouseArea{
