@@ -21,13 +21,17 @@ ApplicationWindow {
 
     ListModel{
         id:titleModel
-        ListElement{Eid: "login"; img:"qrc:/images/title_login.png"; name:qsTr("登录");color:"#59cddf"}
-        ListElement{Eid: "idle"; img:"qrc:/images/title_idle.png"; name:qsTr("待机");color:"#59cddf"}
-        ListElement{Eid: "boxready"; img:"qrc:/images/title_boxready.png"; name:qsTr("试剂盒就绪");color:"#59cddf"}
-        ListElement{Eid: "setup"; img:"qrc:/images/title_setup.png"; name:qsTr("设置");color:"#59cddf"}
-        ListElement{Eid: "startup"; img:"qrc:/images/title_startup.png"; name:qsTr("系统自检");color:"#59cddf"}
-        ListElement{Eid: "startup_error"; img:"qrc:/images/title_startup.png"; name:qsTr("系统启动");color:"#fc7050"}
-        ListElement{Eid: "datamenu"; img:"qrc:/images/title_startup.png"; name:qsTr("历史数据");color:"#59cddf"}
+        ListElement{Eid: "login"; img:"qrc:/images/title_login.png"; name:qsTr("登录");color:"#59cddf";header:true}
+        ListElement{Eid: "idle"; img:"qrc:/images/title_idle.png"; name:qsTr("待机");color:"#59cddf";header:true}
+        ListElement{Eid: "boxready"; img:"qrc:/images/title_boxready.png"; name:qsTr("试剂盒就绪");color:"#59cddf";header:true}
+        ListElement{Eid: "setup"; img:"qrc:/images/title_setup.png"; name:qsTr("设置");color:"#59cddf";header:false}
+        ListElement{Eid: "setup_language"; img:"qrc:/images/title_language.png"; name:qsTr("语言");color:"#59cddf";header:false}
+        ListElement{Eid: "setup_user"; img:"qrc:/images/title_user.png"; name:qsTr("用户帐号");color:"#59cddf";header:true}
+        ListElement{Eid: "startup"; img:"qrc:/images/title_startup.png"; name:qsTr("系统自检");color:"#59cddf";header:true}
+        ListElement{Eid: "startup_error"; img:"qrc:/images/title_startup.png"; name:qsTr("系统启动");color:"#fc7050";header:true}
+        ListElement{Eid: "box_error"; img:"qrc:/images/title_boxalarm.png"; name:qsTr("试剂盒错误");color:"#fc7050";header:true}
+        ListElement{Eid: "datamenu"; img:"qrc:/images/title_startup.png"; name:qsTr("历史数据");color:"#59cddf";header:false}
+        ListElement{Eid: "dataview"; img:"qrc:/images/title_data.png"; name:qsTr("历史数据");color:"#59cddf";header:true}
     }
 
     LanguageDialog{
@@ -238,7 +242,7 @@ ApplicationWindow {
     StackView{
         id: mainView
         anchors.fill: parent
-        initialItem: ExGlobal.debug?"qrc:/HomeUI/Idle.qml":"qrc:/HomeUI/Startup.qml"
+        initialItem: ExGlobal.debug?"qrc:/HomeUI/Login.qml":"qrc:/HomeUI/Startup.qml"
     }
 
     function btclick(index){
@@ -344,6 +348,7 @@ ApplicationWindow {
                             titleico.source = titleModel.get(i).img;
                             headerRec.color = titleModel.get(i).color;
                             headerMsg.text = titleModel.get(i).name;
+                            headerdatetime.visible = titleModel.get(i).header;
                         }
                     }
                 }

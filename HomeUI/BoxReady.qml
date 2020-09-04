@@ -53,6 +53,7 @@ Page {
             x:358
             y:224
             text1: ExGlobal.panelName
+            text2: ExGlobal.panelCode
             text3: ExGlobal.boxSerial()
         }
 

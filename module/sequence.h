@@ -135,6 +135,7 @@ public:
     Q_INVOKABLE bool isLoopTesting(){return currSequenceId == SequenceId::Sequence_LoopTest;}
 
     Q_INVOKABLE int boxParam(){return boxparam;}
+    static QString getPanelName(QString panelCode);
 
 signals:
     void sequenceFinish(SequenceResult result);

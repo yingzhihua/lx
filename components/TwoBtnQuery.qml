@@ -2,8 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.5
 
 Rectangle {
-    id: promptDialog
-    property alias msg: title.text
+    id: promptDialog    
     property alias btn1: bt1.text
     property alias btn2: bt2.text
     signal closeAck(int res)
@@ -59,8 +58,9 @@ Rectangle {
         }
     }
 
-    function show(){
+    function show(msg){
         promptDialog.visible = true;
+        title.text = msg;
     }
 
     MouseArea{

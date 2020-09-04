@@ -8,8 +8,8 @@
 #include <QFile>
 
 const static int BaseLineAccuracy = 10;
-const static int BaseLineLeft = 10;
-const static int BaseLineRight = 15;
+const static int BaseLineLeft = 8;
+const static int BaseLineRight = 13;
 
 static int baseDataIndexStart = 4;
 static int baseDataCount = 10;

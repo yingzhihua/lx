@@ -178,12 +178,10 @@ bool Sequence::sequenceDo(SequenceId id)
             {
                 testStartTime = QDateTime::currentDateTime();
                 QString current_time_str = testStartTime.toString("yyyyMMdd_hhmmss");
-                Log::setDir(QCoreApplication::applicationDirPath()+"/"+current_time_str);
-                //imageCapture->openCamera();
+                Log::setDir(QCoreApplication::applicationDirPath()+"/"+current_time_str);                
                 camera->openCamera();
                 ExGlobal::setPanelName(sequenceAction.attribute("PanelName"));
 
-                //ExGlobal::setReagentBox("202");
                 imageAna->SetMask(ExGlobal::getReagentBox(ExGlobal::reagentBox()),0);
                 testMgr->TestCreate(ExGlobal::boxSerial());
                 bFocused = false;
@@ -500,7 +498,7 @@ void Sequence::ActionFinish(QByteArray data)
             }
             else
             {
-                int decodeResult = decodeQr(data.remove(0,10));
+                int decodeResult = decodeQr(data.mid(10));
                 if (decodeResult == 1){
                     boxparam = 5;
                     emit sequenceFinish(SequenceResult::Result_Box_Invalid);
@@ -508,10 +506,12 @@ void Sequence::ActionFinish(QByteArray data)
                 else if(data[3] == '\x0')
                 {
                     boxparam = 2;
+                    qDebug()<<"Result_Box_Invalid";
                     emit sequenceFinish(SequenceResult::Result_Box_Invalid);
                 }
                 else
                 {
+                    qDebug()<<"Result_Box_Valid";
                     emit sequenceFinish(SequenceResult::Result_Box_Valid);
                 }
             }
@@ -637,7 +637,7 @@ void Sequence::FinishSequence()
     {        
         camera->closeCamera();
         currSequenceId = SequenceId::Sequence_Idle;
-        qDebug()<<"Itemsize"<<imageAna->getItem().size();
+        qDebug()<<"Itemsize"<<imageAna->getItem().size();//imageCapture->openCamera();
         if (imageAna->getItem().size() > 45)
         {
             int testid = testMgr->TestClose(2);
@@ -1524,4 +1524,14 @@ void Sequence::lampDo(LampState state){
         serialMgr->CtrlDirectWrite(ActionParser::ParamToByte("Lamp",1,0,65535,0));
         break;
     }
+}
+
+QString Sequence::getPanelName(QString panelCode){
+    QDomElement root = doc.documentElement();
+    for (QDomElement e = root.firstChildElement("PanelTest"); !e.isNull(); e = e.nextSiblingElement("PanelTest"))
+    {
+        if (e.attribute("PanelCode") == panelCode)
+            return e.attribute("PanelName");
+    }
+    return "";
 }

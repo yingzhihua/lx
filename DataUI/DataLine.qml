@@ -13,9 +13,9 @@ Page {
         title: "实时测试曲线"
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.horizontalCenterOffset: +100
-        anchors.verticalCenter: parent.verticalCenter
-        height: 700
-        width: 1000
+        y:0
+        height: 800
+        width: 1500
         legend.visible: true
         animationOptions: ChartView.SeriesAnimations
         antialiasing: true
@@ -23,8 +23,8 @@ Page {
         ValueAxis{
             id: axisX
             min: 0
-            max: 40
-            tickCount: 5
+            max: 50
+            tickCount: 6
             minorTickCount: 9
             labelFormat: "%d"
         }
@@ -38,16 +38,12 @@ Page {
                 endValue: 0
             }
             CategoryRange{
-                label:ExGlobal.getItemCT(testResultModel.getCurrItemId())
+                label:"Reference Value "+ExGlobal.getItemCT(testResultModel.getCurrItemId())
                 endValue: ExGlobal.getItemCT(testResultModel.getCurrItemId())
             }
             CategoryRange{
-                label:"500"
-                endValue: 500
-            }
-            CategoryRange{
-                label:"5000"
-                endValue: 5000
+                label:"1000"
+                endValue: 1000
             }
             labelsPosition: CategoryAxis.AxisLabelsPositionOnValue
         }
@@ -57,7 +53,7 @@ Page {
         id: gridIitem
         anchors.verticalCenter: chartView.verticalCenter
         anchors.right: chartView.left
-        anchors.rightMargin: 100
+        anchors.rightMargin: 50
 
         Repeater{
             model: itemList.length

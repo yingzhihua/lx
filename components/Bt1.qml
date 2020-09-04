@@ -16,13 +16,13 @@ Rectangle {
         y:3
         width: 299
         height: 106
-        source: "qrc:/images/btexit.png"
+        source: "qrc:/images/back.png"
     }
 
     Text{
         id:label
-        x:130
-        y:26
+        x:140
+        y:24
         font.pixelSize: 40        
         text:qsTr("返回")
     }

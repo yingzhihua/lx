@@ -103,5 +103,22 @@
         <file>images/lockbg.png</file>
         <file>images/cancelTestbt.png</file>
         <file>images/backTestbt.png</file>
+        <file>components/OneBtnQuery.qml</file>
+        <file>images/title_boxalarm.png</file>
+        <file>images/title_data.png</file>
+        <file>images/thrAlarm.png</file>
+        <file>images/datapress.png</file>
+        <file>DataUI/DataInvaildView.qml</file>
+        <file>SetupUI/AddUser.qml</file>
+        <file>SetupUI/UpdateUser.qml</file>
+        <file>images/title_language.png</file>
+        <file>images/setuppress.png</file>
+        <file>images/check.png</file>
+        <file>images/updatebt.png</file>
+        <file>images/title_user.png</file>
+        <file>images/back.png</file>
+        <file>images/addbt.png</file>
+        <file>images/deletebt.png</file>
+        <file>images/userbk.png</file>
     </qresource>
 </RCC>

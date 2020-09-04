@@ -97,26 +97,6 @@ Page {
         }
     }
 
-    TwoBtnQuery{
-        id: promptDlg
-        anchors.fill: parent
-        btn1: qsTr("继续")
-        btn2: qsTr("停止")
-        onCloseAck: {
-            if (res == 1){
-                mainView.pop();
-                mainView.push("qrc:/HomeUI/BoxReady.qml");
-            }
-            else{
-                bErrorOpenDoor = true;
-                busyIndicator.running = true;
-                busyDes.visible = true;
-                busyDes.text = qsTr("试剂盒错误，正在开仓");
-                Sequence.sequenceDo(Sequence.Sequence_OpenBox);
-            }
-        }
-    }
-
     Bt2{
         id: btClose
         y: 754
@@ -195,6 +175,38 @@ Page {
         }
     }
 
+    TwoBtnQuery{
+        id: promptDlg
+        anchors.fill: parent
+        btn1: qsTr("继续")
+        btn2: qsTr("停止")
+        onCloseAck: {
+            if (res == 1){
+                mainView.pop();
+                mainView.push("qrc:/HomeUI/BoxReady.qml");
+            }
+            else{
+                bErrorOpenDoor = true;
+                busyIndicator.running = true;
+                busyDes.visible = true;
+                busyDes.text = qsTr("试剂盒错误，正在开仓");
+                Sequence.sequenceDo(Sequence.Sequence_OpenBox);
+            }
+        }
+    }
+
+    OneBtnQuery{
+        id:promptClose
+        anchors.fill: parent
+        onCloseAck: {
+            bErrorOpenDoor = true;
+            busyIndicator.running = true;
+            busyDes.visible = true;
+            busyDes.text = qsTr("试剂盒错误，正在开仓");
+            Sequence.sequenceDo(Sequence.Sequence_OpenBox);
+        }
+    }
+
     Component.onCompleted: {        
         //Sequence.changeTitle(qsTr("待机"));
         Sequence.setTitle("idle");
@@ -264,12 +276,11 @@ Page {
 
                 busyIndicator.running = false;
                 busyDes.visible = false;
-                promptDlg.msg = qsTr("试剂盒错误，是否继续？")
-                promptDlg.show()
-
-                //bErrorOpenDoor = true;
-                //busyDes.text = qsTr("试剂盒错误，正在开仓");
-                //Sequence.sequenceDo(Sequence.Sequence_OpenBox);
+                Sequence.setTitle("box_error");
+                if (ExGlobal.projectMode() === 0)
+                    promptDlg.show(qsTr("试剂盒错误，是否继续？"))
+                else
+                    promptClose.show(qsTr("试剂盒错误，取消测试"))
             }
 
 

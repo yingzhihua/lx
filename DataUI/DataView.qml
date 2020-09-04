@@ -7,30 +7,47 @@ import Dx.Global 1.0
 import "../components"
 Page {
     property var itemList:[]
-    Text{
-        id: panelName
-        //text: "panelName"
-        text:ExGlobal.panelName+" / "+ExGlobal.boxSerial()
-        font.pixelSize: 40
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.horizontalCenterOffset: -100
-        y:10
-    }
-    Image {
-        id: printIco
-        anchors.verticalCenter: panelName.verticalCenter
-        anchors.left: panelName.right
-        anchors.leftMargin: 10
-        source: "qrc:/image/Print.png"
-        MouseArea{
-            anchors.fill: parent
-            onClicked: {
-                if (Sequence.printTest())
-                    busyIndicator.running = true;
+    Rectangle{
+        id:testmsg
+        y:159
+        width: parent.width
+        height: 114
+        color: "#DDDDDD"
+
+        Text{
+            id: panelName
+            //text: "panelName"
+            text:ExGlobal.panelName+" / "+ExGlobal.boxSerial()
+            font.pixelSize: 40
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.horizontalCenterOffset: -100
+            y:10
+        }
+        Image {
+            id: printIco
+            anchors.verticalCenter: panelName.verticalCenter
+            anchors.left: panelName.right
+            anchors.leftMargin: 10
+            source: "qrc:/image/Print.png"
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    if (Sequence.printTest())
+                        busyIndicator.running = true;
+                }
             }
         }
     }
 
+    Rectangle{
+        id:icmsg
+        anchors.top: testmsg.bottom
+        anchors.topMargin: 0
+        width: parent.width
+        height: 114
+        color: "#f5f5f5"
+    }
+/*
     Image {
         id: divider
         anchors.verticalCenter: parent.verticalCenter
@@ -83,23 +100,21 @@ Page {
             }
         }
     }
+*/
 
-    //*
     Grid{
         id: gridPos
-        //anchors.top: parent.top
-        //anchors.topMargin: 200
-        anchors.verticalCenter: divider.verticalCenter
-        anchors.left: divider.right
-        anchors.leftMargin: 100
-        columns:3
+        anchors.top: icmsg.bottom
+        anchors.topMargin: 20
+        anchors.horizontalCenter: parent.horizontalCenter
+        columns:4
         rowSpacing: 20
         columnSpacing: 30
 
         Repeater{
             model: itemList.length
             Rectangle{
-                width: 200
+                width: 300
                 height: 80
                 objectName: itemList[modelData]
                 Image {
@@ -124,7 +139,6 @@ Page {
             }
         }
     }
-    //*/
 
     Bt1 {
         id: btCannel
@@ -134,6 +148,7 @@ Page {
         anchors.rightMargin: 20
         onClicked: {            
             mainView.pop();
+            Sequence.setTitle("datamenu")
             if (ExGlobal.dataEntry() === 1)
                 mainView.push("qrc:/HomeUI/Idle.qml");
         }
@@ -185,6 +200,7 @@ Page {
         }
         else
             btCheck.visible = false;
+        Sequence.setTitle("dataview")
         console.debug(itemList)
     }
 

@@ -20,6 +20,7 @@ Rectangle {
     }
 
     ScrollView{
+        id: datatb
         anchors.top: datatitle.bottom
         width: parent.width
         height: parent.height - datatitle.height
@@ -34,19 +35,27 @@ Rectangle {
             delegate: Rectangle{
                 width:listView.width
                 height:100
-                //color: (model.index%2 == 1)?"darkgrey":"#ffffff"
+                color: (model.index%2 == 1)?"#ffffff":"#f8f8f8"
                 Row{
                     x:20
                     y:0
                     width: parent.width
+                    height: parent.height
                     //spacing: 10
-                    Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:100;text:Testid}
-                    Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:200;text:SerialNo}
-                    Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:500;text:SampleInfo;clip:true;elide:Text.ElideRight}
-                    Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:300;text:SampleId}
-                    Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:200;text:User}
-                    Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:200;text:Checker}
-                    Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:400;text:TestTime}
+                    Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:100;height:parent.height;text:Testid}
+                    Image {
+                        width: 200
+                        height: 100
+                        fillMode: Image.Pad
+                        verticalAlignment: Text.AlignVCenter
+                        source: ResultType==2?"":"qrc:/images/thrAlarm.png"
+                    }
+                    //Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:200;text:SerialNo}
+                    Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:500;text:SampleInfo;clip:true;elide:Text.ElideRight;maximumLineCount: 2;wrapMode: Text.Wrap;height:parent.height}
+                    Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:300;height:parent.height;text:SampleId}
+                    Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:200;height:parent.height;text:User}
+                    Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:200;height:parent.height;text:Checker}
+                    Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:400;height:parent.height;text:TestTime}
 
                     /*
                     Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:100;text:Testid}
@@ -75,7 +84,10 @@ Rectangle {
                             busyIndicator.running = true;
                             console.log("click:"+index);
                             testModel.setCurrTest(index);
-                            mainView.push("qrc:/DataUI/DataView.qml");
+                            if (ResultType==2)
+                                mainView.push("qrc:/DataUI/DataView.qml");
+                            else
+                                mainView.push("qrc:/DataUI/DataInvaildView.qml");
                             ExGlobal.setDataEntry(0);
                             busyIndicator.running = false;
                         }
@@ -100,5 +112,8 @@ Rectangle {
 
     Component.onCompleted: {
         Sequence.setTitle("datamenu");
+        if (testModel.rowCount() > 8)
+            datatb.ScrollBar.vertical.policy = ScrollBar.AlwaysOn
+        console.log("DataMenu",testModel.rowCount())
     }
 }

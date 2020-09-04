@@ -1,43 +1,34 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.5
 import Dx.Global 1.0
+import Dx.Sequence 1.0
 import "../components"
 
 Rectangle {
     id: user_page
 
-    property int widthx: 500
-    property int itemheight: 60
-
-    Component{
-        id:listheader
-        Rectangle{
-            width: widthx
-            height: itemheight
-            color: "lightgray"
-            Label{
-                anchors.centerIn: parent
-                text:qsTr("用户列表")
-            }
-        }
-    }
+    property int widthx: 800
+    property int itemheight: 80
 
     Component{
         id:listdelegate
         Item{
             id:delegateitem
-            width: widthx
+            width: parent.width-50
             height: itemheight
             Row{
-                anchors.verticalCenter: parent.verticalCenter                
-                //Text{width:100;text:Userid}
-                Text{horizontalAlignment: Text.AlignHCenter;width:200;text:Name}
-                Text{text:DisplayName}
+                anchors.verticalCenter: parent.verticalCenter
+                Text{id:name;horizontalAlignment: Text.AlignHCenter;width:200;text:Name}
+                Text{id:displayname;horizontalAlignment: Text.AlignHCenter;text:DisplayName;width: 300}
+                Text{id:check;horizontalAlignment: Text.AlignHCenter;text:qsTr("审核");width: 200;visible: UserType&2?true:false}
             }
             states: State {
                 name: "Current"
                 when: delegateitem.ListView.isCurrentItem
                 PropertyChanges {target: delegateitem; x:20;scale:1.1}
+                PropertyChanges {target: name; color:"#59cddf"}
+                PropertyChanges {target: displayname; color:"#59cddf"}
+                PropertyChanges {target: check; color:"#59cddf"}
             }
 
             transitions: Transition {
@@ -47,10 +38,11 @@ Rectangle {
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
-                   delegateitem.ListView.view.currentIndex = index
-                   inputName.text = userModel.data(userModel.index(index,0),258)
-                   inputDisplayName.text = userModel.data(userModel.index(index,0),260)
-                   auditor.checked = userModel.data(userModel.index(index,0),261)&2;
+                    delegateitem.ListView.view.currentIndex = index
+                    userModel.setCurrIndex(index)
+                   //inputName.text = userModel.data(userModel.index(index,0),258)
+                   //inputDisplayName.text = userModel.data(userModel.index(index,0),260)
+                   //auditor.checked = userModel.data(userModel.index(index,0),261)&2;
                 }
             }
         }
@@ -62,185 +54,118 @@ Rectangle {
             width: widthx
             height: itemheight
             //color: "#f34b08"
-            color:"azure"
+            color:"#F2F2F2"
             radius: 5
             border.width: 1
             border.color: "#60f50a"
         }
     }
 
-    ListView{
-        id:listView
-        x:20
-        y:20
-        width: widthx
-        height: parent.height - 40
-        focus: true
-        highlight: highlightrec
+    Rectangle{
+        width: 788
+        height: 581
+        radius: 22
+        anchors.centerIn: parent
 
-        highlightFollowsCurrentItem: true
-        header: listheader
-        model: userModel
-        delegate: listdelegate
-    }
-
-    Text{
-        id:labelName
-        anchors.left: listView.right
-        anchors.leftMargin: 300
-        anchors.top: parent.top
-        anchors.topMargin: 200
-        width: 80
-        height: 30
-        text: qsTr("用户名：")
-        horizontalAlignment: Text.AlignRight
-        verticalAlignment: Text.AlignVCenter
-        font.pixelSize: 40
-    }
-
-    TextField{
-        id:inputName
-        anchors.verticalCenter: labelName.verticalCenter
-        anchors.left: labelName.right
-        anchors.leftMargin: 50
-        width:300
-        height: 60
-        verticalAlignment: Text.AlignBottom
-        font.pixelSize: 40
-        background: Rectangle{
-            border.color: "darkgray"
-            radius: 5
-        }
-    }
-
-    CheckBox{
-        id: auditor
-        anchors.left: inputName.right
-        anchors.leftMargin: 60
-        anchors.verticalCenter: inputName.verticalCenter
-        font.pixelSize: 40
-        visible: ExGlobal.projectMode()===2?false:true
-        text: qsTr("审核权限")
-    }
-
-    Text{
-        id:labelDisplayName
-        anchors.right: labelName.right
-        anchors.rightMargin: 0
-        anchors.top: labelName.bottom
-        anchors.topMargin: 60
-        width: 80
-        height: 30
-        text: qsTr("显示名：")
-        horizontalAlignment: Text.AlignRight
-        verticalAlignment: Text.AlignVCenter
-        font.pixelSize: 40
-    }
-
-    TextField{
-        id:inputDisplayName
-        anchors.verticalCenter: labelDisplayName.verticalCenter
-        anchors.left: labelDisplayName.right
-        anchors.leftMargin: 50
-        width:300
-        height: 60
-        verticalAlignment: Text.AlignBottom
-        font.pixelSize: 40
-        background: Rectangle{
-            border.color: "darkgray"
-            radius: 5
-        }
-    }
-
-    Text{
-        id:labelPassword
-        anchors.right: labelDisplayName.right
-        anchors.rightMargin: 0
-        anchors.top: labelDisplayName.bottom
-        anchors.topMargin: 60
-        width: 80
-        height: 30
-        text: qsTr("密码：")
-        horizontalAlignment: Text.AlignRight
-        verticalAlignment: Text.AlignVCenter
-        font.pixelSize: 40
-    }
-
-    TextField{
-        id:inputPassword
-        anchors.verticalCenter: labelPassword.verticalCenter
-        anchors.left: labelPassword.right
-        anchors.leftMargin: 50
-        width:300
-        height: 60
-        verticalAlignment: Text.AlignBottom
-        text:""
-        font.pixelSize: 40
-        background: Rectangle{
-            border.color: "darkgray"
-            radius: 5
-        }
-    }
-
-    Button{
-        id: btSave
-        anchors.top: labelPassword.bottom
-        anchors.topMargin: 80
-        anchors.horizontalCenter: labelPassword.horizontalCenter
-        anchors.horizontalCenterOffset: 30
-        width: 150
-        height: 50
-
-        contentItem: Text {
-                  text: qsTr("增加")
-                  color: "white"
-                  horizontalAlignment: Text.AlignHCenter
-                  verticalAlignment: Text.AlignVCenter
-                  elide: Text.ElideRight
-                  font.pixelSize: 30
-              }
-        background: Rectangle{
-            color: "darkgray"
-            radius: 5
+        Image {
+            anchors.fill: parent
+            source: "qrc:/images/userbk.png"
         }
 
-        onClicked: {
-            userModel.addUser(inputName.text,inputPassword.text,inputDisplayName.text,auditor.checked?3:1);
+        Row{
+            id: headRow
+            x:0
+            y:0
+            width: parent.width
+            height: 96
+            Text{text:qsTr("帐号");verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;height:parent.height;width: 200;font.pixelSize: 40}
+            Text{text:qsTr("显示名");verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;height:parent.height;width: 300;font.pixelSize: 40}
+            Text{text:qsTr("权限");verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;height:parent.height;width: 200;font.pixelSize: 40}
         }
-    }
 
-    Button{
-        id: btDelete
-        anchors.left: btSave.right
-        anchors.leftMargin: 80
-        anchors.verticalCenter: btSave.verticalCenter
-        width: 150
-        height: 50
-
-        contentItem: Text {
-                  text: qsTr("删除")
-                  color: "white"
-                  horizontalAlignment: Text.AlignHCenter
-                  verticalAlignment: Text.AlignVCenter
-                  elide: Text.ElideRight
-                  font.pixelSize: 30
-              }
-        background: Rectangle{
-            color: "darkgray"
-            radius: 5
+        Row{
+            id: footerRow
+            x:20
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 0
+            width: parent.width
+            height: 135
+            Bt2{
+                id: btDelete
+                width: 250
+                height: parent.height
+                textoffsetx: 30
+                textoffsety: -3
+                textcolor: "#464646"
+                text: qsTr("删除")
+                image: "qrc:/images/deletebt.png"
+                onClicked: {
+                    confirmDlg.show(qsTr("确定删除帐号？"))
+                }
+            }
+            Bt2{
+                id: btUpdate
+                width: 250
+                height: parent.height
+                textoffsetx: 30
+                textoffsety: -3
+                textcolor: "#464646"
+                text: qsTr("修改")
+                image: "qrc:/images/updatebt.png"
+                onClicked: {
+                    console.log(listView.currentIndex)
+                    if (listView.currentIndex >= 0)
+                        mainView.push("qrc:/SetupUI/UpdateUser.qml")
+                }
+            }
+            Bt2{
+                id: btAdd
+                width: 250
+                height: parent.height
+                textoffsetx: 30
+                textoffsety: -3
+                textcolor: "#ffffff"
+                text: qsTr("添加")
+                image: "qrc:/images/addbt.png"
+                onClicked: {
+                    mainView.push("qrc:/SetupUI/AddUser.qml")
+                }
+            }
         }
-        onClicked: {
-            confirmDlg.show(qsTr("确定删除帐号？"))
+
+        ScrollView{
+            anchors.top: headRow.bottom
+            anchors.topMargin: 0
+            width: parent.width
+            height: parent.height-headRow.height-footerRow.height
+            clip: true
+            ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+            ScrollBar.vertical.width: 50
+            ScrollBar.vertical.background: Rectangle{color:"#808080"}
+            background: Rectangle{color: "#f5f5f5"}
+
+            ListView{
+                id:listView
+                width: parent.width
+                focus: true
+                highlight: highlightrec
+
+                highlightFollowsCurrentItem: true
+                model: userModel
+                delegate: listdelegate
+            }
+
         }
     }
 
     Bt1 {
         id: btCannel
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: 20
+        anchors.bottomMargin: 40
         anchors.right: parent.right
-        anchors.rightMargin: 20
+        anchors.rightMargin: 170
         onClicked: {
+            Sequence.setTitle("setup")
             mainView.pop();
         }
     }
@@ -252,6 +177,10 @@ Rectangle {
             if (res == "confirm")
                 userModel.deleteUser(listView.currentIndex)
         }
+    }
+
+    Component.onCompleted:{
+        Sequence.setTitle("setup_user")
     }
 }
 

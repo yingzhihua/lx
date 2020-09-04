@@ -5,6 +5,7 @@
 #include <QCoreApplication>
 #include "serialmgr.h"
 #include <QNetworkInterface>
+#include <QApplication>
 
 #define BOXCODE_DEFAULT "204"
 
@@ -21,7 +22,7 @@ bool ExGlobal::test = false;
 
 QString ExGlobal::SysName = "样机02";
 QString ExGlobal::AdminPassword = "123456";
-int ExGlobal::LanguageCode = 1;
+int ExGlobal::LanguageCode = 0;
 int ExGlobal::PanelBoxIndex = 1;
 
 QString ExGlobal::t_version = "V1";
@@ -104,6 +105,10 @@ QHash<int, int> ExGlobal::ItemCT;
 
 unsigned char * ExGlobal::bufrgb = nullptr;
 unsigned char * ExGlobal::hbufrgb = nullptr;
+
+QTranslator ExGlobal::tor;
+QApplication * ExGlobal::app;
+QQmlApplicationEngine * ExGlobal::qml;
 
 static ExGlobal *exGlobal = nullptr;
 QObject *ExGlobal::exglobal_provider(QQmlEngine *engine, QJSEngine *scriptEngine){
@@ -543,7 +548,7 @@ void ExGlobal::updateTextParam(const QString &textName, QString textValue){
 QString ExGlobal::sysLanguageName()
 {
     QString lang = "中文";
-    if (LanguageCode == 0)
+    if (LanguageCode == 1)
         lang = "English";
 
     return lang;
@@ -560,7 +565,7 @@ QString ExGlobal::getPosName(int pos){
 
 int ExGlobal::getItemCT(int Itemid){
     qDebug()<<"getItemCT,Itemid="<<Itemid<<",CT="<<ItemCT[Itemid];
-    return 200;
+    return 500;
     //return ItemCT[Itemid];
 }
 
@@ -634,5 +639,30 @@ void ExGlobal::LoadReagentBox(){
     while(query.next()){
         if (query.value(1).toInt() < 121)
             ReagentBox[query.value(1).toInt()] = static_cast<uchar>(query.value(2).toInt());
+    }
+}
+
+void ExGlobal::setSysLanguageCode(int code){
+    if (code != LanguageCode)
+    {
+        //QApplication::installTranslator(&tor);
+        //QApplication::removeTranslator(&tor);
+        qDebug()<<"setLanguage"<<code;
+        if (code == 0)
+            app->removeTranslator(&tor);
+        else
+            Translator(code);
+
+        qml->retranslate();
+        updateCaliParam("LanguageCode",code);
+        emit sysLanguageCodeChanged();
+    }
+}
+
+void ExGlobal::Translator(int language){
+    if (language == 1)
+    {
+        tor.load(QCoreApplication::applicationDirPath()+"/en_US.qm");
+        app->installTranslator(&tor);
     }
 }

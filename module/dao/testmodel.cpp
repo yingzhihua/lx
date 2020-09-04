@@ -1,6 +1,8 @@
 #include "testmodel.h"
 #include "../exglobal.h"
 #include "../sqlitemgr.h"
+#include "../sequence.h"
+
 #include<QDebug>
 TestModel::TestModel(QObject *parent):QAbstractListModel (parent)
 {
@@ -60,7 +62,8 @@ QHash<int, QByteArray> TestModel::roleNames() const
 
 void TestModel::InitTest(){
     m_display_list.clear();
-    QString sql = "select * from PanelTest where ResultType = 2 order by Testid DESC";
+    //QString sql = "select * from PanelTest where ResultType = 2 order by Testid DESC";
+    QString sql = "select * from PanelTest order by Testid DESC";
     QSqlQuery query = SqliteMgr::select(sql);
     while(query.next()){
         Test test;
@@ -149,4 +152,8 @@ void TestModel::uncheckTest(){
         m_display_list[currTestIndex].Checker = "";
     }
     emit dataChanged(createIndex(currTestIndex,0),createIndex(currTestIndex,0));
+}
+
+QString TestModel::getCurrTestPanelName(){
+    return Sequence::getPanelName(m_display_list[currTestIndex].PanelCode);
 }

@@ -86,6 +86,11 @@ bool UserModel::addUser(QString name, QString password, QString displayName, int
     return result;
 }
 
+bool UserModel::updateUser(QString name, QString password, QString displayName, int type){
+    QString sql = QString("update User set displayName='%1', Password='%2', UserType=%3 where Name = '%4'").arg(displayName).arg(password).arg(type).arg(name);
+    return SqliteMgr::execute(sql);
+}
+
 bool UserModel::deleteUser(int row){
     if (row < 0 || row >= m_display_list.count())
         return false;

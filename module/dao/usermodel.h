@@ -38,9 +38,16 @@ public:
     QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;    
     void LoadUser();
     Q_INVOKABLE bool addUser(QString name,QString password, QString displayName, int type);
+    Q_INVOKABLE bool updateUser(QString name,QString password, QString displayName, int type);
     Q_INVOKABLE bool deleteUser(int row);
     Q_INVOKABLE int login(QString name,QString password);
     Q_INVOKABLE bool updatePassword(QString oldpassword,QString newpassword);
+
+    Q_INVOKABLE QString getCurName(){return m_display_list[currIndex].Name;}
+    Q_INVOKABLE QString getCurDisplayName(){return m_display_list[currIndex].DisplayName;}
+    Q_INVOKABLE QString getCurPassword(){return m_display_list[currIndex].Password;}
+    Q_INVOKABLE int getCurUserType(){return m_display_list[currIndex].UserType;}
+    Q_INVOKABLE void setCurrIndex(int index){currIndex = index;}
 
 protected:
     QHash<int, QByteArray> roleNames() const;
@@ -49,6 +56,7 @@ private:
     QList<MUser> m_display_list;
     QHash<int, QByteArray> roles;
     bool Exist(int id);
+    int currIndex;
 };
 
 #endif // USERMODEL_H

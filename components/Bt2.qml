@@ -10,7 +10,9 @@ Rectangle {
     signal clicked    
     color: "transparent"
     Image {
-        id: img        
+        id: img
+        fillMode: Image.Pad
+        anchors.centerIn: parent
         source: ""
     }
 

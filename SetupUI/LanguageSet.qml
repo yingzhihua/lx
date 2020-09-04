@@ -2,8 +2,55 @@ import QtQuick 2.12
 import QtQuick.Controls 2.5
 import "../components"
 import Dx.Global 1.0
+import Dx.Sequence 1.0
 Item {    
+    id:lang_menu
+    ListModel{
+        id:languageModel
+        ListElement{name:"中文"}
+        ListElement{name:"English"}
+    }
 
+    Column{
+        Repeater{
+            model: languageModel
+
+            Rectangle{
+                height: 120
+                width: lang_menu.width
+                color: (model.index === ExGlobal.sysLanguageCode)?"#dedede":"#ffffff"
+                Text {
+                    anchors.left: parent.left
+                    anchors.leftMargin: 175
+                    anchors.verticalCenter: parent.verticalCenter
+                    font.pixelSize: 35
+                    text: name
+                }
+
+                Image {
+                    id:row
+                    anchors.right: parent.right
+                    anchors.rightMargin: 120
+                    visible: (model.index === ExGlobal.sysLanguageCode)?true:false
+                    width: 39
+                    height: 33
+                    anchors.verticalCenter: parent.verticalCenter
+                    fillMode: Image.Pad
+                    source: "qrc:/images/check.png"
+                }
+
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: {
+                        ExGlobal.sysLanguageCode = model.index;
+                        console.log(model.index,ExGlobal.sysLanguageCode)
+                        mainView.pop();
+                    }
+                }
+            }
+        }
+    }
+/*
     RadioButton{
         id:rbEnglish
         anchors.centerIn: parent
@@ -41,11 +88,8 @@ Item {
             mainView.pop();
         }
     }
-
+*/
     Component.onCompleted: {
-        if(ExGlobal.sysLanguageCode == 0)
-            rbEnglish.checked = true;
-        else if(ExGlobal.sysLanguageCode == 1)
-            rbChinese.checked = true;
+        Sequence.setTitle("setup_language")
     }
 }

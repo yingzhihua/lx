@@ -116,7 +116,12 @@ QList<int> TestResultModel::getCurrItemResult(){
             for(int i = 10; i < dataPos[dataKey].size(); i++)
                 if (dataPos[dataKey][i].y > ct)
                 {
-                    t_result = i;
+                    if (i == 10)
+                        t_result = 110;
+                    else if(dataPos[dataKey][i].y == dataPos[dataKey][i-1].y)
+                        t_result = (i+1)*10;
+                    else
+                        t_result = i*10+((ct-dataPos[dataKey][i-1].y)*10/(dataPos[dataKey][i].y-dataPos[dataKey][i-1].y));
                     break;
                 }
             t_result += dataKey*1000;

@@ -54,10 +54,12 @@ public:
     void InitTest();
     QString getCurrTestDateTime(){return m_display_list[currTestIndex].TestTime;}
     QString getCurrTestCode(){return m_display_list[currTestIndex].SampleId;}
-    QString getCurrTestSerial(){return m_display_list[currTestIndex].SerialNo;}
+    Q_INVOKABLE QString getCurrTestSerial(){return m_display_list[currTestIndex].SerialNo;}
     QString getCurrTestInfo(){return m_display_list[currTestIndex].SampleInfo;}
     QString getCurrTestUser(){return m_display_list[currTestIndex].User;}
     QString getCurrTestChecker(){return m_display_list[currTestIndex].Checker;}
+    Q_INVOKABLE QString getCurrTestPanelName();
+    Q_INVOKABLE QString getCurrTestPanelCode(){return m_display_list[currTestIndex].PanelCode;}
     Q_INVOKABLE void setCurrTest(int TestIndex);
     Q_INVOKABLE bool mayCheck();
     Q_INVOKABLE bool haveCheck();

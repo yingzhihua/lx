@@ -9,6 +9,9 @@
 #include <QDebug>
 #include <QDateTime>
 #include <QCoreApplication>
+#include <QDir>
+
+#define TRY_COUNT 3
 
 QImage QRcoder::img;
 QImage QRcoder::img2;
@@ -20,11 +23,16 @@ const int scalewide = 500;
 
 //#define USE_QZXING
 #define USE_ZBAR
-
+static QString saveDir;
 QRcoder::QRcoder(QObject *parent) : QThread(parent)
 {
     handleimage = true;
     scale = true;
+
+    saveDir = QCoreApplication::applicationDirPath()+"/BoxImage";
+    QDir dir(saveDir);
+    if (!dir.exists())
+        dir.mkpath(saveDir);
 }
 
 bool QRcoder::OpenCamera(int index, VideoCapture &cap){
@@ -62,7 +70,9 @@ void QRcoder::run(){
     Log::LogCam("QRcoder start:"+QDateTime::currentDateTime().toString("hh:mm:ss.zzz"));
 
     if (!OpenCamera(1,cap)){
+        Log::LogCam(QString("Failed to open camera1"));
         if (!OpenCamera(0,cap)){
+            Log::LogCam(QString("Failed to open camera0"));
             res.append("Cannot identify");
             emit finishQRcode(res);
             return;
@@ -100,8 +110,8 @@ void QRcoder::run(){
             qDebug()<<"haveQrcode";
             res[2] = 1;
         }
-        else
-            res[2] = 0;
+        else if(++count < TRY_COUNT)
+            continue;
 
         initX += 600;
         initY -= 100;
@@ -122,8 +132,7 @@ void QRcoder::run(){
             img2 = QImage((const uchar*)liquids.data,liquids.cols,liquids.rows,QImage::Format_RGB888);
         }
         img3 = QImage((const uchar*)handleFrame.data,handleFrame.cols,handleFrame.rows,QImage::Format_Grayscale8);
-        if (!strQr.isEmpty()||++count > 3)
-            break;
+        break;
     }
     cap.release();
 
@@ -384,20 +393,34 @@ int QRcoder::pierce(Mat &image, QString &qrStr){
 bool QRcoder::haveliquids(Mat &image)
 {
     bool result = false;
+    QString saveFile = saveDir+"/Qr"+QDateTime::currentDateTime().toString("MMdd_hh-mm-ss-zzz")+".bmp";
+    cv::imwrite(saveFile.toStdString(),image);
+
     GaussianBlur(image, image, Size(25,25),0);
     threshold(image,image,0,255,THRESH_BINARY|THRESH_OTSU);
 
     vector<vector<Point>> contours;
     vector<Vec4i> hi;
-    findContours(image,contours,hi,RETR_LIST,CHAIN_APPROX_NONE);
+    findContours(image,contours,hi,RETR_EXTERNAL,CHAIN_APPROX_NONE);
+    //findContours(image,contours,hi,RETR_LIST,CHAIN_APPROX_NONE);
     qDebug()<<"contorus.size="<<contours.size();
+
+    Mat con = Mat::zeros(image.rows,image.cols,image.type());
+    for (size_t i = 0; i < contours.size(); i++)
+        drawContours(con,contours,static_cast<int>(i),Scalar(255));
+    saveFile = saveDir+"/R"+QDateTime::currentDateTime().toString("MMdd_hh-mm-ss-zzz")+".bmp";
+    cv::imwrite(saveFile.toStdString(),con);
+
     if (contours.size() < 2)
+    {
+        Log::LogCData(QString("Liquid height = -1 (reference value > 80)"));
         return result;
+    }
 
     vector<int> maxminvalue;
     for (size_t i = 0; i < contours.size(); i++)
     {
-        qDebug()<<"s="<<contourArea(contours[i])<<"L="<<arcLength(contours[i],true);
+        qDebug()<<"s="<<contourArea(contours[i])<<"L="<<arcLength(contours[i],true);        
         if (contourArea(contours[i]) < 150)
             continue;
         int maxValue = contours[i][0].y;
@@ -415,7 +438,10 @@ bool QRcoder::haveliquids(Mat &image)
 
     qDebug()<<maxminvalue;
     if (maxminvalue.size()<4)
+    {
+        Log::LogCData(QString("Liquid height = -2 (reference value > 80)"));
         return false;
+    }
 
     for (size_t i = 0; i < maxminvalue.size()/2; i++){
         size_t j;

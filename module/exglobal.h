@@ -3,6 +3,10 @@
 
 #include <QObject>
 #include <QQmlEngine>
+#include <QQmlApplicationEngine>
+#include <QTranslator>
+#include <QApplication>
+
 #include "dao/testmodel.h"
 #include "dao/testresultmodel.h"
 #include "dao/usermodel.h"
@@ -13,7 +17,7 @@ class ExGlobal : public QObject
     Q_OBJECT
     Q_PROPERTY(QString user READ user WRITE setUser NOTIFY userChanged)
     Q_PROPERTY(QString panelName READ panelName NOTIFY panelNameChanged)
-    Q_PROPERTY(QString panelCode READ panelCodeEx NOTIFY panelCodeChanged)    
+    Q_PROPERTY(QString panelCode READ panelCode NOTIFY panelCodeChanged)
     Q_PROPERTY(QString sampleCode READ sampleCode WRITE setSampleCode NOTIFY sampleCodeChanged)
     Q_PROPERTY(QString sampleInfo READ sampleInfo WRITE setSampleInfo NOTIFY sampleInfoChanged)
     Q_PROPERTY(QString sampleRemark READ sampleRemark WRITE setSampleRemark NOTIFY sampleRemarkChanged)
@@ -63,7 +67,7 @@ public:
     void setAdminPassword(const QString &password){updateTextParam("AdminPassword",password);emit adminPasswordChanged();}
     static QString sysLanguageName();
     int sysLanguageCode(){return LanguageCode;}
-    void setSysLanguageCode(int code){updateCaliParam("LanguageCode",code);emit sysLanguageCodeChanged();}
+    void setSysLanguageCode(int code);
     static QString version(){return t_version;}
     static QString buildversion(){return build_version;}
     static QString tempversion(){return temp_version;}
@@ -171,6 +175,11 @@ public:
     static unsigned char *hbufrgb;
 
     static QString SysName;
+    static QTranslator tor;
+    static QApplication *app;
+    static QQmlApplicationEngine *qml;
+    static void Translator(int language);
+
 signals:
     void userChanged();
     void panelNameChanged();

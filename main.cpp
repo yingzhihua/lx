@@ -25,13 +25,15 @@ int main(int argc, char *argv[])
 
     GlobalApplication app(argc, argv);
     //QApplication app(argc, argv);
-    QTranslator tor;
+    //QTranslator tor;
 
     QFont font;
     font.setPixelSize(30);
     app.setFont(font);
 
     app.global = ExGlobal::getPtr();
+
+    ExGlobal::app = &app;
 
     ExGlobal::pTestModel = new TestModel();
     ExGlobal::pTestResultModel = new TestResultModel();
@@ -50,16 +52,13 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
+    ExGlobal::qml = &engine;
     engine.rootContext()->setContextProperty("testModel",ExGlobal::pTestModel);
     engine.rootContext()->setContextProperty("testResultModel",ExGlobal::pTestResultModel);
     engine.rootContext()->setContextProperty("userModel",ExGlobal::pUserModel);
     engine.rootContext()->setContextProperty("wifiModel",ExGlobal::pWifiModel);
 
-    if (ExGlobal::LanguageCode == 0){
-        bool bload = tor.load(Log::getDir()+"/en_US.qm");
-        bool binstall = app.installTranslator(&tor);
-        qDebug()<<"Language"<<bload<<binstall<<Log::getDir()<<"\r\n\r\n";
-    }
+    ExGlobal::Translator(ExGlobal::LanguageCode);
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     engine.addImageProvider("CodeImg",Sequence::getPtr()->imageProvider);
