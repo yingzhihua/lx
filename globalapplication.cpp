@@ -26,7 +26,7 @@ bool GlobalApplication::notify(QObject *obj, QEvent *e){
             //qDebug()<<"clName:"<<clName<<"mouse:"<<mouseEvent->x();
             if (timerid != -1)
                 this->killTimer(timerid);
-            int timerout = ExGlobal::LockScreenTime;
+            int timerout = ExGlobal::lockscreen_time;
             if (timerout != 0)
                 timerid = this->startTimer(timerout*1000);
         }

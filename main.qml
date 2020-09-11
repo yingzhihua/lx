@@ -21,17 +21,27 @@ ApplicationWindow {
 
     ListModel{
         id:titleModel
-        ListElement{Eid: "login"; img:"qrc:/images/title_login.png"; name:qsTr("登录");color:"#59cddf";header:true}
-        ListElement{Eid: "idle"; img:"qrc:/images/title_idle.png"; name:qsTr("待机");color:"#59cddf";header:true}
-        ListElement{Eid: "boxready"; img:"qrc:/images/title_boxready.png"; name:qsTr("试剂盒就绪");color:"#59cddf";header:true}
-        ListElement{Eid: "setup"; img:"qrc:/images/title_setup.png"; name:qsTr("设置");color:"#59cddf";header:false}
-        ListElement{Eid: "setup_language"; img:"qrc:/images/title_language.png"; name:qsTr("语言");color:"#59cddf";header:false}
-        ListElement{Eid: "setup_user"; img:"qrc:/images/title_user.png"; name:qsTr("用户帐号");color:"#59cddf";header:true}
-        ListElement{Eid: "startup"; img:"qrc:/images/title_startup.png"; name:qsTr("系统自检");color:"#59cddf";header:true}
+        ListElement{Eid: "login"; img:"qrc:/images/title_login.png"; name:qsTr("登录");color:"#5acedf";header:true}
+        ListElement{Eid: "idle"; img:"qrc:/images/title_idle.png"; name:qsTr("待机");color:"#5acedf";header:true}
+        ListElement{Eid: "boxready"; img:"qrc:/images/title_boxready.png"; name:qsTr("试剂盒就绪");color:"#5acedf";header:true}
+        ListElement{Eid: "test"; img:"qrc:/images/title_test.png"; name:qsTr("测试中");color:"#5acedf";header:true}
+        ListElement{Eid: "setup"; img:"qrc:/images/title_setup.png"; name:qsTr("设置");color:"#5acedf";header:false}
+        ListElement{Eid: "setup_language"; img:"qrc:/images/title_language.png"; name:qsTr("语言");color:"#5acedf";header:false}
+        ListElement{Eid: "setup_user"; img:"qrc:/images/title_user.png"; name:qsTr("用户帐号");color:"#5acedf";header:true}
+        ListElement{Eid: "setup_useradd"; img:"qrc:/images/title_adduser.png"; name:qsTr("增加帐号");color:"#5acedf";header:true}
+        ListElement{Eid: "setup_userupdate"; img:"qrc:/images/title_updateuser.png"; name:qsTr("修改帐号");color:"#5acedf";header:true}
+        ListElement{Eid: "setup_lockscreen"; img:"qrc:/images/title_lockscreen.png"; name:qsTr("锁屏时间");color:"#5acedf";header:true}
+        ListElement{Eid: "setup_passwd"; img:"qrc:/images/title_upasswd.png"; name:qsTr("修改密码");color:"#5acedf";header:true}
+        ListElement{Eid: "setup_system"; img:"qrc:/images/title_system.png"; name:qsTr("系统设置");color:"#5acedf";header:true}
+        ListElement{Eid: "setup_datetime"; img:"qrc:/images/title_datetime.png"; name:qsTr("时间");color:"#5acedf";header:true}
+        ListElement{Eid: "setup_network"; img:"qrc:/images/title_network.png"; name:qsTr("有线网络");color:"#5acedf";header:true}
+        ListElement{Eid: "setup_wifi"; img:"qrc:/images/title_wifi.png"; name:qsTr("无线网络");color:"#5acedf";header:true}
+        ListElement{Eid: "startup"; img:"qrc:/images/title_startup.png"; name:qsTr("系统自检");color:"#5acedf";header:true}
         ListElement{Eid: "startup_error"; img:"qrc:/images/title_startup.png"; name:qsTr("系统启动");color:"#fc7050";header:true}
         ListElement{Eid: "box_error"; img:"qrc:/images/title_boxalarm.png"; name:qsTr("试剂盒错误");color:"#fc7050";header:true}
-        ListElement{Eid: "datamenu"; img:"qrc:/images/title_startup.png"; name:qsTr("历史数据");color:"#59cddf";header:false}
-        ListElement{Eid: "dataview"; img:"qrc:/images/title_data.png"; name:qsTr("历史数据");color:"#59cddf";header:true}
+        ListElement{Eid: "datamenu"; img:"qrc:/images/title_datamenu.png"; name:qsTr("历史数据");color:"#5acedf";header:false}
+        ListElement{Eid: "dataview"; img:"qrc:/images/title_data.png"; name:qsTr("历史数据");color:"#5acedf";header:true}
+        ListElement{Eid: "error"; img:"qrc:/images/title_error.png"; name:qsTr("系统报警");color:"#fc7050";header:true}
     }
 
     LanguageDialog{
@@ -95,7 +105,7 @@ ApplicationWindow {
             y:0
             height: parent.height
             width:0
-            color:"white"
+            color:"#c8e5ee"
         }
 
         Image {
@@ -114,6 +124,9 @@ ApplicationWindow {
             anchors.verticalCenter: parent.verticalCenter
             font.pixelSize: 60
             color: "#323232"
+            width: 1300
+            clip:true
+            elide:Text.ElideRight
             text: qsTr("系统启动");
         }
         Text {
@@ -141,7 +154,7 @@ ApplicationWindow {
             anchors.top: parent.top
             anchors.topMargin: 20
             font.pixelSize: 50
-            text:ExGlobal.user
+            text:ExGlobal.displayUser
         }
 
         Text{
@@ -313,9 +326,8 @@ ApplicationWindow {
             if (ExGlobal.debug === false){
                 err.errText = error;
                 err.visible = true;
-                setupbt.enabled = false;
-                homebt.enabled = false;
-                databt.enabled = false;
+                Sequence.setTitle("error");
+                Sequence.updateFooter(false,false,false);
             }
         }
 
@@ -347,8 +359,8 @@ ApplicationWindow {
                         if (titleModel.get(i).Eid === title){
                             titleico.source = titleModel.get(i).img;
                             headerRec.color = titleModel.get(i).color;
-                            headerMsg.text = titleModel.get(i).name;
                             headerdatetime.visible = titleModel.get(i).header;
+                            headerMsg.text = titleModel.get(i).name;
                         }
                     }
                 }

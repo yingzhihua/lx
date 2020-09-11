@@ -88,7 +88,21 @@ bool UserModel::addUser(QString name, QString password, QString displayName, int
 
 bool UserModel::updateUser(QString name, QString password, QString displayName, int type){
     QString sql = QString("update User set displayName='%1', Password='%2', UserType=%3 where Name = '%4'").arg(displayName).arg(password).arg(type).arg(name);
-    return SqliteMgr::execute(sql);
+    bool result = SqliteMgr::execute(sql);
+    if (result){
+        beginResetModel();
+        for (int i = 0; i < m_display_list.count();i++)
+        {
+            if (m_display_list[i].Name == name)
+            {
+                m_display_list[i].Password = password;
+                m_display_list[i].DisplayName = displayName;
+                m_display_list[i].UserType = type;
+            }
+        }
+        endResetModel();
+    }
+    return result;
 }
 
 bool UserModel::deleteUser(int row){
@@ -112,6 +126,7 @@ int UserModel::login(QString name, QString password){
     while(query.next())
     {        
         ExGlobal::UserType = query.value(4).toInt();
+        ExGlobal::DisplayUser = query.value(3).toString();
         Log::Logdb(LOGTYPE_LOGIN,0,name);
         ExGlobal::getPtr()->userChanged();
         ExGlobal::setLogin();
@@ -121,6 +136,7 @@ int UserModel::login(QString name, QString password){
     if (name.toLower() == "admin" && password == ExGlobal::AdminPassword)
     {
         ExGlobal::UserType = 3;
+        ExGlobal::DisplayUser = "Admin";
         Log::Logdb(LOGTYPE_LOGIN,0,name);
         ExGlobal::getPtr()->userChanged();
         ExGlobal::setLogin();
@@ -130,6 +146,7 @@ int UserModel::login(QString name, QString password){
     if (name.toLower() == "flashdx" && password == "654321")
     {
         ExGlobal::UserType = 9;
+        ExGlobal::DisplayUser = "Flashdx";
         Log::Logdb(LOGTYPE_LOGIN,0,name);
         ExGlobal::getPtr()->userChanged();
         ExGlobal::setLogin();
@@ -141,10 +158,14 @@ int UserModel::login(QString name, QString password){
         if (name.length() == 0)
             ExGlobal::User = "user";
         ExGlobal::UserType = 1;
+        ExGlobal::DisplayUser = "User";
         ExGlobal::getPtr()->userChanged();
         ExGlobal::setLogin();
         return 0;
     }
+
+    if (name.toLower() == "admin")
+        return 1;
 
     query = SqliteMgr::select("SELECT * FROM User WHERE Name = '"+name+"' COLLATE NOCASE");
     Log::Logdb(LOGTYPE_LOGIN,1,name,password);

@@ -585,10 +585,6 @@ Rectangle {
     }
     Bt1 {
         id: btCannel
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 20
-        anchors.right: parent.right
-        anchors.rightMargin: 20
         onClicked: {
             mainView.pop();
             Sequence.changeTitle(qsTr("设置"));

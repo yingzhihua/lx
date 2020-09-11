@@ -11,6 +11,7 @@ Page {
         color: "#f5f5f5"
 
         Rectangle{
+            id: addrect
             width: 811
             height: 485
             radius: 22
@@ -104,16 +105,19 @@ Page {
                 text:qsTr("审核权限")
             }
         }
+        Text {
+            id: mess
+            anchors.top: addrect.bottom
+            anchors.topMargin: 20
+            anchors.horizontalCenter: addrect.horizontalCenter
+        }
     }
 
     Bt1 {
         id: btCannel
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 20
-        anchors.right: parent.right
-        anchors.rightMargin: 20
         onClicked: {
             mainView.pop();
+            Sequence.setTitle("setup_user");
         }
     }
 
@@ -126,17 +130,41 @@ Page {
         width: 299
         textoffsetx: 30
         textoffsety: -4
-        image: "qrc:/images/loginquit.png"
+        textcolor: "#ffffff"
+        image: "qrc:/images/confirmbt.png"
         text:qsTr("确认添加")
         onClicked: {
-            mainView.pop();
+            if (password.text != ppassword.text)
+            {
+                mess.text = qsTr("密码和确认密码不一致！");
+            }
+            else if(password.text == "")
+            {
+                mess.text = qsTr("密码不能为空！");
+            }
+            else if(user.text == "")
+            {
+                mess.text = qsTr("帐号不能为空！");
+            }
+            else if(displayName.text == "")
+            {
+                mess.text = qsTr("显示名不能为空！");
+            }
+            else
+            {
+                if (userModel.addUser(user.text,password.text,displayName.text,checker.checked?3:1))
+                {
+                    Sequence.setTitle("setup_user");
+                    mainView.pop();
+                }
+                else
+                    mess.text = qsTr("帐号增加失败！")
+            }
         }
     }
 
-    Component.onCompleted: {
-        //headerMsg.text = qsTr("登录");
-        //Sequence.setTitle("login");
-        //Sequence.updateFooter(false,false,false);
+    Component.onCompleted: {        
+        Sequence.setTitle("setup_useradd");
     }
 }
 

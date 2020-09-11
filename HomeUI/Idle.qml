@@ -7,7 +7,7 @@ import Dx.Global 1.0
 Page {    
     property bool bErrorOpenDoor: false
     id: idle_page
-
+/*
     Image {
         id: openDoor
         width: 219
@@ -22,20 +22,22 @@ Page {
             }
         }
     }
-    /*
+*/
     AnimatedImage{
         id:openDoor
-        y:280
         width: 230
         height: 230
-        anchors.horizontalCenter: parent.horizontalCenter
-        source: "qrc:/images/opendoor.gif"
+        anchors.centerIn: parent
+        anchors.verticalCenterOffset: -100
+        source: "qrc:/images/opendoorAmi.gif"
+        playing: false
         MouseArea{
             anchors.fill: parent
-            onClicked: switchDoor()
+            onClicked: {
+                switchDoor()
+            }
         }
-    }
-    */
+    }    
 
     Text{
         id: boxstate
@@ -45,24 +47,6 @@ Page {
         anchors.top: openDoor.bottom
         anchors.topMargin: 30
         anchors.horizontalCenter: openDoor.horizontalCenter
-    }
-
-    Image {
-        id: editsample
-        anchors.left: openDoor.right
-        anchors.leftMargin: 200
-        anchors.bottom: openDoor.bottom
-        anchors.bottomMargin: 30
-        scale: 2
-        visible: false
-        source: "qrc:/image/editInfo.png"
-
-        MouseArea{
-            anchors.fill: parent
-            onClicked: {
-                queryDlg.show()
-            }
-        }
     }
 
     Text{
@@ -81,19 +65,20 @@ Page {
         }
     }
 
-    ThreeQuery{
-        id: queryDlg
-        qtitle: qsTr("输入样本信息")
-        qlable1: qsTr("样本号")
-        qlable2: qsTr("样本信息")
-        qlable3: qsTr("样本备注")
-        qtext1: ExGlobal.sampleCode
-        qtext2: ExGlobal.sampleInfo
-        anchors.fill: parent
-        onQueryAck: {
-            console.log(res1,res2);
-            ExGlobal.sampleCode = res1;
-            ExGlobal.sampleInfo = res2;
+    Image {
+        id: editsample
+        anchors.verticalCenter: openDoor.verticalCenter
+        anchors.left: openDoor.right
+        anchors.leftMargin: 200
+        height: 75
+        width: 70
+        fillMode: Image.Pad
+        source: "qrc:/images/Pen.png"
+        MouseArea{
+            anchors.fill: parent
+            onClicked: {
+                queryDlg.show()
+            }
         }
     }
 
@@ -141,6 +126,24 @@ Page {
         onClicked: {
             mainView.pop();
             mainView.push("qrc:/HomeUI/BoxReady.qml");
+        }
+    }
+
+    ThreeQuery{
+        id: queryDlg
+        qtitle: qsTr("样本信息录入")
+        qlable1: qsTr("样本号")
+        qlable2: qsTr("样本信息")
+        qlable3: qsTr("样本备注")
+        qtext1: ExGlobal.sampleCode
+        qtext2: ExGlobal.sampleInfo
+        qtext3: ExGlobal.sampleRemark
+        anchors.fill: parent
+        onQueryAck: {
+            console.log(res1,res2,res3);
+            ExGlobal.sampleCode = res1;
+            ExGlobal.sampleInfo = res2;
+            ExGlobal.sampleRemark = res3;
         }
     }
 
@@ -207,27 +210,21 @@ Page {
         }
     }
 
-    Component.onCompleted: {        
-        //Sequence.changeTitle(qsTr("待机"));
-        Sequence.setTitle("idle");
-        //tabBar.enabled = true;
+    Component.onCompleted: {
+        Sequence.setTitle("idle");        
         Sequence.updateFooter(true,true,true);
-
-        Sequence.actionDo("Query",3,0,0,0);        
-        //*
+        Sequence.actionDo("Query",3,0,0,0);
         if (Sequence.door)
             updateState.start();
         else
-            updateState.stop();
-            //*/
+            updateState.stop();            
         if (Sequence.box)
             boxstate.text = qsTr("试剂盒就绪");
         else
             boxstate.text = qsTr("未检测到试剂盒");
 
         if (ExGlobal.projectMode() !== 0){
-            btReady.visible = false;
-            //btExit.visible = false;
+            btReady.visible = false;            
         }
 
         console.log("idle onCompleted,box:"+Sequence.box+",door:"+Sequence.door);
@@ -245,9 +242,13 @@ Page {
                     mainView.push("qrc:/HomeUI/E04.qml");
                 }
                 else
-                {                    
+                {
+                    /*
                     busyIndicator.running = false;
                     busyDes.visible = false;
+                    /*/
+                    openDoor.playing = false
+                    //*/
                     updateState.start();
                 }
             }            
@@ -257,13 +258,19 @@ Page {
 
                 if (Sequence.box){
                     Sequence.sequenceDo(Sequence.Sequence_Pierce);
+                    /*
                     busyIndicator.running = true;
                     busyDes.text = qsTr("正在检测试剂盒");
                     busyDes.visible = true;
+                    //*/
                 }
                 else{
+                    /*
                     busyIndicator.running = false;
                     busyDes.visible = false;
+                    /*/
+                    openDoor.playing = false
+                    //*/
                 }
             }
             else if(result == Sequence.Result_Box_Valid)
@@ -274,8 +281,12 @@ Page {
             else if(result == Sequence.Result_Box_Invalid)
             {                
 
+                /*
                 busyIndicator.running = false;
                 busyDes.visible = false;
+                /*/
+                openDoor.playing = false
+                //*/
                 Sequence.setTitle("box_error");
                 if (ExGlobal.projectMode() === 0)
                     promptDlg.show(qsTr("试剂盒错误，是否继续？"))
@@ -319,24 +330,32 @@ Page {
 
     function switchDoor(){
         console.log("openDoor,status:"+Sequence.door+"box,"+Sequence.box);
-        bErrorOpenDoor = false;
+        bErrorOpenDoor = false;        
         if (Sequence.door == false)
         {
             if (Sequence.sequenceDo(Sequence.Sequence_OpenBox))
             {
+                /*
                 busyIndicator.running = true;
                 busyDes.text = qsTr("正在开仓");
                 busyDes.visible = true;
+                /*/
+                openDoor.playing = true
+                //*/
             }
         }
         else
         {
             if (Sequence.sequenceDo(Sequence.Sequence_CloseBox))
             {
+                /*
                 busyIndicator.running = true;
                 busyDes.text = qsTr("正在合仓");
                 busyDes.visible = true;
+                /*/
+                openDoor.playing = true
+                //*/
             }
-        }
+        }        
     }
 }

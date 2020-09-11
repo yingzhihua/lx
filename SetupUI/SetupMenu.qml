@@ -93,9 +93,10 @@ Rectangle {
 
     Component.onCompleted: {
         setInfo("SystemName",ExGlobal.sysName);
-        setInfo("LockTime",ExGlobal.getCaliParam("LockScreenTime")+qsTr(" 秒"));
         setInfo("Language",ExGlobal.sysLanguageName);
         setInfo("Version",ExGlobal.version);
+        setInfo("Network",ExGlobal.getIP());
+        setlocktimeinfo();
 
         if (ExGlobal.user != "flashdx")
             removeItem("SystemParam");
@@ -130,7 +131,10 @@ Rectangle {
     Connections{
         target: ExGlobal
         onLockTimeChanged:{
-            setModel.get(1).info = ExGlobal.getCaliParam("LockScreenTime")+qsTr(" 秒");
+            setlocktimeinfo()
+        }
+        onLockscreenOpenChanged:{
+            setlocktimeinfo()
         }
         onSysNameChanged:{
             setModel.get(0).info = ExGlobal.sysName;
@@ -167,7 +171,7 @@ Rectangle {
                 return;
         }
 
-        for (var i = 0; i < setModel.count; i++){
+        for (i = 0; i < setModel.count; i++){
             if (setModel.get(i).Eid === id){
                 setModel.insert(i,item)
                 return;
@@ -197,5 +201,22 @@ Rectangle {
                 setModel.get(i).qrc_res = res
             }
         }
+    }
+
+    function setlocktimeinfo(){
+        if (!ExGlobal.lockscreenOpen)
+            setInfo("LockTime",qsTr("关闭"));
+        else if(ExGlobal.lockTime == 0)
+            setInfo("LockTime","1 "+qsTr("分钟"));
+        else if(ExGlobal.lockTime == 1)
+            setInfo("LockTime","3 "+qsTr("分钟"));
+        else if(ExGlobal.lockTime == 2)
+            setInfo("LockTime","5 "+qsTr("分钟"));
+        else if(ExGlobal.lockTime == 3)
+            setInfo("LockTime","10 "+qsTr("分钟"));
+        else if(ExGlobal.lockTime == 4)
+            setInfo("LockTime","15 "+qsTr("分钟"));
+        else
+            setInfo("LockTime","30 "+qsTr("分钟"));
     }
 }

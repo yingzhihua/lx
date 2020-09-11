@@ -7,54 +7,6 @@ import Dx.Global 1.0
 import "../components"
 Page {
     id: test_page
-    /*
-    Image {
-        id: startbutton
-        anchors.centerIn: parent
-
-        source: "qrc:/image/line.png"
-    }
-    Text{
-        id: panelName
-
-        text:ExGlobal.panelName
-        font.pixelSize: 30
-        anchors.horizontalCenter: startbutton.horizontalCenter
-        anchors.horizontalCenterOffset: -400
-        anchors.verticalCenter: startbutton.verticalCenter
-        anchors.verticalCenterOffset: -40
-    }
-    Text{
-        id: panelLot
-
-        text:ExGlobal.boxSerial()
-        font.pixelSize: 30
-        anchors.horizontalCenter: startbutton.horizontalCenter
-        anchors.horizontalCenterOffset: -400
-        anchors.verticalCenter: startbutton.verticalCenter
-        anchors.verticalCenterOffset: +40
-    }
-    Text{
-        id: sampleNo
-
-        text:ExGlobal.sampleCode
-        font.pixelSize: 30
-        anchors.horizontalCenter: startbutton.horizontalCenter
-        anchors.horizontalCenterOffset: +400
-        anchors.verticalCenter: startbutton.verticalCenter
-        anchors.verticalCenterOffset: -40
-    }
-    Text{
-        id: sampleInfo
-
-        text:ExGlobal.sampleInfo
-        font.pixelSize: 30
-        anchors.horizontalCenter: startbutton.horizontalCenter
-        anchors.horizontalCenterOffset: +400
-        anchors.verticalCenter: startbutton.verticalCenter
-        anchors.verticalCenterOffset: +40
-    }    
-*/
     Rectangle{
         anchors.fill: parent
         color: "#f5f5f5"
@@ -63,6 +15,7 @@ Page {
             x:358
             y:224
             text1: ExGlobal.panelName
+            text2: ExGlobal.panelCode
             text3: ExGlobal.boxSerial()
         }
 
@@ -71,7 +24,9 @@ Page {
             y:224
             text1: ExGlobal.sampleCode
             text2: ExGlobal.sampleInfo
+            text3: ExGlobal.sampleRemark
         }
+
         Rectangle{
             anchors.horizontalCenter: parent.horizontalCenter
             y:240
@@ -79,22 +34,18 @@ Page {
             height: 400
             color: "#d9d9d9"
         }
-        Image {
-            id: btQuit
-            x: 1450
-            y: 754
+
+        Bt2{
+            x:1450
+            y:754
             height: 106
             width: 299
-            fillMode: Image.Pad
-            source: "qrc:/images/TestCancel.png"
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-                    testcancelDialog.show(1)
-                }
-                onPressed: parent.x += 10
-                onReleased: parent.x -= 10
-            }
+            textoffsetx: 20
+            textoffsety: -4
+            image: "qrc:/images/CancelTest.png"
+            text: qsTr("取消测试")
+            textcolor: "#323232"
+            onClicked: testcancelDialog.show(1)
         }
     }
 
@@ -118,6 +69,7 @@ Page {
     }
 
     Component.onCompleted: {        
+        Sequence.setTitle("test");
         Sequence.sequenceDo(Sequence.Sequence_Test);
     }
 
@@ -125,7 +77,7 @@ Page {
         target: Sequence
         onProcessFinish:{
             console.log("TestProcess.qml,total:"+total+",finish:"+finish);            
-            message.text = Sequence.sequenceMessage();
+            //message.text = Sequence.sequenceMessage();
         }
 
         onSequenceFinish:{

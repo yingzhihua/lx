@@ -160,10 +160,6 @@ Rectangle {
 
     Bt1 {
         id: btCannel
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 40
-        anchors.right: parent.right
-        anchors.rightMargin: 170
         onClicked: {
             Sequence.setTitle("setup")
             mainView.pop();

@@ -1,7 +1,9 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.5
 import "../components"
+import Dx.Sequence 1.0
 import Dx.Global 1.0
+/*
 Item {
     Text{
         id: labelLock
@@ -50,7 +52,7 @@ Item {
                 verticalAlignment: Text.AlignVCenter
             }
         }
-        //*
+
         down.indicator: Rectangle{
             x:0
             height: parent.height
@@ -66,8 +68,7 @@ Item {
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
             }
-        }
-        //*/
+        }        
     }
 
 
@@ -99,19 +100,83 @@ Item {
             mainView.pop();
         }
     }
+*/
+
+Rectangle{
+    //property bool lockscreenopen: false
+    //anchors.fill: parent
+    color: "#f5f5f5"
+
+    Rectangle{
+        width: 584
+        height: 301
+        radius: 22
+        anchors.centerIn: parent
+
+        Image {
+            anchors.fill: parent
+            source: "qrc:/images/lockscreenbg.png"
+        }
+
+        Text {
+            text: qsTr("启动锁屏功能")
+            x:49
+            y:15
+            font.pixelSize: 40
+        }
+
+        Image {
+            id: lockscreenswitch
+            x:447
+            y:22
+            source: ExGlobal.lockscreenOpen?"qrc:/images/lockscreenON.png":"qrc:/images/lockcreenOFF.png"
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    if (ExGlobal.lockscreenOpen)
+                        ExGlobal.lockscreenOpen = false
+                    else
+                        ExGlobal.lockscreenOpen = true
+                }
+            }
+        }
+
+        Text {
+            id: labelscreen
+            text: qsTr("锁屏时间")
+            x:49
+            y:160
+            font.pixelSize: 40
+            color: ExGlobal.lockscreenOpen?"#000000":"#7f7f7f"
+        }
+
+        ComboBox {
+            id :lockcombo
+            anchors.right: lockscreenswitch.right
+            anchors.rightMargin: 0
+            anchors.verticalCenter: labelscreen.verticalCenter
+            width: 293
+            height: 60
+            enabled: ExGlobal.lockscreenOpen?true:false
+            currentIndex: ExGlobal.lockTime
+            model:["1min","3min","5min","10min","15min","30min"]
+            onCurrentIndexChanged: {
+                if (ExGlobal.lockTime != currentIndex)
+                    ExGlobal.lockTime = currentIndex
+            }
+        }
+    }
 
     Bt1 {
         id: btCannel
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 20
-        anchors.right: parent.right
-        anchors.rightMargin: 20
         onClicked: {
+            Sequence.setTitle("setup")
             mainView.pop();
         }
     }
 
     Component.onCompleted: {
-        spinLock.value = ExGlobal.lockTime
+        Sequence.setTitle("setup_lockscreen")
     }
 }

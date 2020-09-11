@@ -6,16 +6,18 @@
 class WifiItem{
 public:
     WifiItem(){}
-    WifiItem(QString SSID_, int Signal_, int Mode_, bool isConnected_){
+    WifiItem(QString SSID_, int Signal_, int Mode_, bool isConnected_, QString Security_){
         SSID = SSID_;
         Signal = Signal_;
         Mode = Mode_;
         isConnected = isConnected_;
+        Security = Security_;
     }
     QString SSID;
     int Signal;
     int Mode;
     bool isConnected;
+    QString Security;
 };
 
 class WifiModel : public QAbstractListModel
@@ -26,7 +28,8 @@ public:
         RolesSSID = Qt::UserRole + 1,
         RolesSIGNAL,
         RoleMode,
-        RoleConnected
+        RoleConnected,
+        RoleSecurity
     };
 public:
     explicit WifiModel(QObject *parent = nullptr);

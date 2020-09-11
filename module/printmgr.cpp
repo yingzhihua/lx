@@ -40,10 +40,11 @@ void printmgr::run(){
     if (filename.isEmpty())
     {
         res[8] = '\x01';
-        msleep(1000);
+        msleep(5000);
     }
     else {
-        int result = ExGlobal::SysCommand(QString("lp -d dxprinter %1").arg(filename));
+        int result = 0;
+        result = ExGlobal::SysCommand(QString("lp -d dxprinter %1").arg(filename));
         qDebug()<<"print result = "<<result;
     }
 
@@ -275,6 +276,8 @@ bool printmgr::printPTP(){
 #define ITEMENDLINEY ITEMHEADLINEY+340
 
 #define ITEMHEIGHT 20
+#define LINEHEIGHT 18
+#define ITEMLINEWIDTH 700
 #define ITEMINDEXPOS ITEMHEADLINEX+10
 #define ITEMINDEXWIDTH 80
 #define ITEMCODEPOS ITEMINDEXPOS+ITEMINDEXWIDTH
@@ -307,6 +310,7 @@ QString printmgr::CreatePDF(){
     const static QRect CheckerRect(ITEMHEADLINEX+500,ITEMENDLINEY+4,100,20);
     const static QRect CopyRightRect((OUTERX+OUTERWIDTH-TITLEWIDTH)>>1,OUTERY+OUTERHEIGHT-20,TITLEWIDTH,20);
     const static QRect BarCodeRect(SAMPLECODEX+480,SAMPLECODEY,200,70);
+    QRect ItemRect(ITEMHEADLINEX,ITEMHEADLINEY,ITEMHEADLINELENGTH,LINEHEIGHT);
     QRect ItemIndexRect(ITEMINDEXPOS,ITEMHEADLINEY,ITEMINDEXWIDTH,ITEMHEIGHT);
     QRect ItemCodeRect(ITEMCODEPOS,ITEMHEADLINEY,ITEMCODEWIDTH,ITEMHEIGHT);
     QRect ItemNameRect(ITEMNAMEPOS,ITEMHEADLINEY,ITEMNAMEWIDTH,ITEMHEIGHT);
@@ -350,61 +354,64 @@ QString printmgr::CreatePDF(){
 
     font.setPointSize(10);
     painter->setFont(font);
-    painter->drawText(SampleCodeRect,Qt::AlignVCenter,QString("样本编号：")+sampCode);
-    painter->drawText(SampleInfoRect,Qt::AlignVCenter,QString("样本信息：")+sampInfo);
-    painter->drawText(SampleTypeRect,Qt::AlignVCenter,QString("样本类型：")+"鼻咽拭子");
-    painter->drawText(SampleRemarkRect,Qt::AlignVCenter,"样本备注：");
+    painter->drawText(SampleCodeRect,Qt::AlignVCenter,tr("样本编号：")+sampCode);
+    painter->drawText(SampleInfoRect,Qt::AlignVCenter,tr("样本信息：")+sampInfo);
+    painter->drawText(SampleTypeRect,Qt::AlignVCenter,tr("样本类型：")+"鼻咽拭子");
+    painter->drawText(SampleRemarkRect,Qt::AlignVCenter,tr("样本备注："));
     font.setPointSize(8);
     painter->setFont(font);
-    painter->drawText(InnerRefRect,Qt::AlignVCenter,QString("内部参考品：")+"有效 √");
+    painter->drawText(InnerRefRect,Qt::AlignVCenter,tr("内部参考品：")+tr("有效 √"));
     painter->drawText(PanelNameRect,Qt::AlignVCenter|Qt::AlignRight,ExGlobal::panelName());
-    painter->drawText(SerialRect,Qt::AlignVCenter|Qt::AlignRight,QString("批号：")+ExGlobal::boxSerial());
-    painter->drawText(ValidDateRect,Qt::AlignVCenter|Qt::AlignRight,QString("有效期：2021/04/17"));
-    painter->drawText(SystemNameDateRect,Qt::AlignVCenter,QString("仪器：")+ExGlobal::SysName);
+    painter->drawText(SerialRect,Qt::AlignVCenter|Qt::AlignRight,tr("批号：")+ExGlobal::boxSerial());
+    painter->drawText(ValidDateRect,Qt::AlignVCenter|Qt::AlignRight,tr("有效期：")+"2021/04/17");
+    painter->drawText(SystemNameDateRect,Qt::AlignVCenter,tr("仪器：")+ExGlobal::SysName);
 
     painter->drawLine(QLine(QPoint(ITEMHEADLINEX,ITEMHEADLINEY),QPoint(ITEMHEADLINEX+ITEMHEADLINELENGTH,ITEMHEADLINEY)));
     painter->drawLine(QLine(QPoint(ITEMHEADLINEX,ITEMENDLINEY),QPoint(ITEMHEADLINEX+ITEMHEADLINELENGTH,ITEMENDLINEY)));
-    painter->drawText(ItemRemarkRect,Qt::AlignLeft,"备注：本报告仅对此标本负责，结果供医师参考：阴性不能排除该病原体感染，阳性请结合临床考虑，可疑建议再次采样。");
-    painter->drawText(TestTimeRect,Qt::AlignLeft,QString("检测时间：")+testTime);
-    painter->drawText(ReportTimeRect,Qt::AlignLeft,QString("报告时间：")+QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
-    painter->drawText(UserRect,Qt::AlignLeft,QString("检验者：")+user);
-    painter->drawText(CheckerRect,Qt::AlignLeft,QString("审核者：")+checker);
+    painter->drawText(ItemRemarkRect,Qt::AlignLeft,tr("备注：本报告仅对此标本负责，结果供医师参考：阴性不能排除该病原体感染，阳性请结合临床考虑，可疑建议再次采样。"));
+    painter->drawText(TestTimeRect,Qt::AlignLeft,tr("检测时间：")+testTime);
+    painter->drawText(ReportTimeRect,Qt::AlignLeft,tr("报告时间：")+QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"));
+    painter->drawText(UserRect,Qt::AlignLeft,tr("检验者：")+user);
+    painter->drawText(CheckerRect,Qt::AlignLeft,tr("审核者：")+checker);
 
-    painter->drawText(ItemIndexRect,Qt::AlignCenter,"序号");
-    painter->drawText(ItemCodeRect,Qt::AlignVCenter,"代号");
-    painter->drawText(ItemNameRect,Qt::AlignVCenter,"中文名称");
-    painter->drawText(ItemResultRect,Qt::AlignCenter,"结果");
-    painter->drawText(ItemRefRect,Qt::AlignCenter,"参考值");
+    painter->drawText(ItemIndexRect,Qt::AlignCenter,tr("序号"));
+    painter->drawText(ItemCodeRect,Qt::AlignVCenter,tr("代号"));
+    painter->drawText(ItemNameRect,Qt::AlignVCenter,tr("中文名称"));
+    painter->drawText(ItemResultRect,Qt::AlignCenter,tr("结果"));
+    painter->drawText(ItemRefRect,Qt::AlignCenter,tr("参考值"));
 
     QMapIterator<QString,int> it(itemMap);
     int itemIndex = 1;
 
     while(it.hasNext()){
         it.next();
-        ItemIndexRect.moveTop(itemIndex*16+ITEMHEADLINEY+4);
-        ItemCodeRect.moveTop(itemIndex*16+ITEMHEADLINEY+4);
-        ItemNameRect.moveTop(itemIndex*16+ITEMHEADLINEY+4);
-        ItemResultRect.moveTop(itemIndex*16+ITEMHEADLINEY+4);
-        ItemRefRect.moveTop(itemIndex*16+ITEMHEADLINEY+4);
+        ItemRect.moveTop(itemIndex*LINEHEIGHT+ITEMHEADLINEY+5);
+        ItemIndexRect.moveTop(itemIndex*LINEHEIGHT+ITEMHEADLINEY+4);
+        ItemCodeRect.moveTop(itemIndex*LINEHEIGHT+ITEMHEADLINEY+4);
+        ItemNameRect.moveTop(itemIndex*LINEHEIGHT+ITEMHEADLINEY+4);
+        ItemResultRect.moveTop(itemIndex*LINEHEIGHT+ITEMHEADLINEY+4);
+        ItemRefRect.moveTop(itemIndex*LINEHEIGHT+ITEMHEADLINEY+4);
+        if (itemIndex%2 == 1)
+        painter->fillRect(ItemRect,QColor(210,210,210));
         painter->drawText(ItemIndexRect,Qt::AlignCenter,QString::number(itemIndex));
         painter->drawText(ItemCodeRect,Qt::AlignVCenter,it.key());
         if (it.value() != 0)
-            painter->drawText(ItemResultRect,Qt::AlignCenter,"阳性(+)");
+            painter->drawText(ItemResultRect,Qt::AlignCenter,tr("阳性(+)"));
         else
-            painter->drawText(ItemResultRect,Qt::AlignCenter,"阴性(-)");
-        painter->drawText(ItemRefRect,Qt::AlignCenter,"阴性(-)");
+            painter->drawText(ItemResultRect,Qt::AlignCenter,tr("阴性(-)"));
+        painter->drawText(ItemRefRect,Qt::AlignCenter,tr("阴性(-)"));
         itemIndex++;
     }
 
     font.setPointSize(6);
     painter->setFont(font);
-    painter->drawText(CopyRightRect,Qt::AlignCenter,QString("深圳闪量科技有限公司@2020版权所有。软件版本：")+ExGlobal::version());
+    painter->drawText(CopyRightRect,Qt::AlignCenter,tr("深圳闪量科技有限公司@2020版权所有。软件版本：")+ExGlobal::version());
 
     painter->setPen(QPen(QColor(200,200,200),1));
     font.setPointSize(20);
     painter->setFont(font);
     painter->drawRect(BarCodeRect);
-    painter->drawText(BarCodeRect,Qt::AlignCenter,"样本条码粘帖处");
+    painter->drawText(BarCodeRect,Qt::AlignCenter,tr("样本条码粘帖处"));
     painter->end();
     return file;
 }

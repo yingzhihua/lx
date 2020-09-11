@@ -10,6 +10,11 @@ Rectangle {
     //border.color: "orange"
     color: Qt.rgba(0,0,0,0)
 
+    anchors.bottom: parent.bottom
+    anchors.bottomMargin: 40
+    anchors.right: parent.right
+    anchors.rightMargin: 80
+
     Image {
         id: img
         x:3

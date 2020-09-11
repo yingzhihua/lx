@@ -105,10 +105,6 @@ Item {
 */
     Bt1 {
         id: btCannel
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 40
-        anchors.right: parent.right
-        anchors.rightMargin: 120
         onClicked: {
             mainView.pop();
             Sequence.hideTitle(true);

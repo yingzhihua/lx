@@ -53,6 +53,7 @@ Rectangle {
             anchors.leftMargin: 100
             anchors.verticalCenter: query1Lable.verticalCenter
             width: 400
+            height: 60
         }
 
         Text{
@@ -71,6 +72,7 @@ Rectangle {
             anchors.horizontalCenter: ack1.horizontalCenter
             anchors.verticalCenter: query2Lable.verticalCenter
             width: 400
+            height: 60
         }
 
         Text{
@@ -89,6 +91,7 @@ Rectangle {
             anchors.horizontalCenter: ack1.horizontalCenter
             anchors.verticalCenter: query3Lable.verticalCenter
             width: 400
+            height: 60
         }
 
         Bt2{

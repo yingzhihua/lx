@@ -73,7 +73,6 @@
         <file>images/setupmenu_net.png</file>
         <file>images/setupmenu_lock.png</file>
         <file>images/setupmenu_lauguage.png</file>
-        <file>images/setupmenu_about.png</file>
         <file>images/row2.png</file>
         <file>images/row1.png</file>
         <file>images/lockarrow.png</file>
@@ -120,5 +119,39 @@
         <file>images/addbt.png</file>
         <file>images/deletebt.png</file>
         <file>images/userbk.png</file>
+        <file>images/title_updateuser.png</file>
+        <file>images/title_adduser.png</file>
+        <file>images/confirmbt.png</file>
+        <file>images/title_lockscreen.png</file>
+        <file>images/lockscreenON.png</file>
+        <file>images/lockscreenbg.png</file>
+        <file>images/lockcreenOFF.png</file>
+        <file>images/title_upasswd.png</file>
+        <file>images/upasswdbg.png</file>
+        <file>images/confirmbt2.png</file>
+        <file>images/cancelbt.png</file>
+        <file>images/title_system.png</file>
+        <file>images/title_error.png</file>
+        <file>images/shutdown.png</file>
+        <file>images/setupmenu_about.png</file>
+        <file>images/title_datetime.png</file>
+        <file>images/timebg.png</file>
+        <file>images/datebg.png</file>
+        <file>images/title_network.png</file>
+        <file>images/wifiselect.png</file>
+        <file>images/wifibg.png</file>
+        <file>images/title_wifi.png</file>
+        <file>images/sign3.png</file>
+        <file>images/sign2.png</file>
+        <file>images/title_datamenu.png</file>
+        <file>images/thrAlarmSmall.png</file>
+        <file>images/Ref.png</file>
+        <file>images/Print.png</file>
+        <file>images/Positive.png</file>
+        <file>images/Negative.png</file>
+        <file>images/sign1.png</file>
+        <file>images/sign0.png</file>
+        <file>images/title_test.png</file>
+        <file>images/opendoorAmi.gif</file>
     </qresource>
 </RCC>

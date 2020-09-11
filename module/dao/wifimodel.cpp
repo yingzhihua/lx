@@ -13,6 +13,7 @@ WifiModel::WifiModel(QObject *parent):QAbstractListModel (parent)
     roles[RolesSIGNAL] = "Signal";
     roles[RoleMode] = "Mode";
     roles[RoleConnected] = "Connected";
+    roles[RoleSecurity] = "Security";
 }
 
 void WifiModel::LoadData(){
@@ -32,6 +33,7 @@ void WifiModel::LoadData(){
             QString signalFlag = "SIGNAL";
             QString wifiFlag = "SSID";
             QString modeFlag = "MODE";
+            QString securityFlag = "SECURITY";
 
             QString line = in.readLine();
             if (!line.isEmpty()){
@@ -39,17 +41,19 @@ void WifiModel::LoadData(){
                 int signalIndex = line.indexOf(signalFlag);
                 int wifiIndex = line.indexOf(wifiFlag);
                 int modeIndex = line.indexOf(modeFlag);
+                int securityIndex = line.indexOf(securityFlag);
                 while(curLine < WIFINUM){
                     line = in.readLine();
                     QString tmpStr = line;
                     QString curConnection = line.left(1);
                     QString wifiName = line.mid(wifiIndex,(modeIndex-wifiIndex)).simplified();
                     int signalValue = tmpStr.mid(signalIndex,3).simplified().toInt();
+                    QString security = tmpStr.mid(securityIndex).simplified();
                     qDebug()<<line;
                     if (!wifiName.isEmpty()){
                         qDebug()<<"wifiName:"<<wifiName<<",curConnection:"<<curConnection<<",signalValue:"<<signalValue;
                         if (!Exist(wifiName)){
-                            m_display_list<<WifiItem(wifiName,signalValue,1,(curConnection=="*"));
+                            m_display_list<<WifiItem(wifiName,signalValue,1,(curConnection=="*"),security);
                         }
                     }
 
@@ -64,9 +68,7 @@ void WifiModel::LoadData(){
 void WifiModel::refresh(){
     if (!openWifiFunc) return;
 
-    beginResetModel();
     m_display_list.clear();
-    endResetModel();
 
     int result = system("nmcli dev wifi > /opt/wifi.ini");
 
@@ -81,29 +83,32 @@ void WifiModel::refresh(){
             QString signalFlag = "SIGNAL";
             QString wifiFlag = "SSID";
             QString modeFlag = "MODE";
-
+            QString securityFlag = "SECURITY";
             QString line = in.readLine();
             if (!line.isEmpty()){
                 int curLine = 0;
                 int signalIndex = line.indexOf(signalFlag);
                 int wifiIndex = line.indexOf(wifiFlag);
                 int modeIndex = line.indexOf(modeFlag);
+                int securityIndex = line.indexOf(securityFlag);
+                beginResetModel();
                 while(curLine < WIFINUM){
                     line = in.readLine();
                     QString tmpStr = line;
                     QString curConnection = line.left(1);
                     QString wifiName = line.mid(wifiIndex,(modeIndex-wifiIndex)).simplified();
                     int signalValue = tmpStr.mid(signalIndex,3).simplified().toInt();
+                    QString security = tmpStr.mid(securityIndex).simplified();
+                    qDebug()<<line;
                     if (!wifiName.isEmpty()){
-                        if (!Exist(wifiName)){
-                            beginInsertRows(QModelIndex(),rowCount(),rowCount());
-                            m_display_list<<WifiItem(wifiName,signalValue,1,(curConnection=="*"));
-                            endInsertRows();
+                        if (!Exist(wifiName)){                            
+                            m_display_list<<WifiItem(wifiName,signalValue,1,(curConnection=="*"),security);
                         }
                     }
 
                     curLine++;
                 }
+                endResetModel();
             }
         }
         file.close();
@@ -131,6 +136,8 @@ QVariant WifiModel::data(const QModelIndex &index, int role) const
         return item.Mode;
     else if(role == RoleConnected)
         return item.isConnected;
+    else if(role == RoleSecurity)
+        return item.Security;
 
     return QVariant();
 }
@@ -151,10 +158,14 @@ bool WifiModel::Exist(QString ssid){
 bool WifiModel::connect(QString ssid, QString password){
     QString connectNetWorkStr = QString("nmcli dev wifi connect %1 password %2").arg(ssid).arg(password);
     qDebug()<<connectNetWorkStr;
+    QTime time;
+    time.start();
     if (-1 != system(connectNetWorkStr.toLatin1().data())){
         QNetworkConfigurationManager mgr;
+        qDebug()<<"wifi connect-0 elapsed="<<time.elapsed();
         if (mgr.isOnline())
             return true;
     }
+    qDebug()<<"wifi connect-1 elapsed="<<time.elapsed();
     return false;
 }

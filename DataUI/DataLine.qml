@@ -77,12 +77,11 @@ Page {
         id: btCannel
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 20
-        anchors.right: parent.right
-        anchors.rightMargin: 20
         onClicked: {            
             mainView.pop();
         }
     }
+
     function setChart(){
         chartView.removeAllSeries();
         chartView.title = ExGlobal.getPosName(testResultModel.getCurrItemId());

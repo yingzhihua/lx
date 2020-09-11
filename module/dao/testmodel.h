@@ -53,9 +53,9 @@ public:
     bool ExistTest(int Testid);
     void InitTest();
     QString getCurrTestDateTime(){return m_display_list[currTestIndex].TestTime;}
-    QString getCurrTestCode(){return m_display_list[currTestIndex].SampleId;}
+    Q_INVOKABLE QString getCurrTestCode(){return m_display_list[currTestIndex].SampleId;}
     Q_INVOKABLE QString getCurrTestSerial(){return m_display_list[currTestIndex].SerialNo;}
-    QString getCurrTestInfo(){return m_display_list[currTestIndex].SampleInfo;}
+    Q_INVOKABLE QString getCurrTestInfo(){return m_display_list[currTestIndex].SampleInfo;}
     QString getCurrTestUser(){return m_display_list[currTestIndex].User;}
     QString getCurrTestChecker(){return m_display_list[currTestIndex].Checker;}
     Q_INVOKABLE QString getCurrTestPanelName();

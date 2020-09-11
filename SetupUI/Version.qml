@@ -76,10 +76,6 @@ V2.12\n1、增加自动对焦功能。\n\
 
     Bt1 {
         id: btCannel
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 20
-        anchors.right: parent.right
-        anchors.rightMargin: 20
         onClicked: {
             mainView.pop();
         }

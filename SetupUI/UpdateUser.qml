@@ -11,6 +11,7 @@ Page {
         color: "#f5f5f5"
 
         Rectangle{
+            id:updaterect
             width: 811
             height: 485
             radius: 22
@@ -108,14 +109,16 @@ Page {
                 checked: userModel.getCurUserType()&2
             }
         }
+        Text {
+            id: mess
+            anchors.top: updaterect.bottom
+            anchors.topMargin: 20
+            anchors.horizontalCenter: updaterect.horizontalCenter
+        }
     }
 
     Bt1 {
         id: btCannel
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 20
-        anchors.right: parent.right
-        anchors.rightMargin: 20
         onClicked: {
             mainView.pop();
         }
@@ -130,14 +133,35 @@ Page {
         width: 299
         textoffsetx: 30
         textoffsety: -4
-        image: "qrc:/images/loginquit.png"
+        image: "qrc:/images/confirmbt.png"
         text:qsTr("确认修改")
         onClicked: {
-            mainView.pop();
+            if (password.text != ppassword.text)
+            {
+                mess.text = qsTr("密码和确认密码不一致！");
+            }
+            else if(password.text == "")
+            {
+                mess.text = qsTr("密码不能为空！");
+            }
+            else if(displayName.text == "")
+            {
+                mess.text = qsTr("显示名不能为空！");
+            }
+            else
+            {
+                if (userModel.updateUser(user.text,password.text,displayName.text,checker.checked?3:1))
+                {
+                    Sequence.setTitle("setup_user");
+                    mainView.pop();
+                }
+                else
+                    mess.text = qsTr("帐号修改失败！")
+            }
         }
     }
 
     Component.onCompleted: {
-
+        Sequence.setTitle("setup_userupdate");
     }
 }

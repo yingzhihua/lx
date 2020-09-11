@@ -38,7 +38,8 @@ SOURCES += \
     module/printmgr.cpp \
     module/tcamera.cpp \
     module/ckcamera.cpp \
-    module/datahandler.cpp
+    module/datahandler.cpp \
+    module/systemcmd.cpp
 
 RESOURCES += qml.qrc
 
@@ -80,7 +81,8 @@ HEADERS += \
     module/printmgr.h \
     module/tcamera.h \
     module/ckcamera.h \
-    module/datahandler.h
+    module/datahandler.h \
+    module/systemcmd.h
 
 if(contains(DEFINES,PLUTFORM_ARM)){
 INCLUDEPATH += /opt/opencv-4.1.1/include \

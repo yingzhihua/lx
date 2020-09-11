@@ -7,6 +7,7 @@ import Dx.Global 1.0
 import "../components"
 Page {
     property var itemList:[]
+
     Rectangle{
         id:testmsg
         y:159
@@ -16,19 +17,36 @@ Page {
 
         Text{
             id: panelName
-            //text: "panelName"
-            text:ExGlobal.panelName+" / "+ExGlobal.boxSerial()
+            text:testModel.getCurrTestPanelName()
+            font.pixelSize: 40
+            anchors.left: parent.left
+            anchors.leftMargin: 500
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        Text{
+            id: panelCode
+            text:testModel.getCurrTestPanelCode()
             font.pixelSize: 40
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.horizontalCenterOffset: -100
-            y:10
+            anchors.verticalCenter: parent.verticalCenter
         }
+
+        Text{
+            id: boxSerial
+            text:testModel.getCurrTestSerial()
+            font.pixelSize: 40
+            anchors.right: parent.right
+            anchors.rightMargin: 500
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
         Image {
             id: printIco
-            anchors.verticalCenter: panelName.verticalCenter
-            anchors.left: panelName.right
-            anchors.leftMargin: 10
-            source: "qrc:/image/Print.png"
+            anchors.right: parent.right
+            anchors.rightMargin: 200
+            anchors.verticalCenter: parent.verticalCenter
+            source: "qrc:/images/Print.png"
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
@@ -46,67 +64,55 @@ Page {
         width: parent.width
         height: 114
         color: "#f5f5f5"
-    }
-/*
-    Image {
-        id: divider
-        anchors.verticalCenter: parent.verticalCenter
-        x: parent.width/3
-        source: "qrc:/image/line.png"
-    }
-    Rectangle{
-        width:200
-        height:100
-        anchors.verticalCenter: divider.verticalCenter
-        anchors.right: divider.left
-        anchors.rightMargin: 50
 
         Text{
             id:reference
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.top
-            anchors.topMargin: 10
+            anchors.verticalCenter: parent.verticalCenter
             font.pixelSize: 40
-            //text:qsTr("测试有效")
-            text:qsTr("Internal")
+            anchors.left: parent.left
+            anchors.leftMargin: 700
+            color: "#898989"
+            text:qsTr("测试有效")
         }
 
-        Image {
-            id: validico
-            anchors.horizontalCenter: parent.horizontalCenter
-            //anchors.horizontalCenterOffset: -60
-            anchors.horizontalCenterOffset: -150
-            //anchors.top: reference.bottom
-            anchors.verticalCenter: reference.verticalCenter
-            anchors.verticalCenterOffset: 30
-            width: 60
-            height: 60
-            source: "qrc:/image/Valid4.png"
-        }
-        Text {
-            anchors.horizontalCenter: parent.horizontalCenter
-            //anchors.horizontalCenterOffset: +20
-            //anchors.verticalCenter: validico.verticalCenter
-            anchors.top: reference.bottom
-            font.pixelSize: 40
-            //text:qsTr("参照物")
-            text:qsTr("Control")
-        }
-        MouseArea{
-            anchors.fill: parent
-            onClicked: {
-                testResultModel.setCurrItem(2);
-                mainView.push("qrc:/DataUI/DataLine.qml");
+        Rectangle{
+            height: parent.height
+            width: 200
+            anchors.left: reference.right
+            anchors.leftMargin: 150
+            color: "transparent"
+
+            Image {
+                id: validico
+                anchors.verticalCenter: parent.verticalCenter
+                source: "qrc:/images/Ref.png"
+            }
+
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.left: validico.right
+                anchors.leftMargin: 20
+                font.pixelSize: 40
+                color: "#898989"
+                text:qsTr("参照物")
+            }
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    testResultModel.setCurrItem(2);
+                    mainView.push("qrc:/DataUI/DataLine.qml");
+                }
             }
         }
     }
-*/
 
     Grid{
         id: gridPos
         anchors.top: icmsg.bottom
         anchors.topMargin: 20
         anchors.horizontalCenter: parent.horizontalCenter
+        anchors.horizontalCenterOffset: -150
         columns:4
         rowSpacing: 20
         columnSpacing: 30
@@ -120,7 +126,7 @@ Page {
                 Image {
                     anchors.verticalCenter: parent.verticalCenter
                     x:10
-                    source: testResultModel.getItemResult(testResultModel.getTestid(),(itemList[modelData]))>0?"qrc:/image/Positive.png":"qrc:/image/Negative.png"
+                    source: testResultModel.getItemResult(testResultModel.getTestid(),(itemList[modelData]))>0?"qrc:/images/Positive.png":"qrc:/images/Negative.png"
                 }
                 Text{
                     anchors.verticalCenter: parent.verticalCenter
@@ -142,10 +148,6 @@ Page {
 
     Bt1 {
         id: btCannel
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 20
-        anchors.right: parent.right
-        anchors.rightMargin: 20
         onClicked: {            
             mainView.pop();
             Sequence.setTitle("datamenu")
@@ -154,21 +156,24 @@ Page {
         }
     }
 
-    Button {
+    Bt2{
         id: btCheck
-        font.pixelSize: 30
-        width: 200
-        text: qsTr("审核")
         anchors.bottom: btCannel.top
-        anchors.bottomMargin: 80
-        anchors.right: parent.right
-        anchors.rightMargin: 20
+        anchors.bottomMargin: 30
+        anchors.horizontalCenter: btCannel.horizontalCenter
+        height: 106
+        width: 299
+        textoffsetx: 30
+        textoffsety: -4
+        textcolor: "#ffffff"
+        image: "qrc:/images/confirmbt.png"
         onClicked: {
             if (btCheck.text === qsTr("撤回审核"))
                 testModel.uncheckTest();
             else
                 testModel.checkTest();
             mainView.pop();
+            Sequence.setTitle("datamenu")
             if (ExGlobal.dataEntry() === 1)
                 mainView.push("qrc:/HomeUI/Idle.qml");
         }
@@ -194,25 +199,41 @@ Page {
         {
             btCheck.visible = true;
             if (testModel.haveCheck())
+            {
+                btCheck.textcolor = "#323232"
+                btCheck.image = "qrc:/images/CancelTest.png"
                 btCheck.text = qsTr("撤回审核")
+            }
             else
+            {
+                btCheck.textcolor = "#ffffff"
+                btCheck.image = "qrc:/images/confirmbt.png"
                 btCheck.text = qsTr("通过审核")
+            }
         }
         else
             btCheck.visible = false;
         Sequence.setTitle("dataview")
+        Sequence.changeTitle(testModel.getCurrTestCode() + " | " + testModel.getCurrTestInfo())
+        if (testResultModel.getItemResult(testResultModel.getTestid(),2)===0)
+        {
+            reference.text = qsTr("测试无效")
+            reference.color = "#fc7050"
+        }
+
         console.debug(itemList)
     }
+
 
     Connections{
         target: Sequence
         onSequenceFinish:{
-            if (result == Sequence.Result_Print_finish)
+            if (result === Sequence.Result_Print_finish)
             {
                 busyIndicator.running = false;
                 promptDialog.show(qsTr("打印完成"))
             }
-            else if(result == Sequence.Result_Print_Error){
+            else if(result === Sequence.Result_Print_Error){
                 busyIndicator.running = false;
                 promptDialog.show(qsTr("未找到打印机"))
             }

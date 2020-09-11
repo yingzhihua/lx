@@ -13,72 +13,86 @@ Rectangle {
 
     Rectangle{
         z:2
-        width: 800
-        height: 500
+        width: 799
+        height: 469
         anchors.centerIn: parent
-        border.color: "darkgray"
-        radius: 50
+        //border.color: "darkgray"
+        radius: 22
 
-        Text{
+        Image {
+            anchors.fill: parent
+            source: "qrc:/images/wifibg.png"
+        }
+
+        Label{
             id:title
-            y:50
             anchors.horizontalCenter: parent.horizontalCenter
-            font.pixelSize: 40
+            y:18
+            font.pixelSize: 45
         }
 
         Text{
             id:ssid
-            x:50
+            anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: title.bottom
-            anchors.topMargin: 50
-            text: ""
+            anchors.topMargin: 70
+            font.pixelSize: 40
         }
 
         Text{
             id:queryLable
-            x:50
+            x:150
             width: 100
             anchors.top: ssid.bottom
-            anchors.topMargin: 60
+            font.pixelSize: 40
+            anchors.topMargin: 40
         }
 
         TextField{
             id: ack
             anchors.left: queryLable.right
-            anchors.leftMargin: 50
+            anchors.leftMargin: 20
             anchors.verticalCenter: queryLable.verticalCenter
             width: 400
+            height: 64
+            background: Rectangle{
+                border.color: "#cdcdcd"
+                color: "#f5f5f5"
+            }
         }
 
-        Button {
+        Bt2{
+            id: btQuit
+            x:43
+            y:354
+            width: 255
+            height: 85
+            textoffsetx: 30
+            textoffsety: -3
+            textcolor: "#464646"
+            text: qsTr("取消")
+            image: "qrc:/images/cancel.png"
+            onClicked: {
+                queryDialog.visible = false;
+            }
+        }
+        Bt2{
             id: btSet
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 70
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.horizontalCenterOffset: -150
-            width: 200
-            height: 80
-            font.pixelSize: 40
+            x:500
+            y:354
+            width: 255
+            height: 85
+            textoffsetx: 30
+            textoffsety: -3
+            textcolor: "#ffffff"
+            text: qsTr("确认")
+            image: "qrc:/images/confirm.png"
             onClicked: {
                 queryDialog.visible = false;
                 queryDialog.queryAck(ack.text);
             }
         }
 
-        Button {
-            id: btQuit
-            text: qsTr("取消")
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 70
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.horizontalCenterOffset: 150
-            width: 200
-            height: 80
-            font.pixelSize: 40
-            onClicked: {
-                queryDialog.visible = false;
-            }
-        }
     }
 
     function show(name){

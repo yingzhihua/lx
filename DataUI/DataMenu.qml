@@ -26,6 +26,7 @@ Rectangle {
         height: parent.height - datatitle.height
         clip: true
         //ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+        //ScrollBar.vertical.background: Rectangle{color:"#808080"}
         ScrollBar.vertical.width: 50
         ListView{
             id:listView
@@ -48,7 +49,7 @@ Rectangle {
                         height: 100
                         fillMode: Image.Pad
                         verticalAlignment: Text.AlignVCenter
-                        source: ResultType==2?"":"qrc:/images/thrAlarm.png"
+                        source: ResultType==2?"":"qrc:/images/thrAlarmSmall.png"
                     }
                     //Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:200;text:SerialNo}
                     Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:500;text:SampleInfo;clip:true;elide:Text.ElideRight;maximumLineCount: 2;wrapMode: Text.Wrap;height:parent.height}
@@ -56,18 +57,6 @@ Rectangle {
                     Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:200;height:parent.height;text:User}
                     Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:200;height:parent.height;text:Checker}
                     Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:400;height:parent.height;text:TestTime}
-
-                    /*
-                    Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:100;text:Testid}
-                    Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:200;text:PanelCode}
-                    Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:200;text:SerialNo}
-                    Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:200;text:SampleId}
-                    Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:500;text:SampleInfo;clip: true}
-                    Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:300;text:TestTime}
-                    Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:150;text:User}
-                    Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:150;text:Checker}
-                    Text{height:parent.height;verticalAlignment: Text.AlignVCenter;width:50;text:Checker!=""?"√":""}
-                    */
                 }
 
                 MouseArea{

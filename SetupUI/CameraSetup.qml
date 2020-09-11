@@ -271,10 +271,6 @@ Page {
 
     Bt1 {
         id: btCannel
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 20
-        anchors.right: parent.right
-        anchors.rightMargin: 20
         onClicked: {
             Sequence.stopView();
             Sequence.actionDo("Light",1,0,0,0);

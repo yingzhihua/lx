@@ -16,6 +16,7 @@ class ExGlobal : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString user READ user WRITE setUser NOTIFY userChanged)
+    Q_PROPERTY(QString displayUser READ displayUser WRITE setDisplayUser NOTIFY userChanged)
     Q_PROPERTY(QString panelName READ panelName NOTIFY panelNameChanged)
     Q_PROPERTY(QString panelCode READ panelCode NOTIFY panelCodeChanged)
     Q_PROPERTY(QString sampleCode READ sampleCode WRITE setSampleCode NOTIFY sampleCodeChanged)
@@ -24,6 +25,8 @@ class ExGlobal : public QObject
     Q_PROPERTY(QStringList serialPort READ serialPort NOTIFY serialPortChanged)
     Q_PROPERTY(bool debug READ isDebug WRITE setDebug NOTIFY debugChanged)
     Q_PROPERTY(QString sysName READ sysName WRITE setSysName NOTIFY sysNameChanged)
+    Q_PROPERTY(QString hospitalName READ hospitalName WRITE setHospitalName NOTIFY hospitalNameChanged)
+    Q_PROPERTY(int printType READ printType WRITE setPrintType NOTIFY printTypeChanged)
     Q_PROPERTY(QString sysLanguageName READ sysLanguageName NOTIFY sysLanguageNameChanged)
     Q_PROPERTY(int sysLanguageCode READ sysLanguageCode WRITE setSysLanguageCode NOTIFY sysLanguageCodeChanged)
     Q_PROPERTY(QString version READ version NOTIFY versionChanged)
@@ -31,6 +34,7 @@ class ExGlobal : public QObject
     Q_PROPERTY(QString tempversion READ tempversion NOTIFY versionChanged)
     Q_PROPERTY(QString ctrlversion READ ctrlversion NOTIFY versionChanged)    
     Q_PROPERTY(int lockTime READ lockTime WRITE setLockTime NOTIFY lockTimeChanged)
+    Q_PROPERTY(bool lockscreenOpen READ lockscreenOpen WRITE setLockscreenOpen NOTIFY lockscreenOpenChanged)
     Q_PROPERTY(QString adminPassword READ adminPassword WRITE setAdminPassword NOTIFY adminPasswordChanged)
     Q_PROPERTY(bool childImage READ childImage WRITE setChildImage NOTIFY childImageChanged)
     Q_PROPERTY(int autoFocus READ autoFocus WRITE setAutoFocus NOTIFY autoFocusChanged)
@@ -43,9 +47,12 @@ public:
     static void exInit();
 
     QString user() {return User;}
+    QString displayUser() {return DisplayUser;}
     void setUser(const QString &user){User = user;emit userChanged();}
+    void setDisplayUser(const QString &user){DisplayUser = user;emit userChanged();}
     static QString panelName(){return t_panelName;}
     static int SysCommand(QString command);
+    static void AsynCommand(QString command);
     static void setPanelName(const QString &panelName){t_panelName = panelName;}
     static QString panelCode(){return t_panelCode;}
     static QString panelCodeEx(){return "Lot# "+t_panelCode;}
@@ -63,6 +70,10 @@ public:
     static void setDebug(bool debug){test = debug;}
     QString sysName(){return SysName;}
     void setSysName(const QString &name){updateTextParam("SysName",name);emit sysNameChanged();}
+    QString hospitalName(){return HospitalName;}
+    void setHospitalName(const QString &name){updateTextParam("HospitalName",name);emit hospitalNameChanged();}
+    int printType(){return PrintType;}
+    void setPrintType(int printType){updateCaliParam("PrintType",printType);emit printTypeChanged();}
     QString adminPassword(){return AdminPassword;}
     void setAdminPassword(const QString &password){updateTextParam("AdminPassword",password);emit adminPasswordChanged();}
     static QString sysLanguageName();
@@ -75,7 +86,9 @@ public:
     static void settempversion(const QString &version){temp_version = version;}
     static void setctrlversion(const QString &version){ctrl_version = version;}
     int lockTime(){return getCaliParam("LockScreenTime");}
-    void setLockTime(int time){updateCaliParam("LockScreenTime",time);emit lockTimeChanged();}
+    void setLockTime(int time){updateCaliParam("LockScreenTime",time);updateLockTime();emit lockTimeChanged();}
+    bool lockscreenOpen(){return LockScreenOpen == 1;}
+    void setLockscreenOpen(bool bopen){updateCaliParam("LockScreenOpen",bopen?1:0);updateLockTime();emit lockscreenOpenChanged();}
     bool childImage(){return bChildImage;}
     void setChildImage(bool set){bChildImage = set;}
     bool autoFocus(){return AutoFocus;}
@@ -137,6 +150,8 @@ public:
     static int VDSoftHomeX;
 
     static int LockScreenTime;
+    static int lockscreen_time;
+    static int LockScreenOpen;
     static int LanguageCode;
     static int PanelBoxIndex;
 
@@ -164,6 +179,7 @@ public:
 
     static QString AdminPassword;
     static QString User;
+    static QString DisplayUser;
     static int UserType;
     static bool bChildImage;
     static int AutoFocus;
@@ -175,6 +191,8 @@ public:
     static unsigned char *hbufrgb;
 
     static QString SysName;
+    static QString HospitalName;
+    static int PrintType;
     static QTranslator tor;
     static QApplication *app;
     static QQmlApplicationEngine *qml;
@@ -191,6 +209,8 @@ signals:
     void debugChanged();
     void projectModeChanged();
     void sysNameChanged();
+    void hospitalNameChanged();
+    void printTypeChanged();
     void adminPasswordChanged();
     void sysLanguageNameChanged();
     void sysLanguageCodeChanged();
@@ -199,6 +219,7 @@ signals:
     void qrCodeChanged();
     void versionChanged();
     void lockTimeChanged();
+    void lockscreenOpenChanged();
     void exglobalMessage(int code);
 
 private:
@@ -222,6 +243,7 @@ private:
     static void SetCaliParam(const QString &caliName, int caliValue);
     static void SetTextParam(const QString &textName, QString textValue);
     static void LoadReagentBox();
+    static void updateLockTime();
 
 public:
     void GlobalMessage(int code);

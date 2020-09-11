@@ -555,7 +555,7 @@ void Sequence::ActionFinish(QByteArray data)
 
         if (durationState == TimeState::running && currSequenceId == SequenceId::Sequence_Test && bFocused == false && nDuration >= 200000)
         {
-            if (ExGlobal::projectMode() == 10)
+            if (ExGlobal::projectMode() == 1)
             {
                 Log::LogByFile("Focus.txt",QString("ActionFinish,nDuration:%1").arg(nDuration));
                 autoFocus();
@@ -566,7 +566,7 @@ void Sequence::ActionFinish(QByteArray data)
 
 void Sequence::errFinish(QByteArray data){
     qDebug()<<"Sequence errFinish:"<<data.toHex(' ');
-    QString errStr = "未知错误！"+data.toHex(' ');
+    QString errStr = tr("未知错误！")+data.toHex(' ');
     int errCode = 0;
 
     if (data.length()>11 && data[0] == '\xaa' && data[data.length()-1]=='\x55'){
@@ -580,19 +580,18 @@ void Sequence::errFinish(QByteArray data){
             }
             else if(data[7] == '\x24')
             {
-                errStr = QString("温度错误！");
+                errStr = tr("温度错误！");
                 errCode = ERROR_CODE_TEMP_ERR;
             }
 
         }
         else if(data[1] == '\x01' && data.length() > 15){
             if (data[13] == '\x79' && data[14] == '\x27'){
-                errStr = QString("刺破电机运动超时！");
+                errStr = tr("刺破电机运动超时！");
                 errCode = 0x7927;
             }
-        }
-
-        emit errOccur(errStr+" \n\n错误码："+QString::number(errCode,16));
+        }        
+        emit errOccur(tr("故障码：")+QString::number(errCode,16)+"\n"+errStr);
         Log::Logdb(LOGTYPE_ERR,errCode,errStr);
         lampDo(LampState::Lamp_Light_orange);
         qDebug()<<"Lamp3";
@@ -1071,7 +1070,8 @@ void Sequence::CameraView(QImage img)
         if (autoFocus_JumpStep == 2){
             if (autoFocus_CurrPoint > 0)
             {
-                double value = getDefinition();
+                //double value = getDefinition();
+                double value = imageAna->GetDefinition(camera->getyData(),camera->getImageType());
                 qDebug()<<"currValue:"<<value;
                 if (value > autoFocus_ClarityValue)
                 {
@@ -1168,21 +1168,21 @@ bool Sequence::saveView(){
 void Sequence::errReceive(ERROR_CODE code){
     QString errStr;
     if (code == ERROR_CODE_TEMP_CONNECT){
-        errStr = "温控板通讯出错！";        
+        errStr = tr("温控板通讯出错！");
     }
     else if(code == ERROR_CODE_CTRL_CONNECT)
-        errStr = "驱动板通讯出错！";
+        errStr = tr("驱动板通讯出错！");
     else if(code >= ERROR_CODE_CAM_CONNECT && code < ERROR_CODE_FILE_READ)
-        errStr = "摄像头通讯出错！";
+        errStr = tr("摄像头通讯出错！");
     else if(code == ERROR_CODE_FILE_READ)
-        errStr = "配置文件读取出错！";
+        errStr = tr("配置文件读取出错！");
     else if(code == ERROR_CODE_FILE_FORMAT)
-        errStr = "配置文件格式出错！";
+        errStr = tr("配置文件格式出错！");
     else if(code == ERROR_CODE_FILE_MODEL)
-        errStr = "模板文件读取出错！";
+        errStr = tr("模板文件读取出错！");
     else if(code == ERROR_CODE_DISK_FULL)
-        errStr = "磁盘已满！";
-    emit errOccur(errStr+" \n\n错误码："+QString::number(code,16));
+        errStr = tr("磁盘已满！");
+    emit errOccur(tr("故障码：")+QString::number(code,16)+"\n"+errStr);
     lampDo(LampState::Lamp_Light_orange);
     qDebug()<<"Lamp5";
 }

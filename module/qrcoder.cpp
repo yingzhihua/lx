@@ -393,7 +393,8 @@ int QRcoder::pierce(Mat &image, QString &qrStr){
 bool QRcoder::haveliquids(Mat &image)
 {
     bool result = false;
-    QString saveFile = saveDir+"/Qr"+QDateTime::currentDateTime().toString("MMdd_hh-mm-ss-zzz")+".bmp";
+    QString timeStr = QDateTime::currentDateTime().toString("MMdd_hh-mm-ss-zzz");
+    QString saveFile = saveDir+"/R"+timeStr+".bmp";
     cv::imwrite(saveFile.toStdString(),image);
 
     GaussianBlur(image, image, Size(25,25),0);
@@ -401,14 +402,14 @@ bool QRcoder::haveliquids(Mat &image)
 
     vector<vector<Point>> contours;
     vector<Vec4i> hi;
-    findContours(image,contours,hi,RETR_EXTERNAL,CHAIN_APPROX_NONE);
-    //findContours(image,contours,hi,RETR_LIST,CHAIN_APPROX_NONE);
+    //findContours(image,contours,hi,RETR_EXTERNAL,CHAIN_APPROX_NONE);
+    findContours(image,contours,hi,RETR_LIST,CHAIN_APPROX_NONE);
     qDebug()<<"contorus.size="<<contours.size();
 
     Mat con = Mat::zeros(image.rows,image.cols,image.type());
     for (size_t i = 0; i < contours.size(); i++)
         drawContours(con,contours,static_cast<int>(i),Scalar(255));
-    saveFile = saveDir+"/R"+QDateTime::currentDateTime().toString("MMdd_hh-mm-ss-zzz")+".bmp";
+    saveFile = saveDir+"/H"+timeStr+".bmp";
     cv::imwrite(saveFile.toStdString(),con);
 
     if (contours.size() < 2)

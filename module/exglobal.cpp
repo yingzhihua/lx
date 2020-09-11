@@ -7,26 +7,33 @@
 #include <QNetworkInterface>
 #include <QApplication>
 
+#include "systemcmd.h"
+
 #define BOXCODE_DEFAULT "204"
 
 QString ExGlobal::t_panelCode = "012315";
 QString ExGlobal::t_panelName = "上呼吸道测试";
-QString ExGlobal::t_sampleCode = "SLX 01079";
-QString ExGlobal::t_sampleInfo = "华山11";
+QString ExGlobal::t_sampleCode = "";//"SLX 01079";
+QString ExGlobal::t_sampleInfo = "";//"华山11";
 QString ExGlobal::t_sampleRemark = "";
 QString ExGlobal::t_BoxSerial = "Lot# 000001";
 QString ExGlobal::User = "";
+QString ExGlobal::DisplayUser = "";
 int ExGlobal::UserType = 0;
 QString ExGlobal::BoxCode = "";
 bool ExGlobal::test = false;
 
 QString ExGlobal::SysName = "样机02";
+QString ExGlobal::HospitalName = "";
+int ExGlobal::PrintType = 0;
+
 QString ExGlobal::AdminPassword = "123456";
 int ExGlobal::LanguageCode = 0;
 int ExGlobal::PanelBoxIndex = 1;
 
 QString ExGlobal::t_version = "V1";
-QString ExGlobal::build_version = "V1.0.4(build20200824)";
+QString ExGlobal::build_version = "V1.0.2"
+                                  "(build20200824)";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
@@ -65,7 +72,9 @@ int ExGlobal::PumpSoftHomeX = 0;
 int ExGlobal::PumpToolHomeX = 0;
 int ExGlobal::PumpSoftHomeOffset = 460;
 
-int ExGlobal::LockScreenTime = 30;
+int ExGlobal::LockScreenTime = 0;
+int ExGlobal::lockscreen_time = 0;
+int ExGlobal::LockScreenOpen = 0;
 bool ExGlobal::bChildImage = false;
 int ExGlobal::AutoFocus = 0;
 int ExGlobal::QrCode = 0;
@@ -111,6 +120,9 @@ QApplication * ExGlobal::app;
 QQmlApplicationEngine * ExGlobal::qml;
 
 static ExGlobal *exGlobal = nullptr;
+
+static SystemCmd cmd;
+
 QObject *ExGlobal::exglobal_provider(QQmlEngine *engine, QJSEngine *scriptEngine){
     Q_UNUSED(engine);
     Q_UNUSED(scriptEngine);
@@ -128,7 +140,7 @@ ExGlobal *ExGlobal::getPtr()
 
 ExGlobal::ExGlobal(QObject *parent) : QObject(parent)
 {
-    //qDebug()<<"ExGlobal";    
+    //qDebug()<<"ExGlobal";
 }
 
 void ExGlobal::GlobalMessage(int code){
@@ -139,6 +151,10 @@ void ExGlobal::GlobalMessage(int code){
 int ExGlobal::SysCommand(QString command){
     qDebug()<<"SysCommand"<<command;
     return system(command.toLatin1().data());
+}
+
+void ExGlobal::AsynCommand(QString command){
+    cmd.execute(command);
 }
 
 void ExGlobal::exClose(){
@@ -307,6 +323,9 @@ void ExGlobal::CaliParamInit()
     pTestModel->InitTest();
     pUserModel->LoadUser();
     pWifiModel->LoadData();
+
+    updateLockTime();
+
     Log::Logdb(LOGTYPE_POWERON);
 }
 
@@ -388,6 +407,8 @@ void ExGlobal::SetCaliParam(const QString &name, int caliValue)
         CamWhiteBlance = caliValue;
     else if (name == "LockScreenTime")
         LockScreenTime = caliValue;
+    else if (name == "LockScreenOpen")
+        LockScreenOpen = caliValue;
     else if (name == "LanguageCode")
         LanguageCode = caliValue;
     else if (name == "PanelBoxIndex")
@@ -414,6 +435,8 @@ void ExGlobal::SetCaliParam(const QString &name, int caliValue)
         QrY4 = caliValue;
     else if(name == "ProjectMode")
         ProjectMode = caliValue;
+    else if(name == "PrintType")
+        PrintType = caliValue;
     //qDebug()<<"setCaliParam,"<<name<<",result="<<caliValue;
 }
 
@@ -481,6 +504,8 @@ int ExGlobal::getCaliParam(const QString &caliName)
         result = CamWhiteBlance;
     else if(caliName == "LockScreenTime")
         result = LockScreenTime;
+    else if(caliName == "LockScreenOpen")
+        result = LockScreenOpen;
     else if(caliName == "LanguageCode")
         result = LanguageCode;
     else if(caliName == "PanelBoxIndex")
@@ -507,6 +532,8 @@ int ExGlobal::getCaliParam(const QString &caliName)
         result = QrY4;
     else if(caliName == "ProjectMode")
         result = ProjectMode;
+    else if(caliName == "PrintType")
+        result = PrintType;
     qDebug()<<"getCaliParam,"<<caliName<<",result="<<result;
     return result;
 }
@@ -520,6 +547,7 @@ void ExGlobal::updateCaliParam(const QString &caliName, int caliValue)
     else
         sql = "INSERT INTO CaliParam (ParamName, ParamValue) VALUES ('"+caliName+"', "+ QString::number(caliValue)+")";
     SqliteMgr::execute(sql);
+    qDebug()<<"updateCaliParam,"<<caliName<<",result="<<caliValue;
     SetCaliParam(caliName,caliValue);
 }
 
@@ -528,6 +556,8 @@ void ExGlobal::SetTextParam(const QString &textName, QString textValue){
         SysName = textValue;
     else if(textName == "AdminPassword")
         AdminPassword = textValue;
+    else if(textName == "HospitalName")
+        HospitalName = textValue;
 }
 
 QString ExGlobal::getTextParam(const QString &caliName){
@@ -536,6 +566,8 @@ QString ExGlobal::getTextParam(const QString &caliName){
         result = SysName;
     else if(caliName == "AdminPassword")
         result = AdminPassword;
+    else if(caliName == "HospitalName")
+        result = HospitalName;
     return result;
 }
 
@@ -665,4 +697,23 @@ void ExGlobal::Translator(int language){
         tor.load(QCoreApplication::applicationDirPath()+"/en_US.qm");
         app->installTranslator(&tor);
     }
+}
+
+void ExGlobal::updateLockTime(){
+    if (LockScreenOpen == 0)
+        lockscreen_time = 0;
+    else if(LockScreenTime == 0)
+        lockscreen_time = 60;
+    else if(LockScreenTime == 1)
+        lockscreen_time = 180;
+    else if(LockScreenTime == 2)
+        lockscreen_time = 300;
+    else if(LockScreenTime == 3)
+        lockscreen_time = 600;
+    else if(LockScreenTime == 4)
+        lockscreen_time = 900;
+    else if(LockScreenTime == 5)
+        lockscreen_time = 1800;
+    else
+        lockscreen_time = 0;
 }
