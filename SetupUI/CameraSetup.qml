@@ -43,7 +43,7 @@ Page {
         anchors.left: viewWin.left
         anchors.leftMargin: 10
         anchors.top: viewWin.bottom
-        anchors.topMargin: 80
+        anchors.topMargin: 30
         text: qsTr("打开预览")
         font.pixelSize: 30
         onClicked: {

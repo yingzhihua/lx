@@ -11,7 +11,7 @@ Rectangle {
         ListElement{Eid: "SystemName"; img:"qrc:/images/setupmenu_system.png"; name:qsTr("系统设置");info:"";qrc_res:"qrc:/SetupUI/SystemName.qml"}
         ListElement{Eid: "LockTime"; img:"qrc:/images/setupmenu_lock.png"; name:qsTr("锁屏时间");info:"";qrc_res:"qrc:/SetupUI/LockScreenSet.qml"}
         ListElement{Eid: "Language"; img:"qrc:/images/setupmenu_lauguage.png"; name:qsTr("语言");info:"";qrc_res:"qrc:/SetupUI/LanguageSet.qml"}
-        ListElement{Eid: "AdminPassword"; img:"qrc:/images/setupmenu_password.png"; name:qsTr("管理员密码");info:"";qrc_res:"qrc:/SetupUI/AdminPassword.qml"}
+        ListElement{Eid: "AdminPassword"; img:"qrc:/images/setupmenu_password.png"; name:qsTr("修改密码");info:"";qrc_res:"qrc:/SetupUI/AdminPassword.qml"}
         ListElement{Eid: "Wlan"; img:"qrc:/images/setupmenu_wifi.png"; name:qsTr("无线网络");info:"";qrc_res:"qrc:/SetupUI/WifiMenu.qml"}
         ListElement{Eid: "Network"; img:"qrc:/images/setupmenu_net.png"; name:qsTr("有线网络");info:"";qrc_res:"qrc:/SetupUI/NetWork.qml"}
         ListElement{Eid: "TimeSet"; img:"qrc:/images/setupmenu_time.png"; name:qsTr("时间设置");info:"";qrc_res:"qrc:/SetupUI/TimeSet.qml"}
@@ -103,12 +103,12 @@ Rectangle {
 
         if (ExGlobal.user != "admin"){
             removeItem("SystemName");
-            //removeItem("Wlan");
-            //removeItem("Network");
-            //removeItem("TimeSet");
+            removeItem("Wlan");
+            removeItem("Network");
+            removeItem("TimeSet");
             removeItem("LockTime");
             removeItem("User");            
-            setName("AdminPassword",qsTr("设置密码"))
+            //setName("AdminPassword",qsTr("设置密码"))
         }
 
         if (ExGlobal.projectMode() !== 0){            

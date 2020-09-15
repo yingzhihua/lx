@@ -7,6 +7,7 @@ import Dx.Global 1.0
 Page {    
     property bool bErrorOpenDoor: false
     id: idle_page
+    background: Rectangle{color: "#f5f5f5"}
 /*
     Image {
         id: openDoor
@@ -31,6 +32,7 @@ Page {
         anchors.verticalCenterOffset: -100
         source: "qrc:/images/opendoorAmi.gif"
         playing: false
+        speed: 0.3
         MouseArea{
             anchors.fill: parent
             onClicked: {

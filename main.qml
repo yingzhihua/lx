@@ -415,6 +415,7 @@ ApplicationWindow {
         //console.log("lx-model:"+testModel.rowCount());
         //console.log("lengxing",Qt.locale("en_US").nativeLanguageName)
         //VirtualKeyboardSettings.styleName = "retro"
+        //VirtualKeyboardSettings.wordCandidateList.alwaysVisable = true;
     }
 
     onWaitMsgChanged: {

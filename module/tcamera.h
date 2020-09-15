@@ -3,9 +3,12 @@
 
 #include <QObject>
 
-#include "cameraplayer.h"
 #include "imagecapture.h"
 #include "ckcamera.h"
+
+typedef enum{
+    CAMERA_TYPE_V4L2,CAMERA_TYPE_DVP,CAMERA_TYPE_CK,CAMERA_EMPTY
+} CAMERATYPE;
 
 class TCamera : public QObject
 {

@@ -87,20 +87,41 @@ bool UserModel::addUser(QString name, QString password, QString displayName, int
 }
 
 bool UserModel::updateUser(QString name, QString password, QString displayName, int type){
-    QString sql = QString("update User set displayName='%1', Password='%2', UserType=%3 where Name = '%4'").arg(displayName).arg(password).arg(type).arg(name);
-    bool result = SqliteMgr::execute(sql);
-    if (result){
-        beginResetModel();
-        for (int i = 0; i < m_display_list.count();i++)
-        {
-            if (m_display_list[i].Name == name)
+    bool result = false;
+    if (password != ""){
+        qDebug()<<"password is not null";
+        QString sql = QString("update User set displayName='%1', Password='%2', UserType=%3 where Name = '%4'").arg(displayName).arg(password).arg(type).arg(name);
+        result = SqliteMgr::execute(sql);
+        if (result){
+            beginResetModel();
+            for (int i = 0; i < m_display_list.count();i++)
             {
-                m_display_list[i].Password = password;
-                m_display_list[i].DisplayName = displayName;
-                m_display_list[i].UserType = type;
+                if (m_display_list[i].Name == name)
+                {
+                    m_display_list[i].Password = password;
+                    m_display_list[i].DisplayName = displayName;
+                    m_display_list[i].UserType = type;
+                }
             }
+            endResetModel();
         }
-        endResetModel();
+    }
+    else {
+        qDebug()<<"password is null";
+        QString sql = QString("update User set displayName='%1', UserType=%2 where Name = '%3'").arg(displayName).arg(type).arg(name);
+        result = SqliteMgr::execute(sql);
+        if (result){
+            beginResetModel();
+            for (int i = 0; i < m_display_list.count();i++)
+            {
+                if (m_display_list[i].Name == name)
+                {
+                    m_display_list[i].DisplayName = displayName;
+                    m_display_list[i].UserType = type;
+                }
+            }
+            endResetModel();
+        }
     }
     return result;
 }

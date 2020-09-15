@@ -140,10 +140,10 @@ Page {
             {
                 mess.text = qsTr("密码和确认密码不一致！");
             }
-            else if(password.text == "")
-            {
-                mess.text = qsTr("密码不能为空！");
-            }
+            //else if(password.text == "")
+            //{
+            //    mess.text = qsTr("密码不能为空！");
+            //}
             else if(displayName.text == "")
             {
                 mess.text = qsTr("显示名不能为空！");

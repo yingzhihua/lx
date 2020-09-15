@@ -8,6 +8,7 @@ Page {
     property int titleChange: 0
     property bool pagequit: false
     id: start_page
+    background: Rectangle{color: "#f5f5f5"}
 
     Image {
         id: appicon
