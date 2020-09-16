@@ -33,12 +33,11 @@ bool GlobalApplication::notify(QObject *obj, QEvent *e){
     }
     else if(e->type() == QEvent::KeyPress){
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(e);
-        //qDebug()<<keyEvent->key()<<keyEvent->text()<<keyEvent->count();
+        qDebug()<<keyEvent->key()<<keyEvent->text()<<keyEvent->count();
         if (keyEvent->text() != "")
             simpleKey = keyEvent->text();
     }
     else if(e->type() == QEvent::KeyRelease){
-        //qDebug()<<"Press"<<keyEvent->key()<<keyEvent->text()<<keyEvent->count();
         if (simpleKey != "")
         {
             sampleCode += simpleKey;

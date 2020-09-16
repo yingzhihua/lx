@@ -96,6 +96,7 @@ Rectangle {
         setInfo("Language",ExGlobal.sysLanguageName);
         setInfo("Version",ExGlobal.version);
         setInfo("Network",ExGlobal.getIP());
+        setInfo("Wlan",ExGlobal.getWIFIIP());
         setlocktimeinfo();
 
         if (ExGlobal.user != "flashdx")

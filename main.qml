@@ -36,6 +36,7 @@ ApplicationWindow {
         ListElement{Eid: "setup_datetime"; img:"qrc:/images/title_datetime.png"; name:qsTr("时间");color:"#5acedf";header:true}
         ListElement{Eid: "setup_network"; img:"qrc:/images/title_network.png"; name:qsTr("有线网络");color:"#5acedf";header:true}
         ListElement{Eid: "setup_wifi"; img:"qrc:/images/title_wifi.png"; name:qsTr("无线网络");color:"#5acedf";header:true}
+        ListElement{Eid: "setup_about"; img:"qrc:/images/title_about.png"; name:qsTr("关于");color:"#5acedf";header:true}
         ListElement{Eid: "startup"; img:"qrc:/images/title_startup.png"; name:qsTr("系统自检");color:"#5acedf";header:true}
         ListElement{Eid: "startup_error"; img:"qrc:/images/title_startup.png"; name:qsTr("系统启动");color:"#fc7050";header:true}
         ListElement{Eid: "box_error"; img:"qrc:/images/title_boxalarm.png"; name:qsTr("试剂盒错误");color:"#fc7050";header:true}

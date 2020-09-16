@@ -58,7 +58,7 @@ public:
     static QString panelCodeEx(){return "Lot# "+t_panelCode;}
     static void setPanelCode(const QString &panelCode){t_panelCode = panelCode;}
     static QString sampleCode(){return t_sampleCode;}
-    void setSampleCode(const QString &sampleCode){t_sampleCode = sampleCode;emit sampleCodeChanged();}
+    void setSampleCode(const QString &sampleCode);
     static QString sampleInfo(){return t_sampleInfo;}
     void setSampleInfo(const QString &sampleInfo){t_sampleInfo = sampleInfo;emit sampleInfoChanged();}
     static QString sampleRemark(){return t_sampleRemark;}
@@ -103,6 +103,9 @@ public:
     Q_INVOKABLE static void updateTextParam(const QString &caliName, QString caliValue);
     Q_INVOKABLE static QString getTextParam(const QString &caliName);
     Q_INVOKABLE static QString getIP();
+    Q_INVOKABLE static QString getWIFIIP();
+    Q_INVOKABLE static QString getMac();
+    Q_INVOKABLE static QString getSerial();
     Q_INVOKABLE static QStringList getNetWork();
     Q_INVOKABLE static void setNetWork(const QString &ip,const QString &mask,const QString &gate);
     Q_INVOKABLE static bool setTime(QString time);
@@ -123,6 +126,7 @@ public:
 
     static void setLogin(){bLogin = true;}
     Q_INVOKABLE static bool login(){return bLogin;}
+
     static int V1WorkX;
     static int V2WorkX;
     static int V3WorkX;
@@ -185,6 +189,7 @@ public:
     static int AutoFocus;
     static int QrCode;
     static int ProjectMode;
+    static int MachineMode;
     static int DoorOut;
     static int DataEntry;
     static unsigned char *bufrgb;
@@ -197,7 +202,7 @@ public:
     static QApplication *app;
     static QQmlApplicationEngine *qml;
     static void Translator(int language);
-
+    static QString screenCapture();
 signals:
     void userChanged();
     void panelNameChanged();

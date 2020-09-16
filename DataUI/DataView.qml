@@ -100,8 +100,10 @@ Page {
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
-                    testResultModel.setCurrItem(2);
-                    mainView.push("qrc:/DataUI/DataLine.qml");
+                    if (ExGlobal.getCaliParam("MachineMode")===1){
+                        testResultModel.setCurrItem(2);
+                        mainView.push("qrc:/DataUI/DataLine.qml");
+                    }
                 }
             }
         }
@@ -138,8 +140,10 @@ Page {
                     anchors.fill: parent
                     onClicked: {
                         console.log("click:"+parent.objectName);
-                        testResultModel.setCurrItem(parent.objectName);                        
-                        mainView.push("qrc:/DataUI/DataLine.qml");
+                        if (ExGlobal.getCaliParam("MachineMode")===1){
+                            testResultModel.setCurrItem(parent.objectName);
+                            mainView.push("qrc:/DataUI/DataLine.qml");
+                        }
                     }
                 }
             }

@@ -8,38 +8,12 @@ Rectangle{
     height: 457
     radius: 22
     clip: true
-/*
-    Rectangle{
-        x: parent.width/2-11
-        y: 11-parent.width/2
-        width:22
-        height: parent.width
-        rotation: 90
-        gradient: Gradient
-        {
-            GradientStop{position:0.0;color: "#cccccc"}
-            GradientStop{position:1.0;color: "#e5e5e5"}
-        }
-    }
-    Rectangle{
-        x:8
-        y:163
-        width: parent.width-16
-        height: 2
-        color: "#a5a5a5"
-    }
-    Rectangle{
-        x:8
-        y:307
-        width: parent.width-16
-        height: 2
-        color: "#a5a5a5"
-    }
-*/
+
     Image {
         source: "qrc:/images/ThreeMessageBG.png"
     }
 
+    /*
     Text{
         id: message1
         y:60
@@ -57,6 +31,43 @@ Rectangle{
         y:350
         font.pixelSize: 40
         anchors.horizontalCenter: parent.horizontalCenter
+    }
+    */
+    Text{
+        id: message1
+        x:10
+        y:20
+        width: parent.width-20
+        height: 140
+        font.pixelSize: 40
+        verticalAlignment: Text.AlignVCenter
+        horizontalAlignment:Text.AlignHCenter
+        wrapMode: Text.Wrap
+        clip:true
+    }
+    Text{
+        id: message2
+        x:10
+        y:165
+        width: parent.width-20
+        height: 140
+        font.pixelSize: 40
+        verticalAlignment: Text.AlignVCenter
+        horizontalAlignment:Text.AlignHCenter
+        wrapMode: Text.Wrap
+        clip:true
+    }
+    Text{
+        id: message3
+        x:10
+        y:310
+        width: parent.width-20
+        height: 140
+        font.pixelSize: 40
+        verticalAlignment: Text.AlignVCenter
+        horizontalAlignment:Text.AlignHCenter
+        wrapMode: Text.Wrap
+        clip:true
     }
 }
 

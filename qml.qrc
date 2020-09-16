@@ -153,5 +153,6 @@
         <file>images/sign0.png</file>
         <file>images/title_test.png</file>
         <file>images/opendoorAmi.gif</file>
+        <file>images/title_about.png</file>
     </qresource>
 </RCC>

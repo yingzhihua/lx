@@ -6,6 +6,8 @@
 #include "serialmgr.h"
 #include <QNetworkInterface>
 #include <QApplication>
+#include <QScreen>
+#include <QGuiApplication>
 
 #include "systemcmd.h"
 
@@ -32,8 +34,7 @@ int ExGlobal::LanguageCode = 0;
 int ExGlobal::PanelBoxIndex = 1;
 
 QString ExGlobal::t_version = "V1";
-QString ExGlobal::build_version = "V1.0.2"
-                                  "(build20200824)";
+QString ExGlobal::build_version = "V1.0.5(build20200916)";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
@@ -99,6 +100,8 @@ int ExGlobal::QrY4 = 715;
 #endif
 
 int ExGlobal::ProjectMode = 0;
+int ExGlobal::MachineMode = 0;
+
 int ExGlobal::DoorOut = 300;
 int ExGlobal::DataEntry = 0;
 
@@ -167,10 +170,42 @@ void ExGlobal::exClose(){
 }
 
 QString ExGlobal::getIP(){
+    foreach(QNetworkInterface i,QNetworkInterface::allInterfaces()){
+        if (i.name().contains("eth"))
+        foreach(QNetworkAddressEntry e,i.addressEntries()){
+            if (e.ip() != QHostAddress::LocalHost && e.ip().toIPv4Address())
+                return e.ip().toString();
+        }
+    }
+    /*
     foreach(const QHostAddress& hostAddress,QNetworkInterface::allAddresses())
         if(hostAddress != QHostAddress::LocalHost && hostAddress.toIPv4Address())
             return hostAddress.toString();
-    return "127.0.0.1";
+            */
+    return "";
+}
+
+QString ExGlobal::getWIFIIP(){
+    foreach(QNetworkInterface i,QNetworkInterface::allInterfaces()){
+        if (i.name().contains("wlan"))
+        foreach(QNetworkAddressEntry e,i.addressEntries()){
+            if (e.ip() != QHostAddress::LocalHost && e.ip().toIPv4Address())
+                return e.ip().toString();
+        }
+    }
+    return "";
+}
+
+QString ExGlobal::getMac(){
+    foreach(QNetworkInterface i,QNetworkInterface::allInterfaces()){
+        if (i.name().contains("eth"))
+            return i.hardwareAddress();
+    }
+    return "";
+}
+
+QString ExGlobal::getSerial(){
+    return "flashdx123456";
 }
 
 QStringList ExGlobal::getNetWork(){
@@ -435,6 +470,8 @@ void ExGlobal::SetCaliParam(const QString &name, int caliValue)
         QrY4 = caliValue;
     else if(name == "ProjectMode")
         ProjectMode = caliValue;
+    else if(name == "MachineMode")
+        MachineMode = caliValue;
     else if(name == "PrintType")
         PrintType = caliValue;
     //qDebug()<<"setCaliParam,"<<name<<",result="<<caliValue;
@@ -532,6 +569,8 @@ int ExGlobal::getCaliParam(const QString &caliName)
         result = QrY4;
     else if(caliName == "ProjectMode")
         result = ProjectMode;
+    else if(caliName == "MachineMode")
+        result = MachineMode;
     else if(caliName == "PrintType")
         result = PrintType;
     qDebug()<<"getCaliParam,"<<caliName<<",result="<<result;
@@ -716,4 +755,33 @@ void ExGlobal::updateLockTime(){
         lockscreen_time = 1800;
     else
         lockscreen_time = 0;
+}
+
+QString ExGlobal::screenCapture(){
+    QString filename = QCoreApplication::applicationDirPath()+"/screenshot";
+    QDir dir(filename);
+    if (!dir.exists())
+        dir.mkpath(filename);
+    filename += "/"+QDateTime::currentDateTime().toString("yyyyMMdd_hh-mm-ss-zzz")+".jpg";
+    QScreen *screen = QGuiApplication::primaryScreen();
+    screen->grabWindow(0).save(filename,"jpg");
+    return filename;
+}
+
+void ExGlobal::setSampleCode(const QString &sampleCode){
+    if (sampleCode == "p" || sampleCode == "P")
+    {
+        screenCapture();
+    }
+    else if(sampleCode.length()>1 && sampleCode[0] == 'I'){
+        setSampleInfo(sampleCode.mid(1));
+    }
+    else if(sampleCode.length()>1 && sampleCode[0] == 'R'){
+        setSampleRemark(sampleCode.mid(1));
+    }
+    else{
+        t_sampleCode = sampleCode;
+        emit sampleCodeChanged();
+    }
+
 }
