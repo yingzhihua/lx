@@ -32,7 +32,7 @@ private slots:
     void handleWriteTimeout();
 
 private:    
-    void ackReceive(QByteArray wData);
+    bool ackReceive(QByteArray wData);
     void errReceive(QByteArray wData);
     void clearTime(QByteArray wData);
     static void serialSend(bool clearCount);

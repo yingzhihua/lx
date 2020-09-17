@@ -250,6 +250,7 @@ Page {
                     busyDes.visible = false;
                     /*/
                     openDoor.playing = false
+                    openDoor.enabled = true
                     //*/
                     updateState.start();
                 }
@@ -272,6 +273,7 @@ Page {
                     busyDes.visible = false;
                     /*/
                     openDoor.playing = false
+                    openDoor.enabled = true
                     //*/
                 }
             }
@@ -288,6 +290,7 @@ Page {
                 busyDes.visible = false;
                 /*/
                 openDoor.playing = false
+                openDoor.enabled = true
                 //*/
                 Sequence.setTitle("box_error");
                 if (ExGlobal.projectMode() === 0)
@@ -343,6 +346,7 @@ Page {
                 busyDes.visible = true;
                 /*/
                 openDoor.playing = true
+                openDoor.enabled = false
                 //*/
             }
         }
@@ -356,6 +360,7 @@ Page {
                 busyDes.visible = true;
                 /*/
                 openDoor.playing = true
+                openDoor.enabled = false
                 //*/
             }
         }        

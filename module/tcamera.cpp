@@ -116,14 +116,6 @@ bool TCamera::setWhite(int value){
     return true;
 }
 
-double TCamera::getDefinition(){
-    return 0;
-}
-
-double TCamera::getDefinition2(){
-    return 0;
-}
-
 bool TCamera::saveRaw(QString filename){
     if (cameraType == CAMERA_TYPE_CK)
         return ckCamera->saveRaw(filename);

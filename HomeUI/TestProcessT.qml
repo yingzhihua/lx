@@ -81,7 +81,7 @@ Page {
         anchors.left: parent.left
         anchors.leftMargin: 20
         anchors.top: removemask.bottom
-        anchors.topMargin: 40
+        anchors.topMargin: 10
         wrapMode: Text.Wrap
     }
 

@@ -1,3 +1,4 @@
+
 //#include "QZXing.h"
 #include <QDebug>
 #include <QImage>

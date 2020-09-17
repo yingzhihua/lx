@@ -20,7 +20,7 @@ bool GlobalApplication::notify(QObject *obj, QEvent *e){
     QString clName = objMeta->className();
     //qDebug()<<"e.type:"<<e->type();
     if(e->type() == QEvent::MouseButtonRelease){
-        qDebug()<<"clName:"<<clName.mid(0,28);
+        //qDebug()<<"clName:"<<clName.mid(0,28);
         if (clName.mid(0,28) == "QQuickApplicationWindow_QML_"){
             //QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(e);
             //qDebug()<<"clName:"<<clName<<"mouse:"<<mouseEvent->x();
@@ -33,7 +33,7 @@ bool GlobalApplication::notify(QObject *obj, QEvent *e){
     }
     else if(e->type() == QEvent::KeyPress){
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(e);
-        qDebug()<<keyEvent->key()<<keyEvent->text()<<keyEvent->count();
+        //qDebug()<<keyEvent->key()<<keyEvent->text()<<keyEvent->count();
         if (keyEvent->text() != "")
             simpleKey = keyEvent->text();
     }

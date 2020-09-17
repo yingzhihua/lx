@@ -29,8 +29,6 @@ public:
     bool setGain(int value);
     int getWhite();
     bool setWhite(int value);
-    double getDefinition();
-    double getDefinition2();
     bool saveRaw(QString filename);
 
     int imagetype;    

@@ -150,6 +150,7 @@ QString Sequence::getCurrTestTime(){
 bool Sequence::sequenceDo(SequenceId id)
 {
     //QMetaEnum metaEnum = QMetaEnum::fromType<SequenceId>();
+
     qDebug()<<"sequenceDo,currSequenceId:"<<currSequenceId<<id;
     //emit titleNotify(200,"正在测试，预计剩余31分钟");
     //sequenceFinish(SequenceResult::Result_Test_finish);
@@ -1059,6 +1060,7 @@ void Sequence::setSenorState(char char1, char char2)
     //qDebug()<<"bDoorState:"<<bDoorState<<"bBoxState:"<<bBoxState;
 }
 
+static double autoFocus_FirstClarityValue;
 void Sequence::CameraView(QImage img)
 {
     imageProvider->img = img;
@@ -1083,12 +1085,16 @@ void Sequence::CameraView(QImage img)
                     if (autoFocus_dec == false && autoFocus_ClarityPoint == 1){
                         autoFocus_dec = true;
                         autoFocus_CurrPoint = 0;
-                        autoFocus_ClarityValue = 0;
+                        autoFocus_FirstClarityValue = autoFocus_ClarityValue;
+                        autoFocus_ClarityValue = 0;                        
                     }
                     else{
                         int focusResult;
-                        if (autoFocus_dec == true){                            
-                            focusResult = AUTOFOCUS_MAX-AUTOFOCUS_STEP*(autoFocus_ClarityPoint-1)-AUTOFOCUS_MIN;
+                        if (autoFocus_dec == true){
+                            if (autoFocus_ClarityValue < autoFocus_FirstClarityValue)
+                                focusResult = 0;
+                            else
+                                focusResult = AUTOFOCUS_MAX-AUTOFOCUS_STEP*(autoFocus_ClarityPoint-1)-AUTOFOCUS_MIN;
                         }
                         else {                            
                             focusResult = AUTOFOCUS_STEP*(autoFocus_ClarityPoint-1);
@@ -1515,13 +1521,16 @@ QStringList Sequence::getLoopTestList(){
 void Sequence::lampDo(LampState state){
     switch (state) {
     case LampState::Lamp_Light_blue:
-        serialMgr->CtrlDirectWrite(ActionParser::ParamToByte("Lamp",1,1,65535,0));
+        serialMgr->serialWrite(ActionParser::ParamToByte("Lamp",1,1,65535,0));
+        //serialMgr->CtrlDirectWrite(ActionParser::ParamToByte("Lamp",1,1,65535,0));
         break;
     case LampState::Lamp_Light_green:
-        serialMgr->CtrlDirectWrite(ActionParser::ParamToByte("Lamp",1,2,65535,0));
+        serialMgr->serialWrite(ActionParser::ParamToByte("Lamp",1,2,65535,0));
+        //serialMgr->CtrlDirectWrite(ActionParser::ParamToByte("Lamp",1,2,65535,0));
         break;
     case LampState::Lamp_Light_orange:
-        serialMgr->CtrlDirectWrite(ActionParser::ParamToByte("Lamp",1,0,65535,0));
+        serialMgr->serialWrite(ActionParser::ParamToByte("Lamp",1,0,65535,0));
+        //serialMgr->CtrlDirectWrite(ActionParser::ParamToByte("Lamp",1,0,65535,0));
         break;
     }
 }

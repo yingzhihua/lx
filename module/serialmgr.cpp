@@ -200,7 +200,7 @@ void SerialMgr::clearTime(QByteArray wData)
     }
 }
 
-void SerialMgr::ackReceive(QByteArray wData)
+bool SerialMgr::ackReceive(QByteArray wData)
 {
     qDebug()<<"ackReceive start";
     mutex.lock();

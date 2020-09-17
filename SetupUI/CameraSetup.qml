@@ -31,11 +31,13 @@ Page {
 
     Text{
         id: definition
-        anchors.top: viewWin.bottom
-        anchors.topMargin: 20
-        anchors.left: viewWin.left
-        anchors.leftMargin: 0
-        width: viewWin.width
+        anchors.bottom: viewWin.bottom
+        anchors.left: viewWin.right
+        anchors.leftMargin: 20
+        width: 500
+        height: 200
+        wrapMode: Text.Wrap
+        verticalAlignment: Text.AlignBottom
     }
 
     Button{
@@ -233,7 +235,7 @@ Page {
         text: qsTr("打开自动白平衡")
         anchors.right: focusValue.right
         anchors.top: lbfocus.bottom
-        checked: Sequence.getWhiteBalance() == 0
+        checked: Sequence.getWhiteBalance() === 0
         anchors.topMargin: 80
         font.pixelSize: 40
     }
@@ -290,6 +292,8 @@ Page {
                 cameraBox.source = "";
                 cameraBox.source = "image://CodeImg/view";
                 definition.text = "清晰度："+Sequence.getDefinition().toFixed(4)+",  "+Sequence.getDefinition2().toFixed(4)
+                definition.text += "\n亮度："+Sequence.getLight().toFixed(4)
+                definition.text += "\n圆直径："+Sequence.getLight().toFixed(4)
                 console.log("CameraSetup.qml,onCallQmlRefeshImg");
             }
         }
