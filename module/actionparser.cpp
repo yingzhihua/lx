@@ -2,6 +2,12 @@
 #include "exglobal.h"
 #include <QDebug>
 static quint8 nserial = 0;
+
+/*
+ * data[7] == 0x70
+ *  data[11]=0B-0E:1-4档光源,0A:close Light
+ *
+ */
 ActionParser::ActionParser()
 {
 

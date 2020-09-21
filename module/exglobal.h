@@ -190,6 +190,7 @@ public:
     static int QrCode;
     static int ProjectMode;
     static int MachineMode;
+    static int ClearMode;
     static int DoorOut;
     static int DataEntry;
     static unsigned char *bufrgb;

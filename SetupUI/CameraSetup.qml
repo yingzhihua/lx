@@ -291,9 +291,9 @@ Page {
             if (bView == true){
                 cameraBox.source = "";
                 cameraBox.source = "image://CodeImg/view";
-                definition.text = "清晰度："+Sequence.getDefinition().toFixed(4)+",  "+Sequence.getDefinition2().toFixed(4)
+                definition.text = "清晰度："+Sequence.getDefinition1().toFixed(4)+",  "+Sequence.getDefinition2().toFixed(4)+",  "+Sequence.getDefinition3().toFixed(4)
                 definition.text += "\n亮度："+Sequence.getLight().toFixed(4)
-                definition.text += "\n圆直径："+Sequence.getLight().toFixed(4)
+                definition.text += "\n圆直径："+Sequence.getCircSize().toFixed(4)
                 console.log("CameraSetup.qml,onCallQmlRefeshImg");
             }
         }

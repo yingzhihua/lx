@@ -317,6 +317,7 @@ void Sequence::TestSecondTimeout(){
 void Sequence::ActionFinish(QByteArray data)
 {
     qDebug()<<"Sequence ActionFinish:"<<data.toHex(' ');
+    qDebug()<<"currSequenceId:"<<currSequenceId;
     if(bAutoFocus)
         Log::LogByFile("Focus.txt",data.toHex(' '));
     if (data[7] == '\x72'){
@@ -1060,6 +1061,18 @@ void Sequence::setSenorState(char char1, char char2)
     //qDebug()<<"bDoorState:"<<bDoorState<<"bBoxState:"<<bBoxState;
 }
 
+double Sequence::getDefinition(){
+    if (ExGlobal::ClearMode == 1)
+        return imageAna->GetDefinition2(camera->getyData(),camera->getImageType());
+    if (ExGlobal::ClearMode == 2)
+        return imageAna->GetDefinition3(camera->getyData(),camera->getImageType());
+    if (ExGlobal::ClearMode == 3)
+        return imageAna->GetMeanLight(camera->getyData(),camera->getImageType());
+    if (ExGlobal::ClearMode == 4)
+        return imageAna->GetCircularSize(camera->getyData(),camera->getImageType());
+    return imageAna->GetDefinition(camera->getyData(),camera->getImageType());
+}
+
 static double autoFocus_FirstClarityValue;
 void Sequence::CameraView(QImage img)
 {
@@ -1072,8 +1085,7 @@ void Sequence::CameraView(QImage img)
         if (autoFocus_JumpStep == 2){
             if (autoFocus_CurrPoint > 0)
             {
-                //double value = getDefinition();
-                double value = imageAna->GetDefinition(camera->getyData(),camera->getImageType());
+                double value = getDefinition();
                 qDebug()<<"currValue:"<<value;
                 if (value > autoFocus_ClarityValue)
                 {

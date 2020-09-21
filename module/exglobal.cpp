@@ -101,6 +101,7 @@ int ExGlobal::QrY4 = 715;
 
 int ExGlobal::ProjectMode = 0;
 int ExGlobal::MachineMode = 0;
+int ExGlobal::ClearMode = 0;
 
 int ExGlobal::DoorOut = 300;
 int ExGlobal::DataEntry = 0;
@@ -472,6 +473,8 @@ void ExGlobal::SetCaliParam(const QString &name, int caliValue)
         ProjectMode = caliValue;
     else if(name == "MachineMode")
         MachineMode = caliValue;
+    else if(name == "ClearMode")
+        ClearMode = caliValue;
     else if(name == "PrintType")
         PrintType = caliValue;
     //qDebug()<<"setCaliParam,"<<name<<",result="<<caliValue;
@@ -571,6 +574,8 @@ int ExGlobal::getCaliParam(const QString &caliName)
         result = ProjectMode;
     else if(caliName == "MachineMode")
         result = MachineMode;
+    else if(caliName == "ClearMode")
+        result = ClearMode;
     else if(caliName == "PrintType")
         result = PrintType;
     qDebug()<<"getCaliParam,"<<caliName<<",result="<<result;

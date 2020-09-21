@@ -113,9 +113,12 @@ public:
     Q_INVOKABLE void showAnaImg(int type,int light);
     Q_INVOKABLE void qrSet(bool bopenlight, bool scale, bool handlimage, int bin,int pox);
 
-    Q_INVOKABLE double getDefinition(){return imageAna->GetDefinition(camera->getyData(),camera->getImageType());}
+    Q_INVOKABLE double getDefinition();
+    Q_INVOKABLE double getDefinition1(){return imageAna->GetDefinition(camera->getyData(),camera->getImageType());}
     Q_INVOKABLE double getDefinition2(){return imageAna->GetDefinition2(camera->getyData(),camera->getImageType());}
+    Q_INVOKABLE double getDefinition3(){return imageAna->GetDefinition3(camera->getyData(),camera->getImageType());}
     Q_INVOKABLE double getLight(){return imageAna->GetMeanLight(camera->getyData(),camera->getImageType());}
+    Q_INVOKABLE double getCircSize(){return imageAna->GetCircularSize(camera->getyData(),camera->getImageType());}
     Q_INVOKABLE bool validBox(){return bValidBox;}
 
     Q_PROPERTY(int fan1Speed READ fan1Speed NOTIFY fan1SpeedChanged)

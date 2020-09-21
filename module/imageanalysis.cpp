@@ -808,8 +808,11 @@ void ImageAnalysis::SetDebugPos(size_t x, size_t y)
     subImageHandle(true,x,y,firstImg,subImage,contours,centerPoint);
 }
 
-#define CAL_WIDTH 1000
+#define CAL_WIDTH 600
 double ImageAnalysis::GetDefinition(void *data, int imageType){
+    QTime time;
+    time.start();
+
     double meanValue = 0.0;
     Mat imageSobel;
     Mat imageGrey;
@@ -821,10 +824,14 @@ double ImageAnalysis::GetDefinition(void *data, int imageType){
     }
     Sobel(imageGrey,imageSobel,CV_8U,1,1);
     meanValue = mean(imageSobel)[0];
+    qDebug()<<"GetDefinition,elapsed="<<time.elapsed();
     return meanValue;
 }
 
 double ImageAnalysis::GetDefinition2(void *data, int imageType){
+    QTime time;
+    time.start();
+
     double meanValue = 0.0;
     Mat imageSobel;
     Mat imageGrey;
@@ -836,10 +843,14 @@ double ImageAnalysis::GetDefinition2(void *data, int imageType){
     }
     Laplacian(imageGrey,imageSobel,CV_8U);
     meanValue = mean(imageSobel)[0];
+    qDebug()<<"GetDefinition2,elapsed="<<time.elapsed();
     return meanValue;
 }
 
 double ImageAnalysis::GetDefinition3(void *data, int imageType){
+    QTime time;
+    time.start();
+
     double meanValue = 0.0;
     Mat imageSobel;
     Mat imageGrey;
@@ -853,14 +864,64 @@ double ImageAnalysis::GetDefinition3(void *data, int imageType){
 
     meanStdDev(imageGrey,imageSobel,imageMeanStdValue);
     meanValue = imageMeanStdValue.at<double>(0,0);
+    qDebug()<<"GetDefinition3,elapsed="<<time.elapsed();
     return meanValue*meanValue;
 }
 
 double ImageAnalysis::GetMeanLight(void *data, int imageType){
+    QTime time;
+    time.start();
+    double meanValue = 0.0;
     Mat imageGrey;
     if (imageType == 0)
         imageGrey = Mat(1944,2592,CV_8U,data);
     else if(imageType == 1)
         imageGrey = Mat(1944,2592,CV_16U,data);
-    return mean(imageGrey)[0];
+    meanValue = mean(imageGrey)[0];
+    qDebug()<<"GetMeanLight,elapsed="<<time.elapsed();
+    return meanValue;
+}
+
+double ImageAnalysis::GetCircularSize(void *data, int imageType){
+    QTime time;
+    time.start();
+
+    double result = 0;
+    Mat imageGrey = Mat::zeros(CAL_WIDTH,CAL_WIDTH,CV_8U);
+    if (imageType == 0)
+        Mat(1944,2592,CV_8U,data)(Rect((2592-CAL_WIDTH)>>1,(1944-CAL_WIDTH)>>1,CAL_WIDTH,CAL_WIDTH)).copyTo(imageGrey);
+    else if(imageType == 1)
+    {
+        Mat temp = Mat(1944,2592,CV_16U,data)(Rect((2592-CAL_WIDTH)>>1,(1944-CAL_WIDTH)>>1,CAL_WIDTH,CAL_WIDTH));
+        for (int i = 0; i < CAL_WIDTH; i++)
+        {
+            uchar *outdata = imageGrey.ptr<uchar>(i);
+            const uint16_t *indata = temp.ptr<uint16_t>(i);
+            for (int j = 0; j < CAL_WIDTH; j++,outdata++,indata++){
+                *outdata = ((*indata)>>4)&0xFF;
+            }
+        }
+    }
+    GaussianBlur(imageGrey, imageGrey, Size(25,25),0);
+    normalize(imageGrey,imageGrey,0,255,NORM_MINMAX);
+    adaptiveThreshold(imageGrey,imageGrey,255,ADAPTIVE_THRESH_GAUSSIAN_C,THRESH_BINARY,51,0);
+
+    vector<Vec4i> hi;
+    vector<vector<Point>> contours;
+    findContours(imageGrey,contours,hi,RETR_EXTERNAL,CHAIN_APPROX_NONE);
+    double Sm = 0;
+    int Ss = 0;
+    for (size_t z = 0; z < contours.size(); z++)
+    {
+        double s = contourArea(contours[z]);
+        if (s>2000)
+        {
+            Sm += s;
+            Ss++;
+        }
+    }
+    qDebug()<<"GetCircularSize,elapsed="<<time.elapsed()<<"Sm="<<Sm<<"Ss="<<Ss;
+    if (Ss > 9)
+        result = Sm/Ss;
+    return -result;
 }
