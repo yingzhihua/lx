@@ -34,7 +34,7 @@ int ExGlobal::LanguageCode = 0;
 int ExGlobal::PanelBoxIndex = 1;
 
 QString ExGlobal::t_version = "V1";
-QString ExGlobal::build_version = "V1.0.5(build20200916)";
+QString ExGlobal::build_version = "V1.0.7(build20200922)";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
@@ -102,7 +102,13 @@ int ExGlobal::QrY4 = 715;
 int ExGlobal::ProjectMode = 0;
 int ExGlobal::MachineMode = 0;
 int ExGlobal::ClearMode = 0;
-
+int ExGlobal::LiquidsHeight = 70;
+int ExGlobal::DryWet = 11;
+int ExGlobal::ClearWidth = 600;
+int ExGlobal::FocusX = 1000;
+int ExGlobal::FocusY = 670;
+int ExGlobal::FocusWidth = 600;
+int ExGlobal::FocusHeight = 600;
 int ExGlobal::DoorOut = 300;
 int ExGlobal::DataEntry = 0;
 
@@ -475,6 +481,20 @@ void ExGlobal::SetCaliParam(const QString &name, int caliValue)
         MachineMode = caliValue;
     else if(name == "ClearMode")
         ClearMode = caliValue;
+    else if(name == "ClearWidth")
+        ClearWidth = caliValue;
+    else if(name == "FocusX")
+        FocusX = caliValue;
+    else if(name == "FocusY")
+        FocusY = caliValue;
+    else if(name == "FocusWidth")
+        FocusWidth = caliValue;
+    else if(name == "FocusHeight")
+        FocusHeight = caliValue;
+    else if(name == "DryWet")
+        DryWet = caliValue;
+    else if(name == "LiquidsHeight")
+        LiquidsHeight = caliValue;
     else if(name == "PrintType")
         PrintType = caliValue;
     //qDebug()<<"setCaliParam,"<<name<<",result="<<caliValue;
@@ -576,6 +596,20 @@ int ExGlobal::getCaliParam(const QString &caliName)
         result = MachineMode;
     else if(caliName == "ClearMode")
         result = ClearMode;
+    else if(caliName == "ClearWidth")
+        result = ClearWidth;
+    else if(caliName == "FocusX")
+        result = FocusX;
+    else if(caliName == "FocusY")
+        result = FocusY;
+    else if(caliName == "FocusWidth")
+        result = FocusWidth;
+    else if(caliName == "FocusHeight")
+        result = FocusHeight;
+    else if(caliName == "DryWet")
+        result = DryWet;
+    else if(caliName == "LiquidsHeight")
+        result = LiquidsHeight;
     else if(caliName == "PrintType")
         result = PrintType;
     qDebug()<<"getCaliParam,"<<caliName<<",result="<<result;

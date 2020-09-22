@@ -5,7 +5,13 @@
 #include <QDateTime>
 
 #include "imageanalysis.h"
+#include "exglobal.h"
+
 static const int shd = 170;
+int ImageAnalysis::imageWidth = 2592;
+int ImageAnalysis::imageHeight = 1944;
+int ImageAnalysis::calWidth = 600;
+
 static void GetCenter(vector<Point> &c, Point &center)
 {
     int pointCount = c.size();
@@ -86,7 +92,7 @@ static int GetPosValue(int posIndex, Mat source, Mat &mask1, Mat &mask2, QVector
 
 ImageAnalysis::ImageAnalysis(QObject *parent) : QObject(parent)
 {
-    firstImg = Mat::zeros(1944,2592,CV_8U);
+    firstImg = Mat::zeros(imageHeight,imageWidth,CV_8U);
 }
 
 QString ImageAnalysis::QRDecode(QImage img){
@@ -184,17 +190,17 @@ void ImageAnalysis::FirstImage(void *data, int imageType){
     qDebug()<<"FirstImage:"<<imageType;
     if (imageType == 0)
     {
-        flip(Mat(1944,2592,CV_8U,data),firstImg,0);
+        flip(Mat(imageHeight,imageWidth,CV_8U,data),firstImg,0);
         temp = firstImg;
     }
     else if(imageType == 1)
     {
-        temp = Mat(1944,2592,CV_16U,data);
-        for (int i = 0; i < 1944; i++)
+        temp = Mat(imageHeight,imageWidth,CV_16U,data);
+        for (int i = 0; i < imageHeight; i++)
         {
             uchar *outdata = firstImg.ptr<uchar>(i);
             const uint16_t *indata = temp.ptr<uint16_t>(i);
-            for (int j = 0; j < 2592; j++,outdata++,indata++){
+            for (int j = 0; j < imageWidth; j++,outdata++,indata++){
                 *outdata = (*indata)>>4;
             }
         }
@@ -222,17 +228,17 @@ void ImageAnalysis::AddImage(void *data, int imageType){
 
     if (imageType == 0)
     {
-        flip(Mat(1944,2592,CV_8U,data),firstImg,0);
+        flip(Mat(imageHeight,imageWidth,CV_8U,data),firstImg,0);
         temp = firstImg;
     }
     else if(imageType == 1)
     {
-        temp = Mat(1944,2592,CV_16U,data);
-        for (int i = 0; i < 1944; i++)
+        temp = Mat(imageHeight,imageWidth,CV_16U,data);
+        for (int i = 0; i < imageHeight; i++)
         {
             uchar *outdata = firstImg.ptr<uchar>(i);
             const uint16_t *indata = temp.ptr<uint16_t>(i);
-            for (int j = 0; j < 2592; j++,outdata++,indata++){
+            for (int j = 0; j < imageWidth; j++,outdata++,indata++){
                 *outdata = (*indata)>>4;
             }
         }
@@ -808,7 +814,6 @@ void ImageAnalysis::SetDebugPos(size_t x, size_t y)
     subImageHandle(true,x,y,firstImg,subImage,contours,centerPoint);
 }
 
-#define CAL_WIDTH 600
 double ImageAnalysis::GetDefinition(void *data, int imageType){
     QTime time;
     time.start();
@@ -817,12 +822,14 @@ double ImageAnalysis::GetDefinition(void *data, int imageType){
     Mat imageSobel;
     Mat imageGrey;
     if (imageType == 0){
-        Mat(1944,2592,CV_8U,data)(Rect((2592-CAL_WIDTH)>>1,(1944-CAL_WIDTH)>>1,CAL_WIDTH,CAL_WIDTH)).copyTo(imageGrey);
+        Mat(imageHeight,imageWidth,CV_8U,data)(Rect(ExGlobal::FocusX,ExGlobal::FocusY,ExGlobal::FocusWidth,ExGlobal::FocusHeight)).copyTo(imageGrey);
+        Sobel(imageGrey,imageSobel,CV_8U,1,1);
     }
     else if(imageType == 1){
-        Mat(1944,2592,CV_16U,data)(Rect((1944-CAL_WIDTH)>>1,(2592-CAL_WIDTH)>>1,CAL_WIDTH,CAL_WIDTH)).copyTo(imageGrey);
+        Mat(imageHeight,imageWidth,CV_16U,data)(Rect(ExGlobal::FocusX,ExGlobal::FocusY,ExGlobal::FocusWidth,ExGlobal::FocusHeight)).copyTo(imageGrey);
+        Sobel(imageGrey,imageSobel,CV_16U,1,1);
     }
-    Sobel(imageGrey,imageSobel,CV_8U,1,1);
+
     meanValue = mean(imageSobel)[0];
     qDebug()<<"GetDefinition,elapsed="<<time.elapsed();
     return meanValue;
@@ -836,12 +843,13 @@ double ImageAnalysis::GetDefinition2(void *data, int imageType){
     Mat imageSobel;
     Mat imageGrey;
     if (imageType == 0){
-        Mat(1944,2592,CV_8U,data)(Rect((2592-CAL_WIDTH)>>1,(1944-CAL_WIDTH)>>1,CAL_WIDTH,CAL_WIDTH)).copyTo(imageGrey);
+        Mat(imageHeight,imageWidth,CV_8U,data)(Rect(ExGlobal::FocusX,ExGlobal::FocusY,ExGlobal::FocusWidth,ExGlobal::FocusHeight)).copyTo(imageGrey);
+        Laplacian(imageGrey,imageSobel,CV_8U);
     }
     else if(imageType == 1){
-        Mat(1944,2592,CV_16U,data)(Rect((1944-CAL_WIDTH)>>1,(2592-CAL_WIDTH)>>1,CAL_WIDTH,CAL_WIDTH)).copyTo(imageGrey);
+        Mat(imageHeight,imageWidth,CV_16U,data)(Rect(ExGlobal::FocusX,ExGlobal::FocusY,ExGlobal::FocusWidth,ExGlobal::FocusHeight)).copyTo(imageGrey);
+        Laplacian(imageGrey,imageSobel,CV_16U);
     }
-    Laplacian(imageGrey,imageSobel,CV_8U);
     meanValue = mean(imageSobel)[0];
     qDebug()<<"GetDefinition2,elapsed="<<time.elapsed();
     return meanValue;
@@ -856,10 +864,10 @@ double ImageAnalysis::GetDefinition3(void *data, int imageType){
     Mat imageGrey;
     Mat imageMeanStdValue;
     if (imageType == 0){
-        Mat(1944,2592,CV_8U,data)(Rect((2592-CAL_WIDTH)>>1,(1944-CAL_WIDTH)>>1,CAL_WIDTH,CAL_WIDTH)).copyTo(imageGrey);        
+        Mat(imageHeight,imageWidth,CV_8U,data)(Rect(ExGlobal::FocusX,ExGlobal::FocusY,ExGlobal::FocusWidth,ExGlobal::FocusHeight)).copyTo(imageGrey);
     }
     else if(imageType == 1){
-        Mat(1944,2592,CV_16U,data)(Rect((1944-CAL_WIDTH)>>1,(2592-CAL_WIDTH)>>1,CAL_WIDTH,CAL_WIDTH)).copyTo(imageGrey);
+        Mat(imageHeight,imageWidth,CV_16U,data)(Rect(ExGlobal::FocusX,ExGlobal::FocusY,ExGlobal::FocusWidth,ExGlobal::FocusHeight)).copyTo(imageGrey);
     }
 
     meanStdDev(imageGrey,imageSobel,imageMeanStdValue);
@@ -873,10 +881,12 @@ double ImageAnalysis::GetMeanLight(void *data, int imageType){
     time.start();
     double meanValue = 0.0;
     Mat imageGrey;
-    if (imageType == 0)
-        imageGrey = Mat(1944,2592,CV_8U,data);
-    else if(imageType == 1)
-        imageGrey = Mat(1944,2592,CV_16U,data);
+    if (imageType == 0){
+        Mat(imageHeight,imageWidth,CV_8U,data)(Rect(ExGlobal::FocusX,ExGlobal::FocusY,ExGlobal::FocusWidth,ExGlobal::FocusHeight)).copyTo(imageGrey);
+    }
+    else if(imageType == 1){
+        Mat(imageHeight,imageWidth,CV_16U,data)(Rect(ExGlobal::FocusX,ExGlobal::FocusY,ExGlobal::FocusWidth,ExGlobal::FocusHeight)).copyTo(imageGrey);
+    }
     meanValue = mean(imageGrey)[0];
     qDebug()<<"GetMeanLight,elapsed="<<time.elapsed();
     return meanValue;
@@ -885,19 +895,22 @@ double ImageAnalysis::GetMeanLight(void *data, int imageType){
 double ImageAnalysis::GetCircularSize(void *data, int imageType){
     QTime time;
     time.start();
-
+    int x = ExGlobal::FocusX;
+    int y = ExGlobal::FocusY;
+    int w = ExGlobal::FocusWidth;
+    int h = ExGlobal::FocusHeight;
     double result = 0;
-    Mat imageGrey = Mat::zeros(CAL_WIDTH,CAL_WIDTH,CV_8U);
+    Mat imageGrey = Mat::zeros(h,w,CV_8U);
     if (imageType == 0)
-        Mat(1944,2592,CV_8U,data)(Rect((2592-CAL_WIDTH)>>1,(1944-CAL_WIDTH)>>1,CAL_WIDTH,CAL_WIDTH)).copyTo(imageGrey);
+        Mat(imageHeight,imageWidth,CV_8U,data)(Rect(x,y,w,h)).copyTo(imageGrey);
     else if(imageType == 1)
     {
-        Mat temp = Mat(1944,2592,CV_16U,data)(Rect((2592-CAL_WIDTH)>>1,(1944-CAL_WIDTH)>>1,CAL_WIDTH,CAL_WIDTH));
-        for (int i = 0; i < CAL_WIDTH; i++)
+        Mat temp = Mat(imageHeight,imageWidth,CV_16U,data)(Rect(x,y,w,h));
+        for (int i = 0; i < h; i++)
         {
             uchar *outdata = imageGrey.ptr<uchar>(i);
             const uint16_t *indata = temp.ptr<uint16_t>(i);
-            for (int j = 0; j < CAL_WIDTH; j++,outdata++,indata++){
+            for (int j = 0; j < w; j++,outdata++,indata++){
                 *outdata = ((*indata)>>4)&0xFF;
             }
         }
@@ -921,7 +934,7 @@ double ImageAnalysis::GetCircularSize(void *data, int imageType){
         }
     }
     qDebug()<<"GetCircularSize,elapsed="<<time.elapsed()<<"Sm="<<Sm<<"Ss="<<Ss;
-    if (Ss > 9)
+    if (Ss > 3)
         result = Sm/Ss;
     return -result;
 }

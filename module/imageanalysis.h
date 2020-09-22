@@ -34,7 +34,8 @@ public:
     QVector<QVector<int>> getPosValueArr(){return PosValue;}
     int getImageCount(){return imageCount;}
     void paramSet(int posWidth, int posSpace, int bgWidth, int bgSpace){mpp = posWidth;subsize=posSpace;md2=bgWidth;md1=bgSpace;}
-
+    void imageSet(int width, int height){imageWidth = width;imageHeight=height;}
+    void setCalWidth(int width){calWidth = width;}
     int thrsh = 170;
 private:
     int subsize = 140;
@@ -48,6 +49,9 @@ private:
     int gridCols = 11;
     int topPointx = 0;
     int topPointy = 0;
+    static int imageWidth;
+    static int imageHeight;
+    static int calWidth;
     Mat firstImg,mask1,mask2,maskPos;
     //Point **basePos;
     Point basePos[11][11];

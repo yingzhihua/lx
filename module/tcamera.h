@@ -32,7 +32,7 @@ public:
     bool saveRaw(QString filename);
 
     int imagetype;    
-
+    CAMERATYPE cameraType;
 signals:
     void finishCapture(QByteArray result);
     void reView(QImage img);
@@ -42,7 +42,6 @@ public slots:
     void CameraView(QImage img){emit reView(img);}
 
 private:
-    CAMERATYPE cameraType;
     ImageCapture *imageCapture;
     CKCamera *ckCamera;
 };

@@ -16,6 +16,7 @@ TCamera::TCamera(QObject *parent) : QObject(parent)
         ckCamera = new CKCamera();
         connect(ckCamera,&CKCamera::finishCapture,this,&TCamera::ActionFinish);
         connect(ckCamera,&CKCamera::reView,this,&TCamera::CameraView);
+        qDebug()<<"Open CK Camera";
     }
     else if (ImageCapture::readCamera())
     {
@@ -23,7 +24,10 @@ TCamera::TCamera(QObject *parent) : QObject(parent)
         imageCapture = new ImageCapture();
         connect(imageCapture,&ImageCapture::finishCapture,this,&TCamera::ActionFinish);
         connect(imageCapture,&ImageCapture::reView,this,&TCamera::CameraView);
+        qDebug()<<"Open V4L2 Camera";
     }
+    else
+        qDebug()<<"No Camera";
 }
 
 int TCamera::openCamera(){

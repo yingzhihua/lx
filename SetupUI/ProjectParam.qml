@@ -79,9 +79,67 @@ Item {
         }
     }
 
+    Label{
+        id: lminHeight
+        anchors.left: machineType.right
+        anchors.leftMargin: 100
+        anchors.top: clear.top
+        width: clear.width
+        font.pixelSize: 40
+        text: qsTr("反应腔液面高度：")
+    }
+
+    SpinBox{
+        id:minHeight
+        anchors.left: lminHeight.left
+        anchors.top: lminHeight.bottom
+        anchors.topMargin: 30
+        from:20
+        value:ExGlobal.getCaliParam("LiquidsHeight")
+        to:200
+        stepSize: 1
+        font.pixelSize: 40
+        width: clear.width
+        onValueChanged: {
+            if (value !== ExGlobal.getCaliParam("LiquidsHeight"))
+                ExGlobal.updateCaliParam("LiquidsHeight",value)
+        }
+    }
+
+    Label{
+        id: ldry
+        anchors.left: minHeight.left
+        anchors.top: minHeight.bottom
+        anchors.topMargin: 50
+        width: clear.width
+        font.pixelSize: 40
+        text: qsTr("干湿比：")
+    }
+
+    SpinBox{
+        id:dry
+        anchors.left: ldry.left
+        anchors.top: ldry.bottom
+        anchors.topMargin: 30
+        from:5
+        value: ExGlobal.getCaliParam("DryWet")
+        to:20
+        stepSize: 1
+        font.pixelSize: 40
+        width: clear.width
+        textFromValue: function(value,locale){
+            return Number(value/10).toLocaleString(locale,'f',1)
+        }
+        onValueChanged: {
+            if (value !== ExGlobal.getCaliParam("DryWet"))
+                ExGlobal.updateCaliParam("DryWet",value)
+        }
+    }
+
     Bt1 {
         id: btCannel
         onClicked: {
+            console.log("dry",dry.value)
             mainView.pop();
         }
     }
@@ -102,5 +160,8 @@ Item {
             m1.checked = true
         else if (ExGlobal.getCaliParam("MachineMode")===1)
             m2.checked = true;
+
+        minHeight.value = ExGlobal.getCaliParam("LiquidsHeight")
+        dry.value = ExGlobal.getCaliParam("DryWet")
     }
 }

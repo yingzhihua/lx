@@ -191,6 +191,13 @@ public:
     static int ProjectMode;
     static int MachineMode;
     static int ClearMode;
+    static int LiquidsHeight;
+    static int DryWet;
+    static int ClearWidth;
+    static int FocusX;
+    static int FocusY;
+    static int FocusWidth;
+    static int FocusHeight;
     static int DoorOut;
     static int DataEntry;
     static unsigned char *bufrgb;

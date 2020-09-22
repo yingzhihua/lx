@@ -16,6 +16,39 @@ Page {
         anchors.verticalCenterOffset: -100
         source: "qrc:/images/startup_logo.png"
     }
+    /*
+    Image {
+        id: openDoor
+        width: 219
+        height: 224
+        anchors.centerIn: parent
+        anchors.verticalCenterOffset: -100
+        source: "qrc:/images/opendoor.png"
+        MouseArea{
+            anchors.fill: parent
+            onClicked: {
+                switchDoor()
+            }
+        }
+    }
+    */
+
+    AnimatedImage{
+        id:openDoor
+        width: 230
+        height: 230
+        anchors.centerIn: parent
+        anchors.verticalCenterOffset: -100
+        source: "qrc:/images/opendoorAmi.gif"
+        playing: false
+        speed: 0.3
+        MouseArea{
+            anchors.fill: parent
+            onClicked: {
+                switchDoor()
+            }
+        }
+    }
 
     Component.onCompleted: {
         changeTimer.stop();        
@@ -31,21 +64,6 @@ Page {
         }
         else
             Sequence.actionDo("Query",3,0,0,0);
-    }
-
-    Image {
-        id: openDoor
-        width: 219
-        height: 224
-        anchors.centerIn: parent
-        anchors.verticalCenterOffset: -100
-        source: "qrc:/images/opendoor.png"
-        MouseArea{
-            anchors.fill: parent
-            onClicked: {
-                switchDoor()
-            }
-        }
     }
 
     Text {
@@ -93,14 +111,24 @@ Page {
                 mainView.push("qrc:/HomeUI/Login.qml");
             }
             if (result == Sequence.Result_OpenBox_ok)
-            {
+            {                
+                /*
                 busyIndicator.running = false;
                 busyDes.visible = false;
+                /*/
+                openDoor.playing = false
+                openDoor.enabled = true
+                //*/
             }
             else if(result == Sequence.Result_CloseBox_ok)
             {
+                /*
                 busyIndicator.running = false;
                 busyDes.visible = false;
+                /*/
+                openDoor.playing = false
+                openDoor.enabled = true
+                //*/
                 Sequence.actionDo("Query",3,0,0,0);
             }
             else if (result == Sequence.Result_Simple_ok){
@@ -187,18 +215,28 @@ Page {
         {
             if (Sequence.sequenceDo(Sequence.Sequence_OpenBox))
             {
+                /*
                 busyIndicator.running = true;
                 busyDes.text = qsTr("正在开仓");
                 busyDes.visible = true;
+                /*/
+                openDoor.playing = true
+                openDoor.enabled = false
+                //*/
             }
         }
         else
         {
             if (Sequence.sequenceDo(Sequence.Sequence_CloseBox))
             {
+                /*
                 busyIndicator.running = true;
                 busyDes.text = qsTr("正在合仓");
                 busyDes.visible = true;
+                /*/
+                openDoor.playing = true
+                openDoor.enabled = false
+                //*/
             }
         }
     }

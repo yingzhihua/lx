@@ -462,9 +462,9 @@ bool QRcoder::haveliquids(Mat &image)
         qDebug()<<"i="<<i<<"j="<<j<<"minValue="<<minDistance;        
         if (j == maxminvalue.size()/2)
         {
-            Log::LogCData(QString("Liquid height = %1 (reference value > 80)").arg(minDistance));
+            Log::LogCData(QString("Liquid height = %1 (reference value > %2)").arg(minDistance).arg(ExGlobal::DryWet));
             //Log::LogCam(QString("minDistance:%1,ref:>80").arg(minDistance));
-            return minDistance > 80;
+            return minDistance > ExGlobal::DryWet;
         }
     }
     return result;

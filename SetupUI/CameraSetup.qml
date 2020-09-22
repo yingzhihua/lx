@@ -34,7 +34,7 @@ Page {
         anchors.bottom: viewWin.bottom
         anchors.left: viewWin.right
         anchors.leftMargin: 20
-        width: 500
+        width: 600
         height: 200
         wrapMode: Text.Wrap
         verticalAlignment: Text.AlignBottom
@@ -117,7 +117,7 @@ Page {
         text: qsTr("曝光时间:")
         anchors.left: viewWin.right
         anchors.leftMargin: 60
-        y:100
+        y:10
         font.pixelSize: 40
     }
 
@@ -236,7 +236,7 @@ Page {
         anchors.right: focusValue.right
         anchors.top: lbfocus.bottom
         checked: Sequence.getWhiteBalance() === 0
-        anchors.topMargin: 80
+        anchors.topMargin: 40
         font.pixelSize: 40
     }
     Text {
@@ -271,6 +271,90 @@ Page {
         onClicked: Sequence.setWhiteBalance(lbwhite.checked?0:whiteValue.value)
     }
 
+    Text {
+        id: lbFocusRect
+        text: qsTr("聚焦区域:")
+        anchors.right: lbgain.right
+        anchors.top: lbwhiteTemperture.bottom
+        anchors.topMargin: 40
+        font.pixelSize: 40
+    }
+
+    Text{
+        id: lfoucsx
+        text:"x:"
+        anchors.left: viewWin.right
+        anchors.leftMargin: 10
+        anchors.top: lbFocusRect.bottom
+        anchors.topMargin: 10
+        font.pixelSize: 40
+    }
+    TextField{
+        id: focusx
+        width: 100
+        anchors.left: lfoucsx.right
+        anchors.leftMargin: 10
+        anchors.verticalCenter: lfoucsx.verticalCenter
+    }
+    Text{
+        id: lfoucsy
+        text:"y:"
+        anchors.left: focusx.right
+        anchors.leftMargin: 20
+        anchors.verticalCenter: lfoucsx.verticalCenter
+        font.pixelSize: 40
+    }
+    TextField{
+        id: focusy
+        width: 100
+        anchors.left: lfoucsy.right
+        anchors.leftMargin: 10
+        anchors.verticalCenter: lfoucsx.verticalCenter
+    }
+    Text{
+        id: lfoucswidth
+        text:"width:"
+        anchors.left: focusy.right
+        anchors.leftMargin: 20
+        anchors.verticalCenter: lfoucsx.verticalCenter
+        font.pixelSize: 40
+    }
+    TextField{
+        id: focuswidth
+        width: 100
+        anchors.left: lfoucswidth.right
+        anchors.leftMargin: 10
+        anchors.verticalCenter: lfoucsx.verticalCenter
+    }
+    Text{
+        id: lfoucsheight
+        text:"height:"
+        anchors.left: focuswidth.right
+        anchors.leftMargin: 20
+        anchors.verticalCenter: lfoucsx.verticalCenter
+        font.pixelSize: 40
+    }
+    TextField{
+        id: focusheight
+        width: 100
+        anchors.left: lfoucsheight.right
+        anchors.leftMargin: 10
+        anchors.verticalCenter: lfoucsx.verticalCenter
+    }
+    Button{
+        id:foucsrectBt
+        anchors.right: focusheight.right
+        anchors.bottom: lbFocusRect.bottom
+        text: qsTr("设置")
+        font.pixelSize: 40
+        onClicked: {
+            ExGlobal.updateCaliParam("FocusX",focusx.text)
+            ExGlobal.updateCaliParam("FocusY",focusy.text)
+            ExGlobal.updateCaliParam("FocusWidth",focuswidth.text)
+            ExGlobal.updateCaliParam("FocusHeight",focusheight.text)
+        }
+    }
+
     Bt1 {
         id: btCannel
         onClicked: {
@@ -283,6 +367,10 @@ Page {
 
     Component.onCompleted: {
         Sequence.changeTitle(qsTr("摄像头测试"))
+        focusx.text = ExGlobal.getCaliParam("FocusX")
+        focusy.text = ExGlobal.getCaliParam("FocusY")
+        focuswidth.text = ExGlobal.getCaliParam("FocusWidth")
+        focusheight.text = ExGlobal.getCaliParam("FocusHeight")
     }
 
     Connections{

@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QDateTime>
 #include <QDir>
+#include <QPainter>
 
 #include "log.h"
 #include "exglobal.h"
@@ -364,13 +365,22 @@ void CKCamera::run(){
         if (dataLength != 0){
             if (captureMode == CaptureMode::View){
                 qDebug()<<"View,rawImageType="<<rawImageType;
+                QPainter painter;
                 if (rawImageType == 0)
                 {
                     QImage image(rawData, 2592, 1944, QImage::Format_Grayscale8);
+                    painter.begin(&image);
+                    painter.setPen(QPen(QColor(255,255,255),4));
+                    painter.drawRect(ExGlobal::FocusX,ExGlobal::FocusY,ExGlobal::FocusWidth,ExGlobal::FocusHeight);
+                    painter.end();
                     emit reView(image);
                 }
                 else{
                     QImage image(wtobRawData, 2592, 1944, QImage::Format_Grayscale8);
+                    painter.begin(&image);
+                    painter.setPen(QPen(QColor(255,255,255),4));
+                    painter.drawRect(ExGlobal::FocusX,ExGlobal::FocusY,ExGlobal::FocusWidth,ExGlobal::FocusHeight);
+                    painter.end();
                     emit reView(image);
                 }
             }

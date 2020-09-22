@@ -10,7 +10,7 @@ Item {
         y:200
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.horizontalCenterOffset: -200
-        text: qsTr("主机板版本：")+ExGlobal.version
+        text: qsTr("主机板版本：")+ExGlobal.buildversion
     }
     Text {
         id: tempver

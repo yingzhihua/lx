@@ -12,8 +12,6 @@
 #define AUTOFOCUS_STEP 100
 #define AUTOFOCUS_MAXOFFSET 6
 
-#define DRYPFILL 1.10
-
 static int autoFocus_CurrPoint = 0;
 static int autoFocus_ClarityPoint = 0;
 static double autoFocus_ClarityValue = 0;
@@ -79,6 +77,7 @@ Sequence::Sequence(QObject *parent) : QObject(parent)
     connect(camera,&TCamera::finishCapture,this,&Sequence::ActionFinish);
     connect(camera,&TCamera::reView,this,&Sequence::CameraView);
 
+    if (camera->cameraType == CAMERA_EMPTY)
     testMgr = new TestMgr();
 
     qr = new QRcoder();
@@ -107,7 +106,7 @@ Sequence::Sequence(QObject *parent) : QObject(parent)
 #endif
 }
 
-bool Sequence::sequenceInit(){    
+bool Sequence::sequenceInit(){
     if (!ReadTestProcess(QCoreApplication::applicationDirPath()+"/FLASHDXcn"))    
         return false;
     return true;
@@ -469,8 +468,8 @@ void Sequence::ActionFinish(QByteArray data)
                 else if(currCameraCaptureType == 3){
                     fillMeanValue = imageAna->GetMeanLight(camera->getyData(),camera->getImageType());
                     //Log::LogTime(QString("Dry Mean Value:%1,Fill Mean Value:%2").arg(dryMeanValue).arg(fillMeanValue));
-                    Log::LogCData(QString("Dry Value/Fill Value = %1/%2 = %3 (reference value > %4)").arg(dryMeanValue).arg(fillMeanValue).arg(dryMeanValue/fillMeanValue).arg(DRYPFILL));
-                    if (dryMeanValue > 3 && fillMeanValue > 3 && dryMeanValue/fillMeanValue < DRYPFILL)
+                    Log::LogCData(QString("Dry Value/Fill Value = %1/%2 = %3 (reference value > %4)").arg(dryMeanValue).arg(fillMeanValue).arg(dryMeanValue/fillMeanValue).arg(ExGlobal::DryWet));
+                    if (dryMeanValue > 3 && fillMeanValue > 3 && dryMeanValue/fillMeanValue < ExGlobal::DryWet)
                         emit sequenceFinish(SequenceResult::Result_Test_DryFillErr);
                 }
             }
