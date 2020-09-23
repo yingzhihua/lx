@@ -156,7 +156,7 @@ Page {
         anchors.rightMargin: 20
         onClicked: {
             if (idle == true)
-            {
+            {                
                 mainView.pop();
                 mainView.push("qrc:/HomeUI/Idle.qml");
             }
@@ -169,12 +169,14 @@ Page {
         id:closemsg
         anchors.fill: parent
         onCloseAck: {
+            Sequence.uiStage = Sequence.Stage_idle;
             mainView.pop();
             mainView.push("qrc:/HomeUI/Idle.qml");
         }
     }
 
     Component.onCompleted: {
+        Sequence.uiStage = Sequence.Stage_test;
         Sequence.sequenceDo(Sequence.Sequence_Test);
         console.log(ExGlobal.getPosNameArray());
         //var newline = chartView.createSeries(ChartView.SeriesTypeLine,"lx");
@@ -220,7 +222,7 @@ Page {
                 mainView.push("qrc:/HomeUI/Login.qml");
             }
             else if(result == Sequence.Result_CannelTest_ok)
-            {
+            {                
                 mainView.pop();
                 mainView.push("qrc:/HomeUI/Idle.qml");
             }
@@ -230,6 +232,7 @@ Page {
                 //mainView.push("qrc:/HomeUI/Idle.qml");
                 mainView.push("qrc:/DataUI/DataView.qml");
                 ExGlobal.setDataEntry(1);
+                Sequence.uiStage = Sequence.Stage_idle;
             }
             else if(result == Sequence.Result_Test_unfinish){
                 headerMsg.text = "测试完成！";

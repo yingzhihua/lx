@@ -117,6 +117,7 @@ Page {
 
     Component.onCompleted: {        
         //headerMsg.text = qsTr("登录");
+        Sequence.uiStage = Sequence.Stage_login;
         Sequence.setTitle("login");
         Sequence.updateFooter(false,false,false);
         labelMessage.text = "";

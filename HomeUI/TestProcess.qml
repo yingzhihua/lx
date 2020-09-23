@@ -68,7 +68,8 @@ Page {
         }
     }
 
-    Component.onCompleted: {        
+    Component.onCompleted: {
+        Sequence.uiStage = Sequence.Stage_test;
         Sequence.setTitle("test");
         Sequence.sequenceDo(Sequence.Sequence_Test);
     }

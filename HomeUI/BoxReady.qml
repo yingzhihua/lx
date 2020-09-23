@@ -40,12 +40,16 @@ Page {
             }
         }
         Text{
+            id:readyTips
             font.pixelSize: 45
             font.bold: true
             anchors.top: startbutton.bottom
             anchors.topMargin: 28
             anchors.horizontalCenter: startbutton.horizontalCenter
             color: "#4c4c4c"
+            wrapMode: Text.WrapAnywhere
+            width: 350
+            horizontalAlignment: Text.AlignHCenter
             text: qsTr("开始测试")
         }
 
@@ -58,7 +62,7 @@ Page {
         }
 
         ThreeMessage{
-            x:1159
+            x:1195
             y:224
             text1: ExGlobal.sampleCode
             text2: ExGlobal.sampleInfo
@@ -134,12 +138,39 @@ Page {
 
     Component.onCompleted: {
         Sequence.setTitle("boxready");
+        Sequence.uiStage = Sequence.Stage_ready;
+        if (ExGlobal.sampleCode === "")
+        {
+            startbutton.source = "qrc:/images/UStartTest.png"
+            startbutton.enabled = false
+            readyTips.text = qsTr("样本号不能为空 请输入样本号")
+            readyTips.color = "#FC7052"
+        }
     }
 
     Connections{
         target: Sequence
         onPanelNameChanged:{
             panelName.text = ExGlobal.panelName;
+        }
+    }
+
+    Connections{
+        target: ExGlobal
+        onSampleCodeChanged:{
+            if (ExGlobal.sampleCode !== "")
+            {
+                startbutton.source = "qrc:/images/StartTest.png"
+                startbutton.enabled = true
+                readyTips.text = qsTr("开始测试")
+                readyTips.color = "#4c4c4c"
+            }
+            else{
+                startbutton.source = "qrc:/images/UStartTest.png"
+                startbutton.enabled = false
+                readyTips.text = qsTr("样本号不能为空 请输入样本号")
+                readyTips.color = "#FC7052"
+            }
         }
     }
 

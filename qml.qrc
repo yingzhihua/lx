@@ -155,5 +155,6 @@
         <file>images/opendoorAmi.gif</file>
         <file>images/title_about.png</file>
         <file>SetupUI/ProjectParam.qml</file>
+        <file>images/UStartTest.png</file>
     </qresource>
 </RCC>

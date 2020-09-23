@@ -216,6 +216,7 @@ Page {
         Sequence.setTitle("idle");        
         Sequence.updateFooter(true,true,true);
         Sequence.actionDo("Query",3,0,0,0);
+        Sequence.uiStage = Sequence.Stage_idle;
         if (Sequence.door)
             updateState.start();
         else

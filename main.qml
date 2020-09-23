@@ -284,6 +284,8 @@ ApplicationWindow {
                 else
                     mainView.push("qrc:/HomeUI/TestProcess.qml");
             }
+            else if (Sequence.uiStage === Sequence.Stage_ready)
+                mainView.push("qrc:/HomeUI/BoxReady.qml");
             else
                 mainView.push("qrc:/HomeUI/Idle.qml");
             headerdatetime.visible = true

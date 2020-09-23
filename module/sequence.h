@@ -80,6 +80,15 @@ public:
     };
     Q_ENUM(LampState)
 
+    enum class StageState{
+        Stage_selfcheck,
+        Stage_login,
+        Stage_idle,
+        Stage_ready,
+        Stage_test
+    };
+    Q_ENUM(StageState)
+
     Q_PROPERTY(bool door READ readDoorState NOTIFY doorStateChanged)
     Q_PROPERTY(bool box READ readBoxState NOTIFY boxStateChanged)    
 
@@ -138,9 +147,11 @@ public:
     Q_INVOKABLE bool loopTest(QString testName, int count);
     Q_INVOKABLE bool isLoopTesting(){return currSequenceId == SequenceId::Sequence_LoopTest;}
 
-    Q_INVOKABLE int boxParam(){return boxparam;}
+    Q_INVOKABLE int boxParam(){return boxparam;}    
     static QString getPanelName(QString panelCode);
-
+    Q_PROPERTY(StageState uiStage READ readStage WRITE setStage NOTIFY stageChanged)
+    StageState readStage(){return stage;}
+    void setStage(StageState uiStage){stage = uiStage;}
 signals:
     void sequenceFinish(SequenceResult result);
     void processFinish(int total,int finish);
@@ -161,6 +172,7 @@ signals:
     void autoFocusNotify(int status, int value);
     void titleNotify(int titleparam, QString title);
     void footerNotify(bool setup, bool home, bool data);
+    void stageChanged();
 
 public slots:
     void SequenceTimeout();
@@ -246,6 +258,7 @@ private:
     bool dirctAction(QString device, int value, int param1, int param2, int param3);
 
     double dryMeanValue,fillMeanValue;
+    StageState stage;
 };
 
 #endif // SEQUENCE_H

@@ -77,7 +77,6 @@ Sequence::Sequence(QObject *parent) : QObject(parent)
     connect(camera,&TCamera::finishCapture,this,&Sequence::ActionFinish);
     connect(camera,&TCamera::reView,this,&Sequence::CameraView);
 
-    if (camera->cameraType == CAMERA_EMPTY)
     testMgr = new TestMgr();
 
     qr = new QRcoder();
@@ -91,6 +90,7 @@ Sequence::Sequence(QObject *parent) : QObject(parent)
 
     bValidBox = false;
 
+    stage = StageState::Stage_selfcheck;
     //actionDo("Sensor",0,0,0);
     serialMgr->serialWrite(ActionParser::ParamToByte("AutoData",1,0,0,0));
     //ReadMask(QCoreApplication::applicationDirPath()+"/pos");
@@ -107,6 +107,11 @@ Sequence::Sequence(QObject *parent) : QObject(parent)
 }
 
 bool Sequence::sequenceInit(){
+    if (camera->cameraType == CAMERA_EMPTY)
+    {
+        errReceive(ERROR_CODE_CAM_CONNECT);
+        return false;
+    }
     if (!ReadTestProcess(QCoreApplication::applicationDirPath()+"/FLASHDXcn"))    
         return false;
     return true;
@@ -175,20 +180,19 @@ bool Sequence::sequenceDo(SequenceId id)
         for (sequenceAction = root.firstChildElement("PanelTest"); !sequenceAction.isNull(); sequenceAction = sequenceAction.nextSiblingElement("PanelTest"))
         {
             if (sequenceAction.attribute("PanelCode")==ExGlobal::panelCode())
-            {
+            {                
                 testStartTime = QDateTime::currentDateTime();
                 QString current_time_str = testStartTime.toString("yyyyMMdd_hhmmss");
                 Log::setDir(QCoreApplication::applicationDirPath()+"/"+current_time_str);                
                 camera->openCamera();
                 ExGlobal::setPanelName(sequenceAction.attribute("PanelName"));
-
-                imageAna->SetMask(ExGlobal::getReagentBox(ExGlobal::reagentBox()),0);
-                testMgr->TestCreate(ExGlobal::boxSerial());
+                imageAna->SetMask(ExGlobal::getReagentBox(ExGlobal::reagentBox()),0);                
+                testMgr->TestCreate(ExGlobal::boxSerial());                
                 bFocused = false;
                 dryMeanValue = 0;
                 fillMeanValue = 0;
                 nTestSecond = 0;
-                testSecondTime->start(1000);
+                testSecondTime->start(1000);                
                 break;
             }
         }
@@ -310,6 +314,8 @@ void Sequence::TestSecondTimeout(){
         nTestSecond++;
     int remain = sequenceAction.attribute("Duration").toInt()/1000 - nTestSecond;
     title = QString("正在测试，预计剩余%1分%2秒").arg(remain/60).arg(remain%60);
+    if (currSequenceId == SequenceId::Sequence_CannelTest)
+        title = QString("正在取消测试");
     emit titleNotify((nTestSecond*1000)/(sequenceAction.attribute("Duration").toInt()/1000)+100,title);
 }
 

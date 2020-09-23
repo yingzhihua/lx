@@ -15,9 +15,14 @@ int TestMgr::TestCreate(QString nSerial){
     qDebug()<<sql;
     if(SqliteMgr::execute(sql))
     {
+        qDebug()<<"get Test id";
         QSqlQuery query = SqliteMgr::select("select Testid from PanelTest order by Testid desc limit 1");
+        //qDebug()<<"get record"<<query.size()<<query.next();
         if (query.next())
+        {
             Testid = query.value(0).toInt();
+            qDebug()<<"Testid"<<Testid;
+        }
         else
             Testid = -1;
     }
