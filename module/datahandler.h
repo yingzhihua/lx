@@ -11,7 +11,8 @@ class DataHandler
 {
 public:
     DataHandler();
-    static bool HandleData(int testId, QHash<int,vector<Point>> &posArr);    
+    static bool HandleData(int testId, QHash<int,vector<Point>> &posArr);
+    static bool LoadData(QString filename, QHash<int,vector<Point>> &posArr);
     static bool SaveData(int testId);    
     static QHash<int,int> getPosItemid();
     static void setAssayItem(QMap<int, QString> assayItem);

@@ -211,6 +211,8 @@ public:
     static QQmlApplicationEngine *qml;
     static void Translator(int language);
     static QString screenCapture();
+
+    static QString DemoPanelCode;
 signals:
     void userChanged();
     void panelNameChanged();

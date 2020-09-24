@@ -87,9 +87,12 @@ QVariant TestResultModel::getField(int row,QString field) const{
     return QVariant();
 }
 
-void TestResultModel::setTestid(int id){
+void TestResultModel::setTestid(int id,QString panelCode){
     Testid = id;
-    DataHandler::HandleData(Testid,dataPos);
+    if (panelCode == ExGlobal::DemoPanelCode)
+        DataHandler::LoadData(QCoreApplication::applicationDirPath()+"/RawData.csv",dataPos);
+    else
+        DataHandler::HandleData(Testid,dataPos);
     PosId = DataHandler::getPosItemid();
 }
 

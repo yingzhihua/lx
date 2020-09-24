@@ -139,6 +139,7 @@ public:
     ImageProvider *imageProvider;
 
     Q_INVOKABLE bool isTesting(){return currSequenceId == SequenceId::Sequence_Test;}
+    Q_INVOKABLE bool isIdle(){return currSequenceId == SequenceId::Sequence_Idle;}
     Q_INVOKABLE void changeTitle(QString title);
     Q_INVOKABLE void setTitle(QString titleid);
     Q_INVOKABLE void hideTitle(bool hide);

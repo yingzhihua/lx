@@ -52,7 +52,8 @@ Rectangle {
                         source: ResultType==2?"":"qrc:/images/thrAlarmSmall.png"
                     }
                     //Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:200;text:SerialNo}
-                    Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:500;text:SampleInfo;clip:true;elide:Text.ElideRight;maximumLineCount: 2;wrapMode: Text.Wrap;height:parent.height}
+                    //Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:500;text:SampleInfo;clip:true;elide:Text.ElideRight;maximumLineCount: 2;wrapMode: Text.Wrap;height:parent.height}
+                    Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:500;text:PanelName;clip:true;elide:Text.ElideRight;maximumLineCount: 2;wrapMode: Text.Wrap;height:parent.height}
                     Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:300;height:parent.height;text:SampleId}
                     Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:200;height:parent.height;text:User}
                     Text{verticalAlignment: Text.AlignVCenter;horizontalAlignment:Text.AlignHCenter;width:200;height:parent.height;text:Checker}

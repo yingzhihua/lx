@@ -45,7 +45,7 @@ static void RemoveNoise(QHash<int, vector<Point> > &posArr){
         EvalMean /= Eval.size();
         //qDebug()<<"RemoveNoise"<<posIndex<<"Max="<<EvalMax<<"Mean="<<EvalMean<<Eval;
 
-        while(Eval[EvalMax] > 2*EvalMean){
+        while((EvalMax<15&&Eval[EvalMax]>EvalMean)||Eval[EvalMax] > 2*EvalMean){
             posArr[posIndex][EvalMax].y = (posArr[posIndex][EvalMax-1].y+posArr[posIndex][EvalMax+1].y)/2;
             if (EvalMax == FirstPos)
                 posArr[posIndex][FirstPos-1].y = posArr[posIndex][FirstPos].y*2-posArr[posIndex][FirstPos+1].y;
@@ -188,56 +188,10 @@ static void BaseLineFit(QHash<int, vector<Point>> &posArr){
             int linebaseEnd = points.size() - 1;
             Vec4f line_para;
             bool doLine = true;
-#if 0
+#if 1
             {
-                tempPoint.assign(points.begin()+7,points.begin()+25);
-                fitLine(tempPoint,line_para,cv::DIST_L2,0,1e-2,1e-2);
-                double dvalue1 = 0;
-                double dvalue2 = 0;
-                double dvalue3 = 0;
-                int value1 = 0;
-                int value2 = 0;
-                int value3 = 0;
-                for (int i = 0; i < tempPoint.size(); i++){
-                    double dv = line_para[1]/line_para[0]*(tempPoint[i].x-line_para[2])+line_para[3];
-                    double tempdv;
-                    dv = fabs(tempPoint[i].y-dv);
-                    if (dv > dvalue1)
-                    {
-                        tempdv = dvalue1;
-                        dvalue1 = dv;
-                        dv = tempdv;
-                        value1 = tempPoint[i].y;
-                    }
-                    if (dv > dvalue2)
-                    {
-                        tempdv = dvalue2;
-                        dvalue2 = dv;
-                        dv = tempdv;
-                        value2 = tempPoint[i].y;
-                    }
-                    if (dv > dvalue3)
-                    {
-                        tempdv = dvalue3;
-                        dvalue3 = dv;
-                        dv = tempdv;
-                        value3 = tempPoint[i].y;
-                    }
-                }
-                if (posIndex == 82)
-                qDebug()<<"value1="<<value1<<"value2="<<value2<<"value3="<<value3;
-                vector<Point>::iterator ite = tempPoint.begin();
-                while(ite != tempPoint.end()){
-                    if (value1 != 0 && ite->y == value1)
-                        ite = tempPoint.erase(ite);
-                    else if (value2 != 0 && ite->y == value2)
-                        ite = tempPoint.erase(ite);
-                    else if (value3 != 0 && ite->y == value3)
-                        ite = tempPoint.erase(ite);
-                    else
-                        ++ite;
-                }
-                //fitLine(tempPoint,line_para,cv::DIST_L2,0,1e-2,1e-2);
+                tempPoint.assign(points.begin()+5,points.begin()+15);
+                fitLine(tempPoint,line_para,cv::DIST_L2,0,1e-2,1e-2);                
                 doLine = false;
             }
 #endif
@@ -363,6 +317,61 @@ static void FillTestData(int Testid, QHash<int, vector<Point> > &posArr){
     }
 }
 
+static bool LoadTestData(QString filename, QHash<int, vector<Point> > &posArr){
+    QFile file(filename);
+    if (file.open(QIODevice::ReadOnly)){
+        QTextStream in(&file);
+        QString line = in.readLine();
+        QStringList lineArr = line.split(',');
+        QHash<int,int> indexArr;
+
+        posArr.clear();
+        PosId.clear();
+        rawData.clear();
+        posBG.clear();
+        BGMax = 0;
+
+        for (int i = 1; i < lineArr.size(); i+=5){
+            QStringList recordArr = lineArr[i].split('/');
+            PosId[recordArr[2].toInt()] = recordArr[1].toInt();
+            indexArr[i] = recordArr[2].toInt();
+        }
+        qDebug()<<line;
+        line = in.readLine();
+        int cycleNu = 1;
+        while(!line.isEmpty()){
+            lineArr = line.split(',');
+            qDebug()<<line;
+            for (int i = 1; i < lineArr.size(); i+=5){
+                int PosValue = lineArr[i].toInt();
+                int PosNum = lineArr[i+1].toInt();
+                int BgValue = lineArr[i+2].toInt();
+                int BgNum = lineArr[i+3].toInt();
+                int64 value = BgValue;
+                value = value*PosNum/BgNum;
+
+                posArr[indexArr[i]].push_back(Point(cycleNu*10,(PosValue-static_cast<int>(value))*10/PosNum));
+                posBG[indexArr[i]].push_back(BgValue*10/BgNum);
+                rawData[indexArr[i]].push_back(Vec8i(PosValue,PosNum,BgValue,BgNum,(PosValue-static_cast<int>(value))*10/PosNum));
+            }
+            line = in.readLine();
+            cycleNu++;
+        }
+
+        foreach(int posIndex, posBG.keys()){
+            int sum = 0;
+            for(size_t i = 0; i < posBG[posIndex].size(); i++){
+                sum += posBG[posIndex][i];
+                if (posBG[posIndex][i] > BGMax)
+                    BGMax = posBG[posIndex][i];
+            }
+            bgMean[posIndex] = sum/posBG[posIndex].size();
+        }
+        return true;
+    }
+    return false;
+}
+
 static void outputPos(QString filename, QHash<int, vector<Point> > posArr){
     //QFile file(saveDir+"/"+filename+".csv");
     QFile file(filename);
@@ -402,7 +411,11 @@ static void outputPos(QString filename, QHash<int, vector<Vec8i> > posArr){
         int cyclecount = 0;
         saveStr = "cycle";
         foreach(int posIndex, PosId.keys()){
-            saveStr += QString(",%1(%2-R%3C%4),,,,").arg(ExGlobal::AssayItem[PosId[posIndex]]).arg(posIndex).arg(posIndex/11+1).arg(posIndex%11+1);
+            //saveStr += QString(",%1(%2-R%3C%4),,,,").arg(ExGlobal::AssayItem[PosId[posIndex]]).arg(posIndex).arg(posIndex/11+1).arg(posIndex%11+1);
+            if (PosId[posIndex] == 1)
+                saveStr += QString(",%1/%2/%3,,,,").arg("pos").arg(PosId[posIndex]).arg(posIndex);
+            else
+                saveStr += QString(",%1/%2/%3,,,,").arg(ExGlobal::AssayItem[PosId[posIndex]]).arg(PosId[posIndex]).arg(posIndex);
             cyclecount = posArr[posIndex].size();
         }
         textStream<<saveStr<<endl;
@@ -477,6 +490,18 @@ bool DataHandler::HandleData(int testId, QHash<int, vector<Point>> &posArr){
     //CurveFit(posArr);
     BaseLineFit(posArr);
     return true;
+}
+
+bool DataHandler::LoadData(QString filename, QHash<int, vector<Point> > &posArr){
+    if (LoadTestData(filename,posArr))
+    {
+        RefPosFit(posArr);
+        NormalizeFit(posArr);
+        RemoveNoise(posArr);
+        BaseLineFit(posArr);
+        return true;
+    }
+    return false;
 }
 
 bool DataHandler::SaveData(int testId){

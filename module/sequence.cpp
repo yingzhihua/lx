@@ -114,6 +114,7 @@ bool Sequence::sequenceInit(){
     }
     if (!ReadTestProcess(QCoreApplication::applicationDirPath()+"/FLASHDXcn"))    
         return false;
+    ExGlobal::pTestModel->InitTest();
     return true;
 }
 
@@ -474,8 +475,8 @@ void Sequence::ActionFinish(QByteArray data)
                 else if(currCameraCaptureType == 3){
                     fillMeanValue = imageAna->GetMeanLight(camera->getyData(),camera->getImageType());
                     //Log::LogTime(QString("Dry Mean Value:%1,Fill Mean Value:%2").arg(dryMeanValue).arg(fillMeanValue));
-                    Log::LogCData(QString("Dry Value/Fill Value = %1/%2 = %3 (reference value > %4)").arg(dryMeanValue).arg(fillMeanValue).arg(dryMeanValue/fillMeanValue).arg(ExGlobal::DryWet));
-                    if (dryMeanValue > 3 && fillMeanValue > 3 && dryMeanValue/fillMeanValue < ExGlobal::DryWet)
+                    Log::LogCData(QString("Dry Value/Fill Value = %1/%2 = %3 (reference value > %4/10)").arg(dryMeanValue).arg(fillMeanValue).arg(dryMeanValue/fillMeanValue).arg(ExGlobal::DryWet));
+                    if (dryMeanValue > 3 && fillMeanValue > 3 && dryMeanValue*10/fillMeanValue < ExGlobal::DryWet)
                         emit sequenceFinish(SequenceResult::Result_Test_DryFillErr);
                 }
             }
@@ -644,13 +645,14 @@ void Sequence::FinishSequence()
         camera->closeCamera();
         currSequenceId = SequenceId::Sequence_Idle;
         qDebug()<<"Itemsize"<<imageAna->getItem().size();//imageCapture->openCamera();
-        if (imageAna->getItem().size() > 45)
+        if (imageAna->getItem().size() > 45 || ExGlobal::panelCode() == ExGlobal::DemoPanelCode)
         {
             int testid = testMgr->TestClose(2);
             qDebug()<<"testid"<<testid;
             ExGlobal::pTestModel->AddTest(testid);
-            ExGlobal::pTestResultModel->setTestid(testid);
-            DataHandler::SaveData(testid);
+            ExGlobal::pTestResultModel->setTestid(testid,ExGlobal::panelCode());
+            if (ExGlobal::panelCode() != ExGlobal::DemoPanelCode)
+                DataHandler::SaveData(testid);
             out = SequenceResult::Result_Test_finish;
         }
         else
@@ -1554,10 +1556,14 @@ void Sequence::lampDo(LampState state){
 
 QString Sequence::getPanelName(QString panelCode){
     QDomElement root = doc.documentElement();
+    qDebug()<<"getPanelName"<<panelCode;
     for (QDomElement e = root.firstChildElement("PanelTest"); !e.isNull(); e = e.nextSiblingElement("PanelTest"))
     {
         if (e.attribute("PanelCode") == panelCode)
+        {
+            qDebug()<<"ok"<<e.attribute("PanelName");
             return e.attribute("PanelName");
+        }
     }
     return "";
 }

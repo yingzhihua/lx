@@ -27,7 +27,7 @@ public:
     QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
     void AddTest(const TestResult &result);
     Q_INVOKABLE QVariant getField(int row,QString field) const;
-    Q_INVOKABLE void setTestid(int id);
+    Q_INVOKABLE void setTestid(int id,QString panelCode);
     Q_INVOKABLE int getTestid(){return Testid;}
     Q_INVOKABLE void setCurrItem(int id);
     Q_INVOKABLE int getCurrItemId(){return currItemid;}
