@@ -156,5 +156,7 @@
         <file>images/title_about.png</file>
         <file>SetupUI/ProjectParam.qml</file>
         <file>images/UStartTest.png</file>
+        <file>SetupUI/UsbFile.qml</file>
+        <file>components/Doing.qml</file>
     </qresource>
 </RCC>

@@ -24,6 +24,7 @@ Rectangle {
         ListElement{Eid: "TestLoop"; img:"qrc:/images/setupmenu_system.png"; name:qsTr("循环测试");info:"";qrc_res:"qrc:/SetupUI/TestLoop.qml"}
         ListElement{Eid: "SystemParam"; img:"qrc:/images/setupmenu_system.png"; name:qsTr("系统参数");info:"";qrc_res:"qrc:/SetupUI/SystemParam.qml"}
         ListElement{Eid: "ProjectParam"; img:"qrc:/images/setupmenu_system.png"; name:qsTr("工程参数");info:"";qrc_res:"qrc:/SetupUI/ProjectParam.qml"}
+        ListElement{Eid: "Usb"; img:"qrc:/images/setupmenu_system.png"; name:qsTr("数据维护");info:"";qrc_res:"qrc:/SetupUI/UsbFile.qml"}
         ListElement{Eid: "Version"; img:"qrc:/images/setupmenu_about.png"; name:qsTr("关于");info:"";qrc_res:"qrc:/SetupUI/Version.qml"}
     }
 

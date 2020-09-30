@@ -34,7 +34,7 @@ int ExGlobal::LanguageCode = 0;
 int ExGlobal::PanelBoxIndex = 1;
 
 QString ExGlobal::t_version = "V1";
-QString ExGlobal::build_version = "V1.0.9(build20200924)";
+QString ExGlobal::build_version = "V1.0.11(build20200930)";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
@@ -118,6 +118,7 @@ TestModel * ExGlobal::pTestModel = nullptr;
 TestResultModel * ExGlobal::pTestResultModel = nullptr;
 UserModel * ExGlobal::pUserModel = nullptr;
 WifiModel * ExGlobal::pWifiModel = nullptr;
+UsbModel * ExGlobal::pUsbModel = nullptr;
 
 QMap<int, QString> ExGlobal::AssayItem;
 QHash<int, int> ExGlobal::ItemCT;

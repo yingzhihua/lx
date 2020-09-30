@@ -14,6 +14,7 @@
 #include "module/dao/testresultmodel.h"
 #include "module/dao/usermodel.h"
 #include "module/dao/wifimodel.h"
+#include "module/dao/usbmodel.h"
 
 
 int main(int argc, char *argv[])
@@ -39,6 +40,7 @@ int main(int argc, char *argv[])
     ExGlobal::pTestResultModel = new TestResultModel();
     ExGlobal::pUserModel = new UserModel();
     ExGlobal::pWifiModel = new WifiModel();
+    ExGlobal::pUsbModel = new UsbModel();
 
     SqliteMgr::conn(Log::getDir()+"/data.db","sa","123456");
 
@@ -57,6 +59,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("testResultModel",ExGlobal::pTestResultModel);
     engine.rootContext()->setContextProperty("userModel",ExGlobal::pUserModel);
     engine.rootContext()->setContextProperty("wifiModel",ExGlobal::pWifiModel);
+    engine.rootContext()->setContextProperty("usbModel",ExGlobal::pUsbModel);
 
     ExGlobal::Translator(ExGlobal::LanguageCode);
 

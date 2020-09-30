@@ -11,6 +11,7 @@
 #include "dao/testresultmodel.h"
 #include "dao/usermodel.h"
 #include "dao/wifimodel.h"
+#include "dao/usbmodel.h"
 
 class ExGlobal : public QObject
 {
@@ -177,6 +178,7 @@ public:
     static TestResultModel *pTestResultModel;
     static UserModel *pUserModel;
     static WifiModel *pWifiModel;
+    static UsbModel *pUsbModel;
 
     static QMap<int, QString> AssayItem;
     static QHash<int, int> ItemCT;

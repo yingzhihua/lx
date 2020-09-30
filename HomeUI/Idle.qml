@@ -328,9 +328,9 @@ Page {
         repeat: true
         interval: 500
         running: false
-        onTriggered: {
-            console.log("idle query sensor state");
-            Sequence.actionDo("Query",3,0,0,0);
+        onTriggered: {            
+            if (Sequence.isIdle())
+                Sequence.actionDo("Query",3,0,0,0);
         }
     }
 

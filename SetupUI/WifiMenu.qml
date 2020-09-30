@@ -12,7 +12,7 @@ Rectangle {
         if (sign > 70)
             return "qrc:/images/sign3.png";
         else if (sign > 50)
-            return "qrc:/image2/sign2.png";
+            return "qrc:/images/sign2.png";
         else if (sign > 30)
             return "qrc:/images/sign1.png";
         return "qrc:/images/sign0.png";
