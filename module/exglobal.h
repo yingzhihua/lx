@@ -181,6 +181,7 @@ public:
     static UsbModel *pUsbModel;
 
     static QMap<int, QString> AssayItem;
+    static QHash<QString, QString> ItemName;
     static QHash<int, int> ItemCT;
 
     static QString AdminPassword;
@@ -215,6 +216,7 @@ public:
     static QString screenCapture();
 
     static QString DemoPanelCode;
+    static QDateTime validDateTime;
 signals:
     void userChanged();
     void panelNameChanged();

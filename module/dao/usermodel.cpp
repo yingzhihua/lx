@@ -143,7 +143,7 @@ int UserModel::login(QString name, QString password){
     QSqlQuery query = SqliteMgr::select(sql);
     qDebug()<<"login:"<<sql;
 
-    ExGlobal::User = name;
+    ExGlobal::User = name.toLower();
     while(query.next())
     {        
         ExGlobal::UserType = query.value(4).toInt();

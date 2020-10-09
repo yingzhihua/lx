@@ -345,12 +345,12 @@ QString printmgr::CreatePDF(){
     painter->drawRect(SampleRemarkRect);
     painter->drawRect(InnerRefRect);
 #endif
-    painter->drawText(TitleRect,Qt::AlignCenter,"多重呼吸道病原体辅助测试报告");
+    painter->drawText(TitleRect,Qt::AlignCenter,panelName+"报告");
     if (flashdxlogo.load(QCoreApplication::applicationDirPath()+"/Dxlogo.png"))
         painter->drawImage(dxLogoRect,flashdxlogo);
     font.setPointSize(12);
     painter->setFont(font);
-    painter->drawText(HospitalRect,Qt::AlignCenter,"深圳南山闪量医院");
+    painter->drawText(HospitalRect,Qt::AlignCenter,ExGlobal::HospitalName);
 
     font.setPointSize(10);
     painter->setFont(font);
@@ -361,7 +361,7 @@ QString printmgr::CreatePDF(){
     font.setPointSize(8);
     painter->setFont(font);
     painter->drawText(InnerRefRect,Qt::AlignVCenter,tr("内部参考品：")+tr("有效 √"));
-    painter->drawText(PanelNameRect,Qt::AlignVCenter|Qt::AlignRight,ExGlobal::panelName());
+    painter->drawText(PanelNameRect,Qt::AlignVCenter|Qt::AlignRight,panelName);
     painter->drawText(SerialRect,Qt::AlignVCenter|Qt::AlignRight,tr("批号：")+ExGlobal::boxSerial());
     painter->drawText(ValidDateRect,Qt::AlignVCenter|Qt::AlignRight,tr("有效期：")+"2021/04/17");
     painter->drawText(SystemNameDateRect,Qt::AlignVCenter,tr("仪器：")+ExGlobal::SysName);
@@ -395,6 +395,7 @@ QString printmgr::CreatePDF(){
         painter->fillRect(ItemRect,QColor(210,210,210));
         painter->drawText(ItemIndexRect,Qt::AlignCenter,QString::number(itemIndex));
         painter->drawText(ItemCodeRect,Qt::AlignVCenter,it.key());
+        painter->drawText(ItemNameRect,Qt::AlignVCenter,ExGlobal::ItemName[it.key()]);
         if (it.value() != 0)
             painter->drawText(ItemResultRect,Qt::AlignCenter,tr("阳性(+)"));
         else

@@ -34,7 +34,7 @@ int ExGlobal::LanguageCode = 0;
 int ExGlobal::PanelBoxIndex = 1;
 
 QString ExGlobal::t_version = "V1";
-QString ExGlobal::build_version = "V1.0.11(build20200930)";
+QString ExGlobal::build_version = "V1.0.12(build20201009)";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
@@ -122,6 +122,7 @@ UsbModel * ExGlobal::pUsbModel = nullptr;
 
 QMap<int, QString> ExGlobal::AssayItem;
 QHash<int, int> ExGlobal::ItemCT;
+QHash<QString, QString> ExGlobal::ItemName;
 
 unsigned char * ExGlobal::bufrgb = nullptr;
 unsigned char * ExGlobal::hbufrgb = nullptr;
@@ -135,6 +136,7 @@ static ExGlobal *exGlobal = nullptr;
 static SystemCmd cmd;
 
 QString ExGlobal::DemoPanelCode = "20001";
+QDateTime ExGlobal::validDateTime = QDateTime::currentDateTime();
 
 QObject *ExGlobal::exglobal_provider(QQmlEngine *engine, QJSEngine *scriptEngine){
     Q_UNUSED(engine);
@@ -363,6 +365,7 @@ void ExGlobal::CaliParamInit()
         //qDebug()<<"Itemid:"<<query.value(0).toInt()<<"ItemName:"<<query.value(1).toString()<<"ItemCT:"<<query.value(2).toInt();
         AssayItem[query.value(0).toInt()] = query.value(1).toString();
         ItemCT[query.value(0).toInt()] = query.value(2).toInt();
+        ItemName[query.value(1).toString()] = query.value(3).toString();
     }
 
     pUserModel->LoadUser();

@@ -212,6 +212,11 @@ void UsbModel::updateSoft(){
             QFile::remove(QCoreApplication::applicationDirPath()+"/RawData.csv");
             QFile::copy("/mnt/RawData.csv",QCoreApplication::applicationDirPath()+"/RawData.csv");
         }
+        if (QFile::exists("/mnt/en_US.qm"))
+        {
+            QFile::remove(QCoreApplication::applicationDirPath()+"/en_US.qm");
+            QFile::copy("/mnt/en_US.qm",QCoreApplication::applicationDirPath()+"/en_US.qm");
+        }
         system("sync");
         system("umount -l /mnt");
     }

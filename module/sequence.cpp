@@ -107,14 +107,14 @@ Sequence::Sequence(QObject *parent) : QObject(parent)
 }
 
 bool Sequence::sequenceInit(){
+    if (!ReadTestProcess(QCoreApplication::applicationDirPath()+"/FLASHDXcn"))    
+        return false;
+    ExGlobal::pTestModel->InitTest();
     if (camera->cameraType == CAMERA_EMPTY)
     {
         errReceive(ERROR_CODE_CAM_CONNECT);
         return false;
     }
-    if (!ReadTestProcess(QCoreApplication::applicationDirPath()+"/FLASHDXcn"))    
-        return false;
-    ExGlobal::pTestModel->InitTest();
     return true;
 }
 
@@ -1383,6 +1383,7 @@ int Sequence::decodeQr(QString strQr){
         ExGlobal::setBoxSerial(QString("Lot# %1").arg(record[3]));
 
         QDateTime time = QDateTime::fromString(record[4],"yyyyMMddhh");
+        ExGlobal::validDateTime = time.addDays(record[5].toInt());
         if (time.addDays(record[5].toInt()).toTime_t() < QDateTime::currentDateTime().toTime_t())
             return 1;
     }
@@ -1445,6 +1446,7 @@ bool Sequence::printTest(){
     printer->sampInfo = ExGlobal::pTestModel->getCurrTestInfo();
     printer->user = ExGlobal::pTestModel->getCurrTestUser();
     printer->checker = ExGlobal::pTestModel->getCurrTestChecker();
+    printer->panelName = ExGlobal::pTestModel->getCurrTestPanelName();
     printer->itemMap.clear();
     QList<int> item = ExGlobal::getBoxItemList();
     int testID = ExGlobal::pTestResultModel->getTestid();

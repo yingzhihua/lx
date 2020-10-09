@@ -158,5 +158,7 @@
         <file>images/UStartTest.png</file>
         <file>SetupUI/UsbFile.qml</file>
         <file>components/Doing.qml</file>
+        <file>images/dir.png</file>
+        <file>images/file.png</file>
     </qresource>
 </RCC>

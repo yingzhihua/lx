@@ -15,6 +15,7 @@ public:
     QString checker;
     QString sampInfo;
     QString sampCode;
+    QString panelName;
 
 protected:
     void run();

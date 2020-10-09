@@ -107,7 +107,7 @@ Rectangle {
                     Image {
                         anchors.verticalCenter: parent.verticalCenter
                         x:10
-                        source: IsDir?"qrc:/images/Positive.png":"qrc:/images/Negative.png"
+                        source: IsDir?"qrc:/images/dir.png":"qrc:/images/file.png"
                     }
 
                     Text{

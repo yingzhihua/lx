@@ -30,7 +30,7 @@ Rectangle {
 
     ScrollView{
         anchors.fill: parent
-        //ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+        ScrollBar.vertical.policy: ScrollBar.AlwaysOn
         ScrollBar.vertical.width: 100
         Column{
             Repeater{
@@ -110,7 +110,8 @@ Rectangle {
             removeItem("Network");
             removeItem("TimeSet");
             removeItem("LockTime");
-            removeItem("User");            
+            removeItem("User");
+            removeItem("Usb");
             //setName("AdminPassword",qsTr("设置密码"))
         }
 
