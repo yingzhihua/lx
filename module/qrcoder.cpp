@@ -24,6 +24,15 @@ const int scalewide = 500;
 //#define USE_QZXING
 #define USE_ZBAR
 static QString saveDir;
+static QString timeStr;
+static void saveImage(Mat &image,QString flag,bool updateTime){
+    qDebug()<<"saveImage,"<<"flag="<<flag<<"upateTime="<<updateTime;
+    if (updateTime)
+        timeStr = QDateTime::currentDateTime().toString("MMdd_hh-mm-ss-zzz");
+    QString saveFile = saveDir+"/"+flag+timeStr+".bmp";
+    cv::imwrite(saveFile.toStdString(),image);
+}
+
 QRcoder::QRcoder(QObject *parent) : QThread(parent)
 {
     handleimage = true;
@@ -33,6 +42,8 @@ QRcoder::QRcoder(QObject *parent) : QThread(parent)
     QDir dir(saveDir);
     if (!dir.exists())
         dir.mkpath(saveDir);
+
+    timeStr = QDateTime::currentDateTime().toString("MMdd_hh-mm-ss-zzz");
 }
 
 bool QRcoder::OpenCamera(int index, VideoCapture &cap){
@@ -86,8 +97,7 @@ void QRcoder::run(){
     //cap.set(CAP_PROP_EXPOSURE,2000);
 
     qDebug()<<"width:"<<cap.get(CAP_PROP_FRAME_WIDTH)<<" height:"<<cap.get(CAP_PROP_FRAME_HEIGHT)<<" Frame:"<<cap.get(CAP_PROP_FPS)<<" auto_expoure:"<<cap.get(CAP_PROP_AUTO_EXPOSURE)<<" exp:"<<cap.get(CAP_PROP_EXPOSURE);
-
-    strQr.clear();    
+    strQr.clear();
     for (;;) {
         Mat Frame;
         cap>>Frame;
@@ -118,6 +128,7 @@ void QRcoder::run(){
         qDebug()<<"initX="<<initX<<"initY="<<initY;
         if (initX > 0 && initX < (1920-200) && initY > 0 && initY < (1080-500))
         {
+            saveImage(handleFrame,"Qr",true);
             handleFrame = Mat(500,120,CV_8UC1,ExGlobal::hbufrgb);
             cvtColor(sourceFrame(Rect(initX,initY,120,500)), handleFrame, COLOR_RGB2GRAY);
 
@@ -393,9 +404,8 @@ int QRcoder::pierce(Mat &image, QString &qrStr){
 bool QRcoder::haveliquids(Mat &image)
 {
     bool result = false;
-    QString timeStr = QDateTime::currentDateTime().toString("MMdd_hh-mm-ss-zzz");
-    QString saveFile = saveDir+"/R"+timeStr+".bmp";
-    cv::imwrite(saveFile.toStdString(),image);
+
+    saveImage(image,"R",false);
 
     GaussianBlur(image, image, Size(25,25),0);
     threshold(image,image,0,255,THRESH_BINARY|THRESH_OTSU);
@@ -409,8 +419,8 @@ bool QRcoder::haveliquids(Mat &image)
     Mat con = Mat::zeros(image.rows,image.cols,image.type());
     for (size_t i = 0; i < contours.size(); i++)
         drawContours(con,contours,static_cast<int>(i),Scalar(255));
-    saveFile = saveDir+"/H"+timeStr+".bmp";
-    cv::imwrite(saveFile.toStdString(),con);
+
+    saveImage(con,"H",false);
 
     if (contours.size() < 2)
     {

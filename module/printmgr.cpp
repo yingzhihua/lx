@@ -299,10 +299,10 @@ QString printmgr::CreatePDF(){
     const static QRect SampleTypeRect(SAMPLECODEX,SAMPLECODEY+40,300,20);
     const static QRect SampleRemarkRect(SAMPLECODEX+200,SAMPLECODEY,300,20);
     const static QRect InnerRefRect(INNERREFX,INNERREFY,150,20);
-    const static QRect PanelNameRect(INNERREFX+150,INNERREFY,200,20);
-    const static QRect SerialRect(INNERREFX+350,INNERREFY,150,20);
-    const static QRect ValidDateRect(INNERREFX+500,INNERREFY,120,20);
-    const static QRect SystemNameDateRect(INNERREFX+650,INNERREFY,150,20);
+    const static QRect PanelNameRect(INNERREFX+150,INNERREFY,150,20);
+    const static QRect SerialRect(INNERREFX+300,INNERREFY,150,20);
+    const static QRect ValidDateRect(INNERREFX+450,INNERREFY,150,20);
+    const static QRect SystemNameDateRect(INNERREFX+600,INNERREFY,150,20);
     const static QRect ItemRemarkRect(ITEMHEADLINEX+10,ITEMENDLINEY-20,ITEMHEADLINELENGTH,20);
     const static QRect TestTimeRect(ITEMHEADLINEX+10,ITEMENDLINEY+4,200,20);
     const static QRect ReportTimeRect(ITEMHEADLINEX+10,ITEMENDLINEY+22,200,20);
@@ -363,8 +363,8 @@ QString printmgr::CreatePDF(){
     painter->drawText(InnerRefRect,Qt::AlignVCenter,tr("内部参考品：")+tr("有效 √"));
     painter->drawText(PanelNameRect,Qt::AlignVCenter|Qt::AlignRight,panelName);
     painter->drawText(SerialRect,Qt::AlignVCenter|Qt::AlignRight,tr("批号：")+ExGlobal::boxSerial());
-    painter->drawText(ValidDateRect,Qt::AlignVCenter|Qt::AlignRight,tr("有效期：")+"2021/04/17");
-    painter->drawText(SystemNameDateRect,Qt::AlignVCenter,tr("仪器：")+ExGlobal::SysName);
+    painter->drawText(ValidDateRect,Qt::AlignVCenter|Qt::AlignRight,tr("有效期：")+validTime.split(" ")[0]);
+    painter->drawText(SystemNameDateRect,Qt::AlignVCenter|Qt::AlignRight,tr("仪器：")+ExGlobal::SysName);
 
     painter->drawLine(QLine(QPoint(ITEMHEADLINEX,ITEMHEADLINEY),QPoint(ITEMHEADLINEX+ITEMHEADLINELENGTH,ITEMHEADLINEY)));
     painter->drawLine(QLine(QPoint(ITEMHEADLINEX,ITEMENDLINEY),QPoint(ITEMHEADLINEX+ITEMHEADLINELENGTH,ITEMENDLINEY)));

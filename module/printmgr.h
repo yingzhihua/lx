@@ -11,6 +11,7 @@ public:
     explicit printmgr(QObject *parent = nullptr);
     QMap<QString,int> itemMap;
     QString testTime;
+    QString validTime;
     QString user;
     QString checker;
     QString sampInfo;

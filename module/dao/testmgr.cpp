@@ -10,8 +10,9 @@ TestMgr::TestMgr(QObject *parent) : QObject(parent)
 }
 
 int TestMgr::TestCreate(QString nSerial){
-    QString sql = QString("insert into PanelTest(PanelCode,SerialNo,BoxCode,TestTime,SampleInfo,Sampleid,UserName,ResultType) values('%1','%2','%3','%4','%5','%6','%7',%8)")
-            .arg(ExGlobal::panelCode()).arg(nSerial).arg(ExGlobal::reagentBox()).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")).arg(ExGlobal::sampleInfo()).arg(ExGlobal::sampleCode()).arg(ExGlobal::User).arg(0);
+    QString sql = QString("insert into PanelTest(PanelCode,SerialNo,BoxCode,TestTime,SampleInfo,Sampleid,UserName,ResultType,ValidTime) values('%1','%2','%3','%4','%5','%6','%7',%8,'%9')")
+            .arg(ExGlobal::panelCode()).arg(nSerial).arg(ExGlobal::reagentBox()).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")).arg(ExGlobal::sampleInfo()).arg(ExGlobal::sampleCode())
+            .arg(ExGlobal::User).arg(0).arg(ExGlobal::validDateTime.toString("yyyy-MM-dd hh:mm:ss"));
     qDebug()<<sql;
     if(SqliteMgr::execute(sql))
     {
@@ -34,7 +35,7 @@ int TestMgr::TestCreate(QString nSerial){
 }
 
 int TestMgr::LoopTestCreate(QString panelCode, int loopTestCount){
-    QString sql = QString("insert into PanelTest(PanelCode,SerialNo,BoxCode,TestTime,SampleInfo,Sampleid,UserName,ResultType,ValidTime) values('%1','%2','%3','%4','%5','%6','%7',%8)")
+    QString sql = QString("insert into PanelTest(PanelCode,SerialNo,BoxCode,TestTime,SampleInfo,Sampleid,UserName,ResultType) values('%1','%2','%3','%4','%5','%6','%7',%8)")
             .arg(panelCode).arg(0).arg(loopTestCount).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")).arg(ExGlobal::sampleInfo()).arg(ExGlobal::sampleCode())
             .arg(ExGlobal::User).arg(0).arg(ExGlobal::validDateTime.toString("yyyy-MM-dd hh:mm:ss"));
     qDebug()<<sql;

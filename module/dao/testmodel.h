@@ -23,6 +23,7 @@ public:
     QString SerialNo;
     QString BoxCode;
     QString TestTime;
+    QString ValidTime;
     QString SampleInfo;
     QString SampleId;
     QString User;
@@ -41,6 +42,7 @@ public:
         RolesSerialNo,
         RolesBoxCode,
         RoleTestTime,
+        RoleValidTime,
         RoleSampleInfo,
         RoleSampleId,
         RoleUser,
@@ -55,6 +57,7 @@ public:
     bool ExistTest(int Testid);
     void InitTest();
     QString getCurrTestDateTime(){return m_display_list[currTestIndex].TestTime;}
+    QString getCurrValidDateTime(){return m_display_list[currTestIndex].ValidTime;}
     Q_INVOKABLE QString getCurrTestCode(){return m_display_list[currTestIndex].SampleId;}
     Q_INVOKABLE QString getCurrTestSerial(){return m_display_list[currTestIndex].SerialNo;}
     Q_INVOKABLE QString getCurrTestInfo(){return m_display_list[currTestIndex].SampleInfo;}

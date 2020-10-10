@@ -1384,6 +1384,7 @@ int Sequence::decodeQr(QString strQr){
 
         QDateTime time = QDateTime::fromString(record[4],"yyyyMMddhh");
         ExGlobal::validDateTime = time.addDays(record[5].toInt());
+        qDebug()<<"validDate"<<ExGlobal::validDateTime.toString();
         if (time.addDays(record[5].toInt()).toTime_t() < QDateTime::currentDateTime().toTime_t())
             return 1;
     }
@@ -1442,6 +1443,7 @@ bool Sequence::printTest(){
     if (printer->isRunning())
         return false;
     printer->testTime = ExGlobal::pTestModel->getCurrTestDateTime();
+    printer->validTime = ExGlobal::pTestModel->getCurrValidDateTime();
     printer->sampCode = ExGlobal::pTestModel->getCurrTestCode();
     printer->sampInfo = ExGlobal::pTestModel->getCurrTestInfo();
     printer->user = ExGlobal::pTestModel->getCurrTestUser();

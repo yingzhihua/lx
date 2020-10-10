@@ -10,6 +10,7 @@ TestModel::TestModel(QObject *parent):QAbstractListModel (parent)
     roles[RoleUser] = "User";
     roles[RoleChecker] = "Checker";
     roles[RoleTestTime] = "TestTime";
+    roles[RoleValidTime] = "ValidTime";
     roles[RolesSerialNo] = "SerialNo";
     roles[RolesBoxCode] = "BoxCode";
     roles[RoleResultType] = "ResultType";
@@ -40,6 +41,8 @@ QVariant TestModel::data(const QModelIndex &index, int role) const
         return test.Checker;
     else if(role == RoleTestTime)
         return test.TestTime;
+    else if(role == RoleValidTime)
+        return test.ValidTime;
     else if(role == RolesSerialNo)
         return test.SerialNo;
     else if(role == RolesBoxCode)
@@ -75,6 +78,7 @@ void TestModel::InitTest(){
         test.SerialNo = query.value(2).toString();
         test.BoxCode = query.value(3).toString();
         test.TestTime = query.value(4).toString();
+        test.ValidTime = query.value(10).toString();
         test.SampleInfo = query.value(5).toString();
         test.SampleId = query.value(6).toString();
         test.User = query.value(7).toString();
@@ -101,6 +105,7 @@ void TestModel::AddTest(int testid){
             test.User = query.value(7).toString();
             test.Checker = query.value(8).toString();
             test.ResultType = query.value(9).toInt();
+            test.ValidTime = query.value(10).toString();
             test.PanelName = Sequence::getPanelName(test.PanelCode);
             m_display_list<<test;
         }
