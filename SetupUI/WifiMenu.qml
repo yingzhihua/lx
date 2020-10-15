@@ -111,6 +111,24 @@ Rectangle {
         }
     }
 
+    Bt2{
+        id: btdiscon
+        anchors.bottom: btflash.top
+        anchors.bottomMargin: 30
+        anchors.horizontalCenter: btCannel.horizontalCenter
+        height: 106
+        width: 299
+        textoffsetx: 30
+        textoffsety: -4
+        textcolor: "#323232"
+        image: "qrc:/images/CancelTest.png"
+        text: qsTr("断开连接")
+        onClicked: {
+            loadDialog.show(qsTr("正在断开WIFI"))
+            wifiModel.disconnect()
+        }
+    }
+
     Query{
         id: queryDlg
         qtitle: qsTr("输入WIFI密码")
@@ -119,13 +137,37 @@ Rectangle {
         anchors.fill: parent
         onQueryAck: {
             console.log(wifiModel.data(wifiModel.index(listView.currentIndex,0),257),res);
-            if (wifiModel.connect(wifiModel.data(wifiModel.index(listView.currentIndex,0),257),res)){
-                console.log("connect");
-            }
+            loadDialog.show(qsTr("正在连接WIFI"))
+            wifiModel.connect(wifiModel.data(wifiModel.index(listView.currentIndex,0),257),res);
         }
+    }
+
+    OneBtnQuery{
+        id:promptClose
+        anchors.fill: parent
+        bttext: qsTr("确定")
+    }
+
+    Loading{
+        id:loadDialog
+        anchors.fill: parent
     }
 
     Component.onCompleted:{
         Sequence.setTitle("setup_wifi")
+    }
+
+    Connections{
+        target: wifiModel
+        onFinish:{
+            console.log(val)
+            loadDialog.close()
+            if (val === 0)
+                promptClose.show(qsTr("WIFI连接失败！"))
+            else if(val === 1)
+                promptClose.show(qsTr("WIFI连接成功！"))
+            else if(val === 2)
+                promptClose.show(qsTr("WIFI连接断开！"))            
+        }
     }
 }

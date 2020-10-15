@@ -20,6 +20,27 @@ public:
     QString Security;
 };
 
+class WifiConnect : public QObject
+{
+    Q_OBJECT
+public:
+    explicit WifiConnect(QObject *parent = nullptr);
+    void setParam(QString ssid_,QString password_){ssid = ssid_;password=password_;}
+    void setMode(int mode_){mode = mode_;}
+
+signals:
+    void Progress(int val);
+    void Finish();
+
+public slots:
+    void start();
+
+private:
+    QString ssid;
+    QString password;
+    int mode;
+};
+
 class WifiModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -37,15 +58,24 @@ public:
     QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
     void LoadData();
     Q_INVOKABLE void refresh();
-    Q_INVOKABLE bool connect(QString ssid,QString password);
+    Q_INVOKABLE void disconnect();
+    Q_INVOKABLE void connect(QString ssid,QString password);
 
 protected:
     QHash<int, QByteArray> roleNames() const;
 
+public slots:
+    void ConnectFinish(int result);
+
+signals:
+    void finish(int val);
+
 private:
     QList<WifiItem> m_display_list;
     QHash<int, QByteArray> roles;
-    bool Exist(QString ssid);
+    int Exist(QString ssid);
+    bool isConnected();
+    WifiConnect *connector;
 };
 
 #endif // WIFIMODEL_H

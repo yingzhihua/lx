@@ -28,11 +28,17 @@ Item {
                 }
             }
             RadioButton{
-                id:rb3
-                checked: true
+                id:rb3                
                 text: qsTr("送检软件")
                 onClicked: {
                     ExGlobal.updateCaliParam("ProjectMode",2);
+                }
+            }
+            RadioButton{
+                id:rb4
+                text: qsTr("演示软件")
+                onClicked: {
+                    ExGlobal.updateCaliParam("ProjectMode",3);
                 }
             }
         }
@@ -45,27 +51,14 @@ Item {
         }
     }
 
-    Button {
-        id: btExit
-        font.pixelSize: 30
-        width: 200
-        height: 70
-        text: qsTr("退出")
-        anchors.bottom: btCannel.top
-        anchors.bottomMargin: 60
-        anchors.right: parent.right
-        anchors.rightMargin: 20
-        onClicked: {
-           close()
-        }
-    }
-
-    Component.onCompleted: {
-        if (ExGlobal.getCaliParam("ProjectMode")===1)
-            rb1.checked = true
-        else if (ExGlobal.getCaliParam("ProjectMode")===0)
+    Component.onCompleted: {        
+        if (ExGlobal.getCaliParam("ProjectMode")===0)
             rb2.checked = true;
         else if (ExGlobal.getCaliParam("ProjectMode")===2)
             rb3.checked = true;
+        else if (ExGlobal.getCaliParam("ProjectMode")===3)
+            rb4.checked = true;
+        else
+            rb1.checked = true
     }
 }

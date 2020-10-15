@@ -29,8 +29,9 @@ Rectangle {
     }
 
     ScrollView{
+        id: setuplist
         anchors.fill: parent
-        ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+        //ScrollBar.vertical.policy: ScrollBar.AlwaysOn
         ScrollBar.vertical.width: 100
         Column{
             Repeater{
@@ -131,6 +132,8 @@ Rectangle {
         //Sequence.changeTitle(qsTr("设置"));
         Sequence.setTitle("setup");
         //Sequence.hideTitle(true);
+        if (setModel.count > 11)
+            setuplist.ScrollBar.vertical.policy = ScrollBar.AlwaysOn
     }
 
     Connections{
@@ -159,6 +162,13 @@ Rectangle {
         onSysLanguageCodeChanged:{
             console.log("onSysLanguageCodeChanged")
             setInfo("Language",ExGlobal.sysLanguageName);
+        }
+    }
+
+    Connections{
+        target: wifiModel
+        onFinish:{
+            setInfo("Wlan",ExGlobal.getWIFIIP());
         }
     }
 

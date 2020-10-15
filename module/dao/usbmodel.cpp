@@ -33,7 +33,7 @@ bool Worker::CopyDir(const QString &fromDir, const QString &toDir, bool cover){
 Worker::Worker(QObject *parent) : QObject(parent)
 {
     qDebug()<<"new Worker";
-    stop = false;
+    stop = false;    
 }
 
 void Worker::start(){
@@ -70,6 +70,7 @@ UsbModel::UsbModel(QObject *parent):QAbstractListModel (parent)
     roles[RolesName] = "Name";
     roles[RolesSelect] = "Select";
     refresh();
+    worker = nullptr;
 }
 
 int UsbModel::rowCount(const QModelIndex &parent) const
@@ -259,13 +260,16 @@ void UsbModel::Finish(){
 }
 
 void UsbModel::startCpy(){
+    if (worker != nullptr)
+        return;
     worker = new Worker;
     connect(worker,SIGNAL(Progress(int)),this,SLOT(Progress(int)));
     connect(worker,SIGNAL(Finish()),this,SLOT(Finish()));
     QThread *thread = new QThread;
     worker->moveToThread(thread);
     connect(thread,SIGNAL(started()),worker,SLOT(start()));
-    connect(worker,SIGNAL(Finish()),thread,SLOT(quit()));
+    connect(worker,SIGNAL(Finish()),worker,SLOT(deleteLater()));
+    connect(worker,SIGNAL(destroyed()),thread,SLOT(quit()));
     connect(thread,SIGNAL(finished()),thread,SLOT(deleteLater()));
     worker->setList(m_display_list);
     thread->start();

@@ -160,5 +160,7 @@
         <file>components/Doing.qml</file>
         <file>images/dir.png</file>
         <file>images/file.png</file>
+        <file>images/loading.gif</file>
+        <file>components/Loading.qml</file>
     </qresource>
 </RCC>

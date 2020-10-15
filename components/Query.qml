@@ -55,6 +55,7 @@ Rectangle {
             anchors.verticalCenter: queryLable.verticalCenter
             width: 400
             height: 64
+            echoMode: TextInput.Password
             background: Rectangle{
                 border.color: "#cdcdcd"
                 color: "#f5f5f5"
@@ -73,7 +74,8 @@ Rectangle {
             text: qsTr("取消")
             image: "qrc:/images/cancel.png"
             onClicked: {
-                queryDialog.visible = false;
+                focus = true
+                queryDialog.visible = false;                
             }
         }
         Bt2{
@@ -89,6 +91,7 @@ Rectangle {
             image: "qrc:/images/confirm.png"
             onClicked: {
                 queryDialog.visible = false;
+                focus = true
                 queryDialog.queryAck(ack.text);
             }
         }
@@ -97,6 +100,7 @@ Rectangle {
 
     function show(name){
         ssid.text = name;
+        ack.text = "";
         queryDialog.visible = true;
     }
 
