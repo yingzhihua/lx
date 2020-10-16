@@ -57,7 +57,15 @@ Page {
             errorDesp.text = qsTr("空试剂盒");
         else if (Sequence.boxParam() === 5)
             errorDesp.text = qsTr("试剂盒已过期");
-        updateState.start()
+
+        if (!Sequence.box)
+         {
+            updateState.stop()
+            mainView.pop();
+            mainView.push("qrc:/HomeUI/Idle.qml");
+        }
+        else
+            updateState.start()
     }
 }
 

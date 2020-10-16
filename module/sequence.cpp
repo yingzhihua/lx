@@ -496,9 +496,17 @@ void Sequence::ActionFinish(QByteArray data)
             data.remove(0,10);
             emit qrDecode(data.data());
         }
-        else if(data[7] == '\xB1'){ //刺穿识别 1:识别出二维码;2:检查出刺穿孔;4:已刺穿;8:有试剂液体
-            if (ExGlobal::projectMode() == 10)
+        else if(data[7] == '\xB1'){ //刺穿识别 data[2]=1:识别出二维码;data[3]=1:有试剂液体
+            if (ExGlobal::projectMode() == 3){
+                //if (data[2] == '\x0' && decodeQr(data.mid(10)) == 2)
+                {
+                    sequenceSetPanel("20001");
+                    ExGlobal::setReagentBox("205");
+                    ExGlobal::setBoxSerial(QString("Lot# 20001"));
+                    ExGlobal::validDateTime = QDateTime::currentDateTime().addDays(90);
+                }
                 emit sequenceFinish(SequenceResult::Result_Box_Valid);
+            }
             else if(data[2] == '\x0')
             {
                 boxparam = 4;
@@ -645,6 +653,7 @@ void Sequence::FinishSequence()
         camera->closeCamera();
         currSequenceId = SequenceId::Sequence_Idle;
         qDebug()<<"Itemsize"<<imageAna->getItem().size();//imageCapture->openCamera();
+        qDebug()<<"panelCode"<<ExGlobal::panelCode()<<ExGlobal::DemoPanelCode;
         if (imageAna->getItem().size() > 45 || ExGlobal::panelCode() == ExGlobal::DemoPanelCode)
         {
             int testid = testMgr->TestClose(2);
@@ -828,6 +837,13 @@ bool Sequence::DoAction(QDomElement action,bool isChild)
         QByteArray send = ActionParser::ActionToByte(action);
         currOrder = send[7];
         serialMgr->serialWrite(send);
+    }
+    else if(action.attribute("Device")=="Other")
+    {
+        if (action.attribute("ActionValue") == "1"){    //曝光时间设置
+            bFinishAction = true;
+            camera->setabsExpose(action.attribute("ActionParam1").toInt());
+        }
     }
 
     if (isChild){
@@ -1387,8 +1403,9 @@ int Sequence::decodeQr(QString strQr){
         qDebug()<<"validDate"<<ExGlobal::validDateTime.toString();
         if (time.addDays(record[5].toInt()).toTime_t() < QDateTime::currentDateTime().toTime_t())
             return 1;
+        return 0;
     }
-    return 0;
+    return 2;
 }
 
 void Sequence::SwitchDoor(){
