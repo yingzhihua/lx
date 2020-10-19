@@ -14,6 +14,7 @@ public:
 private:
     QWidget *widget;
     int timerid;
+    int timerkey;
 
 protected:
     void timerEvent(QTimerEvent *event);

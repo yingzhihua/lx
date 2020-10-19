@@ -15,6 +15,7 @@ void GlobalApplication::setWindowInstance(QWidget *wnd){
 //static bool keyvalid = true;
 static QString sampleCode = "";
 static QString simpleKey = "";
+static time_t timel = 0;
 bool GlobalApplication::notify(QObject *obj, QEvent *e){
     const QMetaObject* objMeta = obj->metaObject();
     QString clName = objMeta->className();
@@ -39,7 +40,16 @@ bool GlobalApplication::notify(QObject *obj, QEvent *e){
     }
     else if(e->type() == QEvent::KeyRelease){
         if (simpleKey != "")
-        {
+        {            
+            if (timel != 0)
+            {
+                time_t tmpt = timel;
+                timel = clock();
+                if (timel-tmpt > 30000)
+                    sampleCode = "";
+            }
+            else
+                timel = clock();
             sampleCode += simpleKey;
             simpleKey = "";
         }
@@ -48,7 +58,8 @@ bool GlobalApplication::notify(QObject *obj, QEvent *e){
             QKeyEvent *keyEvent = static_cast<QKeyEvent *>(e);
             if (keyEvent->key() == Qt::Key_Return)
             {
-                global->setSampleCode(sampleCode);
+                if (sampleCode.length() > 3)
+                    global->setSampleCode(sampleCode);
                 qDebug()<<sampleCode;
                 sampleCode = "";
             }
@@ -62,6 +73,14 @@ bool GlobalApplication::notify(QObject *obj, QEvent *e){
 void GlobalApplication::timerEvent(QTimerEvent *event){
     qDebug()<<"timerEvent:"<<event->timerId();
     this->killTimer(event->timerId());
-    timerid = -1;
-    global->GlobalMessage(1);    
+    if (event->timerId() == timerid)
+    {
+        timerid = -1;
+        global->GlobalMessage(1);
+    }
+    else if(event->timerId() == timerkey)
+    {
+        timerkey = -1;
+        sampleCode = "";
+    }
 }
