@@ -209,6 +209,14 @@ bool Sequence::sequenceDo(SequenceId id)
         SwitchDoor();
         return true;
     }
+    else if(id == SequenceId::Sequence_DoorToWork){
+        DoorToWork(true);
+        return true;
+    }
+    else if(id == SequenceId::Sequence_DoorFromWork){
+        DoorToWork(false);
+        return true;
+    }
     else if(id == SequenceId::Sequence_SelfCheck){
         sequenceAction = root.firstChildElement("SelfCheck");
     }
@@ -547,7 +555,8 @@ void Sequence::ActionFinish(QByteArray data)
         emit sequenceFinish(SequenceResult::Result_Simple_ok);
     }
     else if (currSequenceId == SequenceId::Sequence_QrDecode || currSequenceId == SequenceId::Sequence_Pierce
-             ||currSequenceId == SequenceId::Sequence_OpenBox || currSequenceId == SequenceId::Sequence_CloseBox){
+             ||currSequenceId == SequenceId::Sequence_OpenBox || currSequenceId == SequenceId::Sequence_CloseBox
+             ||currSequenceId == SequenceId::Sequence_DoorToWork ||currSequenceId == SequenceId::Sequence_DoorFromWork){
         if (!listNextAction(false))
         {
             FinishSequence();
@@ -641,6 +650,14 @@ void Sequence::FinishSequence()
     {
         bDoorState = true;
         out = SequenceResult::Result_OpenBox_ok;
+    }
+    else if(currSequenceId == SequenceId::Sequence_DoorToWork)
+    {
+        out = SequenceResult::Result_DoorToWork_ok;
+    }
+    else if(currSequenceId == SequenceId::Sequence_DoorFromWork)
+    {
+        out = SequenceResult::Result_DoorToWork_ok;
     }
     else if(currSequenceId == SequenceId::Sequence_CannelTest)
     {
@@ -1165,6 +1182,16 @@ void Sequence::CameraView(QImage img)
         else if(autoFocus_JumpStep == 1)
             autoFocus_JumpStep = 2;
     }
+    else if (bCaptureLight){
+        qDebug()<<"bCaptureLight"<<autoFocus_JumpStep;
+        if (++autoFocus_JumpStep>1){
+            autoFocus_JumpStep = 0;
+            camera->stopCamera();
+            dirctAction("Light",1,0,0,0);
+            bCaptureLight = false;
+            emit refreshLightValue();
+        }
+    }
 }
 
 bool Sequence::startView(int id){
@@ -1422,6 +1449,22 @@ void Sequence::SwitchDoor(){
     listNextAction(true);
 }
 
+void Sequence::DoorToWork(bool toWork){
+    actList.clear();
+    action act;
+
+    act.device = "Door";
+    act.value = 5;
+    actList.append(act);
+
+    if (toWork){
+        act.device = "Door";
+        act.value = 7;
+        actList.append(act);
+    }
+
+    listNextAction(true);
+}
 void Sequence::fan1SetSpeed(int speed)
 {
     qDebug()<<"fan1SetSpeed:"<<speed<<"prespeed:"<<t_fan1Speed;
@@ -1445,7 +1488,7 @@ void Sequence::autoFocus(){
         }
         //*/
         dirctAction("Light",2,0,0,0);
-        camera->preview();
+        camera->preview(1);
 
         dirctAction("Focus",1,0,0,0);
         bAutoFocus = true;
@@ -1454,6 +1497,13 @@ void Sequence::autoFocus(){
         autoFocus_JumpStep = 0;
         autoFocus_dec = false;
     }
+}
+
+void Sequence::startLight(){
+    bCaptureLight = true;
+    autoFocus_JumpStep = 0;
+    dirctAction("Light",2,0,0,0);
+    camera->preview(2);
 }
 
 bool Sequence::printTest(){

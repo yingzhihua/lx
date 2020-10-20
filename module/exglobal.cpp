@@ -109,6 +109,10 @@ int ExGlobal::FocusX = 1000;
 int ExGlobal::FocusY = 670;
 int ExGlobal::FocusWidth = 600;
 int ExGlobal::FocusHeight = 600;
+int ExGlobal::LightX = 1000;
+int ExGlobal::LightY = 670;
+int ExGlobal::LightWidth = 600;
+int ExGlobal::LightHeight = 600;
 int ExGlobal::DoorOut = 300;
 int ExGlobal::DataEntry = 0;
 
@@ -496,6 +500,14 @@ void ExGlobal::SetCaliParam(const QString &name, int caliValue)
         FocusWidth = caliValue;
     else if(name == "FocusHeight")
         FocusHeight = caliValue;
+    else if(name == "LightX")
+        LightX = caliValue;
+    else if(name == "LightY")
+        LightY = caliValue;
+    else if(name == "LightWidth")
+        LightWidth = caliValue;
+    else if(name == "LightHeight")
+        LightHeight = caliValue;
     else if(name == "DryWet")
         DryWet = caliValue;
     else if(name == "LiquidsHeight")
@@ -611,6 +623,14 @@ int ExGlobal::getCaliParam(const QString &caliName)
         result = FocusWidth;
     else if(caliName == "FocusHeight")
         result = FocusHeight;
+    else if(caliName == "LightX")
+        result = LightX;
+    else if(caliName == "LightY")
+        result = LightY;
+    else if(caliName == "LightWidth")
+        result = LightWidth;
+    else if(caliName == "LightHeight")
+        result = LightHeight;
     else if(caliName == "DryWet")
         result = DryWet;
     else if(caliName == "LiquidsHeight")

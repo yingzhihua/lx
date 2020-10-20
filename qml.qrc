@@ -162,5 +162,6 @@
         <file>images/file.png</file>
         <file>images/loading.gif</file>
         <file>components/Loading.qml</file>
+        <file>SetupUI/Light.qml</file>
     </qresource>
 </RCC>

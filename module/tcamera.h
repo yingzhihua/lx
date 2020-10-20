@@ -19,7 +19,7 @@ public:
     int closeCamera();
     int stopCamera();
     bool capture(QString fileName, int nCount);
-    bool preview();
+    bool preview(int viewType = 0);
     void *getyData();
     int getImageType();
 

@@ -892,6 +892,20 @@ double ImageAnalysis::GetMeanLight(void *data, int imageType){
     return meanValue;
 }
 
+double ImageAnalysis::GetLLight(void *data, int imageType){
+    double meanValue = 0.0;
+    Mat imageGrey;
+    if (imageType == 0){
+        Mat(imageHeight,imageWidth,CV_8U,data)(Rect(ExGlobal::LightX,ExGlobal::LightY,ExGlobal::LightWidth,ExGlobal::LightHeight)).copyTo(imageGrey);
+    }
+    else if(imageType == 1){
+        Mat(imageHeight,imageWidth,CV_16U,data)(Rect(ExGlobal::LightX,ExGlobal::LightY,ExGlobal::LightWidth,ExGlobal::LightHeight)).copyTo(imageGrey);
+    }
+    meanValue = mean(imageGrey)[0];
+    qDebug()<<"GetLLight,elapsed="<<ExGlobal::LightX<<ExGlobal::LightY<<ExGlobal::LightWidth<<ExGlobal::LightHeight;
+    return meanValue;
+}
+
 double ImageAnalysis::GetCircularSize(void *data, int imageType){
     QTime time;
     time.start();

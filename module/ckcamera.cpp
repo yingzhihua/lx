@@ -136,7 +136,7 @@ bool CKCamera::stopCamera(){
     return true;
 }
 
-static bool saverawimage = false;
+static bool saverawimage = true;
 
 uint32_t CKCamera::CKGetFrame(){
     CameraSdkStatus status;
@@ -295,7 +295,7 @@ bool CKCamera::capture(QString fileName, int nCount){
     return true;
 }
 
-bool CKCamera::preview(){
+bool CKCamera::preview(int viewType){
     qDebug()<<"CK preview"<<captureMode;
     Log::LogByFile("CK.txt",QString("preview"));
     if (captureMode == CaptureMode::View)
@@ -305,6 +305,7 @@ bool CKCamera::preview(){
     count = 1;
     stopping = false;
     captureMode = CaptureMode::View;
+    ViewType = viewType;
     this->start();
     return true;
 }
@@ -371,7 +372,10 @@ void CKCamera::run(){
                     QImage image(rawData, 2592, 1944, QImage::Format_Grayscale8);
                     painter.begin(&image);
                     painter.setPen(QPen(QColor(255,255,255),4));
-                    painter.drawRect(ExGlobal::FocusX,ExGlobal::FocusY,ExGlobal::FocusWidth,ExGlobal::FocusHeight);
+                    if (ViewType == 1)
+                        painter.drawRect(ExGlobal::FocusX,ExGlobal::FocusY,ExGlobal::FocusWidth,ExGlobal::FocusHeight);
+                    else if(ViewType == 2)
+                        painter.drawRect(ExGlobal::LightX,ExGlobal::LightY,ExGlobal::LightWidth,ExGlobal::LightHeight);
                     painter.end();
                     emit reView(image);
                 }
@@ -379,7 +383,10 @@ void CKCamera::run(){
                     QImage image(wtobRawData, 2592, 1944, QImage::Format_Grayscale8);
                     painter.begin(&image);
                     painter.setPen(QPen(QColor(255,255,255),4));
-                    painter.drawRect(ExGlobal::FocusX,ExGlobal::FocusY,ExGlobal::FocusWidth,ExGlobal::FocusHeight);
+                    if (ViewType == 1)
+                        painter.drawRect(ExGlobal::FocusX,ExGlobal::FocusY,ExGlobal::FocusWidth,ExGlobal::FocusHeight);
+                    else if(ViewType == 2)
+                        painter.drawRect(ExGlobal::LightX,ExGlobal::LightY,ExGlobal::LightWidth,ExGlobal::LightHeight);
                     painter.end();
                     emit reView(image);
                 }

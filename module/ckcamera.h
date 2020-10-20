@@ -22,7 +22,7 @@ public:
     bool closeCamera();
     bool stopCamera();
     bool capture(QString fileName, int nCount);
-    bool preview();
+    bool preview(int viewType = 0);
     void *getyData();
     int getImageType(){return rawImageType;}
 
@@ -46,6 +46,7 @@ private:
     QString filename;
     int count;
     bool stopping;
+    int ViewType;
     uint8_t* rawData;
     uint8_t* wtobRawData;
     uint16_t* wRawData;

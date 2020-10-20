@@ -17,6 +17,7 @@
 #include <QDir>
 #include <QMutex>
 #include <QTime>
+#include <QPainter>
 
 #include <linux/videodev2.h>
 #include "log.h"
@@ -864,7 +865,7 @@ bool ImageCapture::capture(QString fileName, int nCount){
     return true;
 }
 
-bool ImageCapture::preview(){
+bool ImageCapture::preview(int viewType){
     qDebug()<<"v4l2 preview"<<captureMode;
     if (captureMode == CaptureMode::View)
         return true;
@@ -873,6 +874,7 @@ bool ImageCapture::preview(){
     count = 9999;
     stopping = false;
     captureMode = CaptureMode::View;
+    ViewType = viewType;
     this->start();
     return true;
 }
@@ -1014,6 +1016,13 @@ int ImageCapture::process_image(int i, const void *p, int size){
         convert_yuv_to_rgb_buffer((unsigned char *)p,ExGlobal::bufrgb,width,height);
         convert_yuv_to_y_buffer((unsigned char *)p,bufy,width,height);
         QImage image(ExGlobal::bufrgb,width,height,QImage::Format_RGB888);
+        QPainter painter;
+        painter.begin(&image);
+        painter.setPen(QPen(QColor(255,255,255),4));
+        if (ViewType == 1)
+            painter.drawRect(ExGlobal::FocusX,ExGlobal::FocusY,ExGlobal::FocusWidth,ExGlobal::FocusHeight);
+        else if(ViewType == 2)
+            painter.drawRect(ExGlobal::LightX,ExGlobal::LightY,ExGlobal::LightWidth,ExGlobal::LightHeight);
         emit reView(image);
     }
     else{

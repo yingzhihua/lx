@@ -62,11 +62,11 @@ bool TCamera::capture(QString fileName, int nCount){
     return false;
 }
 
-bool TCamera::preview(){
+bool TCamera::preview(int viewType){
     if (cameraType == CAMERA_TYPE_CK)
-        return ckCamera->preview();
+        return ckCamera->preview(viewType);
     else if(cameraType == CAMERA_TYPE_V4L2)
-        return imageCapture->preview();
+        return imageCapture->preview(viewType);
     return false;
 }
 

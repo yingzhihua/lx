@@ -37,7 +37,7 @@ public:
     int closeCamera();
     int stopCamera();
     bool capture(QString fileName, int nCount);
-    bool preview();
+    bool preview(int viewType = 0);
     int getabsExpose();
     bool setabsExpose(int value);
     int getGain();
@@ -80,6 +80,7 @@ private:
     unsigned int *sum;
     QString filename;    
     bool stopping;
+    int ViewType;
     int internal_stop_capturing();
     void recordParam();    
 #if 0

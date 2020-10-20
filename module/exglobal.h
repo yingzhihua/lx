@@ -201,6 +201,10 @@ public:
     static int FocusY;
     static int FocusWidth;
     static int FocusHeight;
+    static int LightX;
+    static int LightY;
+    static int LightWidth;
+    static int LightHeight;
     static int DoorOut;
     static int DataEntry;
     static unsigned char *bufrgb;

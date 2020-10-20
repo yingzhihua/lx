@@ -182,7 +182,7 @@ QByteArray ActionParser::ParamToByte(const QString &action, int value, int param
     QByteArray data;
 
     if (action == "Door"){        
-        if (value==1)       //1:出仓；2：进仓；3：正方向移动；4：负方向移动;5:复位
+        if (value==1)       //1:出仓；2：进仓；3：正方向移动；4：负方向移动;5:复位;6：从工作位回道硬件复位位置；7:从复位位置进到工作位；
         {
             data.resize(15);
             data[6] = 0x00;
@@ -235,9 +235,8 @@ QByteArray ActionParser::ParamToByte(const QString &action, int value, int param
             data[6] = 0x00;
             data[7] = 0x70;
             data[8] = 0x00;
-            data[9] = 0x04;
-            data[10] = 0x01;    //保留
             data[9] = 0x06;
+            data[10] = 0x01;    //保留            
             data[11] = 0x49;
             if (value == 7)
                 param1 = ExGlobal::VDWorkX;

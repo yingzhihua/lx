@@ -29,6 +29,8 @@ public:
         Sequence_SelfCheck,
         Sequence_OpenBox,
         Sequence_CloseBox,
+        Sequence_DoorToWork,
+        Sequence_DoorFromWork,
         Sequence_CannelTest,
         Sequence_Test,
         Sequence_LoopTest,
@@ -50,6 +52,7 @@ public:
         Result_OpenBox_err,
         Result_CloseBox_ok,
         Result_CloseBox_err,
+        Result_DoorToWork_ok,
         Result_CannelTest_ok,
         Result_Test_finish,
         Result_Test_unfinish,
@@ -127,6 +130,7 @@ public:
     Q_INVOKABLE double getDefinition2(){return imageAna->GetDefinition2(camera->getyData(),camera->getImageType());}
     Q_INVOKABLE double getDefinition3(){return imageAna->GetDefinition3(camera->getyData(),camera->getImageType());}
     Q_INVOKABLE double getLight(){return imageAna->GetMeanLight(camera->getyData(),camera->getImageType());}
+    Q_INVOKABLE double getLLight(){return imageAna->GetLLight(camera->getyData(),camera->getImageType());}
     Q_INVOKABLE double getCircSize(){return imageAna->GetCircularSize(camera->getyData(),camera->getImageType());}
     Q_INVOKABLE bool validBox(){return bValidBox;}
 
@@ -134,6 +138,7 @@ public:
     Q_PROPERTY(int fan2Speed READ fan2Speed NOTIFY fan2SpeedChanged)
     Q_PROPERTY(int fan3Speed READ fan3Speed NOTIFY fan3SpeedChanged)
     Q_INVOKABLE void autoFocus();
+    Q_INVOKABLE void startLight();
 
     Q_INVOKABLE bool printTest();
     ImageProvider *imageProvider;
@@ -164,6 +169,7 @@ signals:
     void errOccur(QString error);
     void callQmlRefeshView();
     void callQmlRefeshQrImg();
+    void refreshLightValue();
     void callQmlRefeshAnaMainImg();
     void callQmlRefeshData(int index, QVector<int> item,QVector<int> value);
     void qrDecode(QString info);
@@ -233,9 +239,11 @@ private:
     int decodeQr(QString strQr);
     void PierceDect();
     void SwitchDoor();
+    void DoorToWork(bool toWork);
     bool bQrOpenLight = true;
     bool bAutoFocus = false;
     bool bFocused = false;
+    bool bCaptureLight = false;
 
     int t_fan1Speed;
     int t_fan2Speed;

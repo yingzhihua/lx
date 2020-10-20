@@ -46,5 +46,9 @@ Rectangle {
         loadimg.playing = false
         lockDialog.visible = false
     }
+
+    MouseArea{
+        anchors.fill: parent
+    }
 }
 
