@@ -14,9 +14,9 @@ Page {
         ThreeMessage{
             x:358
             y:224
-            text1: ExGlobal.panelName
-            text2: ExGlobal.panelCode
-            text3: ExGlobal.boxSerial()
+            text1: ExGlobal.panelName+ExGlobal.panelCode
+            text2: ExGlobal.boxSerial()
+            text3: ExGlobal.getCurrSampleName()
         }
 
         ThreeMessage{
@@ -93,6 +93,10 @@ Page {
                 mainView.push("qrc:/HomeUI/Idle.qml");
             }
             else if(result == Sequence.Result_Test_finish){
+                ExGlobal.sampleCode = "";
+                ExGlobal.sampleInfo = "";
+                ExGlobal.sampleRemark = "";
+
                 if (ExGlobal.projectMode() === 2){
                     headerMsg.text = "测试完成！";
                     closemsg.show(qsTr("测试完成，准备退出到待机！"))

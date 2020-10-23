@@ -375,7 +375,8 @@ void CKCamera::run(){
                     if (ViewType == 1)
                         painter.drawRect(ExGlobal::FocusX,ExGlobal::FocusY,ExGlobal::FocusWidth,ExGlobal::FocusHeight);
                     else if(ViewType == 2)
-                        painter.drawRect(ExGlobal::LightX,ExGlobal::LightY,ExGlobal::LightWidth,ExGlobal::LightHeight);
+                        painter.drawEllipse(QRect(ExGlobal::LightCX-ExGlobal::LightR,ExGlobal::LightCY-ExGlobal::LightR,ExGlobal::LightR*2,ExGlobal::LightR*2));
+                        //painter.drawRect(ExGlobal::LightX,ExGlobal::LightY,ExGlobal::LightWidth,ExGlobal::LightHeight);
                     painter.end();
                     emit reView(image);
                 }
@@ -386,7 +387,8 @@ void CKCamera::run(){
                     if (ViewType == 1)
                         painter.drawRect(ExGlobal::FocusX,ExGlobal::FocusY,ExGlobal::FocusWidth,ExGlobal::FocusHeight);
                     else if(ViewType == 2)
-                        painter.drawRect(ExGlobal::LightX,ExGlobal::LightY,ExGlobal::LightWidth,ExGlobal::LightHeight);
+                        painter.drawEllipse(QRect(ExGlobal::LightCX-ExGlobal::LightR,ExGlobal::LightCY-ExGlobal::LightR,ExGlobal::LightR*2,ExGlobal::LightR*2));
+                        //painter.drawRect(ExGlobal::LightX,ExGlobal::LightY,ExGlobal::LightWidth,ExGlobal::LightHeight);
                     painter.end();
                     emit reView(image);
                 }

@@ -895,15 +895,26 @@ double ImageAnalysis::GetMeanLight(void *data, int imageType){
 double ImageAnalysis::GetLLight(void *data, int imageType){
     double meanValue = 0.0;
     Mat imageGrey;
+    Mat maskImage = Mat::zeros(ExGlobal::LightR<<1,ExGlobal::LightR<<1,CV_8U);
+    circle(maskImage,Point(ExGlobal::LightR,ExGlobal::LightR),ExGlobal::LightR,Scalar(1),-1);
+
     if (imageType == 0){
-        Mat(imageHeight,imageWidth,CV_8U,data)(Rect(ExGlobal::LightX,ExGlobal::LightY,ExGlobal::LightWidth,ExGlobal::LightHeight)).copyTo(imageGrey);
+        Mat(imageHeight,imageWidth,CV_8U,data)(Rect(ExGlobal::LightCX-ExGlobal::LightR,ExGlobal::LightCY-ExGlobal::LightR,ExGlobal::LightR*2,ExGlobal::LightR*2)).copyTo(imageGrey);
     }
     else if(imageType == 1){
-        Mat(imageHeight,imageWidth,CV_16U,data)(Rect(ExGlobal::LightX,ExGlobal::LightY,ExGlobal::LightWidth,ExGlobal::LightHeight)).copyTo(imageGrey);
+        Mat(imageHeight,imageWidth,CV_16U,data)(Rect(ExGlobal::LightCX-ExGlobal::LightR,ExGlobal::LightCY-ExGlobal::LightR,ExGlobal::LightR*2,ExGlobal::LightR*2)).copyTo(imageGrey);
     }
-    meanValue = mean(imageGrey)[0];
-    qDebug()<<"GetLLight,elapsed="<<ExGlobal::LightX<<ExGlobal::LightY<<ExGlobal::LightWidth<<ExGlobal::LightHeight;
+    meanValue = mean(imageGrey,maskImage)[0];
+
+    qDebug()<<"GetLLight,elapsed="<<ExGlobal::LightCX<<ExGlobal::LightCY<<ExGlobal::LightR<<maskImage.cols<<imageGrey.cols;
     return meanValue;
+}
+
+void ImageAnalysis::fillellipe(void *data){
+    Mat temp = Mat(imageHeight,imageWidth,CV_8UC3,data);
+    circle(temp,Point(ExGlobal::LightCX,ExGlobal::LightCY),100,Scalar(255,0,0),-1);
+    circle(temp,Point(ExGlobal::LightCX*2,ExGlobal::LightCY*2),100,Scalar(255,0,0),-1);
+    circle(temp,Point(imageWidth,imageHeight),100,Scalar(255,0,0),-1);
 }
 
 double ImageAnalysis::GetCircularSize(void *data, int imageType){
@@ -952,3 +963,4 @@ double ImageAnalysis::GetCircularSize(void *data, int imageType){
         result = Sm/Ss;
     return -result;
 }
+

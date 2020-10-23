@@ -21,6 +21,7 @@ public:
     static double GetDefinition3(void *data, int imageType);
     static double GetMeanLight(void *data, int imageType);
     static double GetLLight(void *data, int imageType);
+    static void fillellipe(void *data);
     static double GetCircularSize(void *data, int imageType);
     void FirstImage(void *data, int imageType);
     void AddImage(void *data, int imageType);

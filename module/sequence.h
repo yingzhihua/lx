@@ -154,6 +154,8 @@ public:
     Q_INVOKABLE bool isLoopTesting(){return currSequenceId == SequenceId::Sequence_LoopTest;}
 
     Q_INVOKABLE int boxParam(){return boxparam;}    
+    Q_INVOKABLE int onePointPanelIndex(){return OnePointPanelIndex;}
+    Q_INVOKABLE void setOnePointPanelIndex(int index);
     static QString getPanelName(QString panelCode);
     Q_PROPERTY(StageState uiStage READ readStage WRITE setStage NOTIFY stageChanged)
     StageState readStage(){return stage;}
@@ -268,6 +270,7 @@ private:
 
     double dryMeanValue,fillMeanValue;
     StageState stage;
+    int OnePointPanelIndex;
 };
 
 #endif // SEQUENCE_H

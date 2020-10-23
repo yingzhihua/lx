@@ -1015,6 +1015,7 @@ int ImageCapture::process_image(int i, const void *p, int size){
     {
         convert_yuv_to_rgb_buffer((unsigned char *)p,ExGlobal::bufrgb,width,height);
         convert_yuv_to_y_buffer((unsigned char *)p,bufy,width,height);
+        //ImageAnalysis::fillellipe(ExGlobal::bufrgb);
         QImage image(ExGlobal::bufrgb,width,height,QImage::Format_RGB888);
         QPainter painter;
         painter.begin(&image);
@@ -1022,7 +1023,8 @@ int ImageCapture::process_image(int i, const void *p, int size){
         if (ViewType == 1)
             painter.drawRect(ExGlobal::FocusX,ExGlobal::FocusY,ExGlobal::FocusWidth,ExGlobal::FocusHeight);
         else if(ViewType == 2)
-            painter.drawRect(ExGlobal::LightX,ExGlobal::LightY,ExGlobal::LightWidth,ExGlobal::LightHeight);
+            painter.drawEllipse(QRect(ExGlobal::LightCX-ExGlobal::LightR,ExGlobal::LightCY-ExGlobal::LightR,ExGlobal::LightR*2,ExGlobal::LightR*2));
+            //painter.drawRect(ExGlobal::LightX,ExGlobal::LightY,ExGlobal::LightWidth,ExGlobal::LightHeight);
         emit reView(image);
     }
     else{

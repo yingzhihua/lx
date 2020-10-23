@@ -91,6 +91,8 @@ void TestResultModel::setTestid(int id,QString panelCode){
     Testid = id;
     if (panelCode == ExGlobal::DemoPanelCode)
         DataHandler::LoadData(QCoreApplication::applicationDirPath()+"/RawData.csv",dataPos);
+    else if(panelCode == ExGlobal::OnePointPanelCode)
+        DataHandler::HandleOnePointData(Testid,dataPos);
     else
         DataHandler::HandleData(Testid,dataPos);
     PosId = DataHandler::getPosItemid();

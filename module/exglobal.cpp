@@ -34,7 +34,7 @@ int ExGlobal::LanguageCode = 0;
 int ExGlobal::PanelBoxIndex = 1;
 
 QString ExGlobal::t_version = "V1";
-QString ExGlobal::build_version = "V1.0.13(build20201015)";
+QString ExGlobal::build_version = "V1.0.14(build20201023)";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
@@ -109,10 +109,9 @@ int ExGlobal::FocusX = 1000;
 int ExGlobal::FocusY = 670;
 int ExGlobal::FocusWidth = 600;
 int ExGlobal::FocusHeight = 600;
-int ExGlobal::LightX = 1000;
-int ExGlobal::LightY = 670;
-int ExGlobal::LightWidth = 600;
-int ExGlobal::LightHeight = 600;
+int ExGlobal::LightCX = 1300;
+int ExGlobal::LightCY = 100;
+int ExGlobal::LightR = 300;
 int ExGlobal::DoorOut = 300;
 int ExGlobal::DataEntry = 0;
 
@@ -140,8 +139,12 @@ static ExGlobal *exGlobal = nullptr;
 static SystemCmd cmd;
 
 QString ExGlobal::DemoPanelCode = "20001";
+QString ExGlobal::OnePointPanelCode = "20002";
+int ExGlobal::SampleType = 0;
+
 QDateTime ExGlobal::validDateTime = QDateTime::currentDateTime();
 
+static QStringList SampleTypeArr;
 QObject *ExGlobal::exglobal_provider(QQmlEngine *engine, QJSEngine *scriptEngine){
     Q_UNUSED(engine);
     Q_UNUSED(scriptEngine);
@@ -160,6 +163,7 @@ ExGlobal *ExGlobal::getPtr()
 ExGlobal::ExGlobal(QObject *parent) : QObject(parent)
 {
     //qDebug()<<"ExGlobal";
+    SampleTypeArr<<"鼻咽拭子"<<"咽拭子";
 }
 
 void ExGlobal::GlobalMessage(int code){
@@ -500,14 +504,12 @@ void ExGlobal::SetCaliParam(const QString &name, int caliValue)
         FocusWidth = caliValue;
     else if(name == "FocusHeight")
         FocusHeight = caliValue;
-    else if(name == "LightX")
-        LightX = caliValue;
-    else if(name == "LightY")
-        LightY = caliValue;
-    else if(name == "LightWidth")
-        LightWidth = caliValue;
-    else if(name == "LightHeight")
-        LightHeight = caliValue;
+    else if(name == "LightCX")
+        LightCX = caliValue;
+    else if(name == "LightCY")
+        LightCY = caliValue;
+    else if(name == "LightR")
+        LightR = caliValue;
     else if(name == "DryWet")
         DryWet = caliValue;
     else if(name == "LiquidsHeight")
@@ -623,14 +625,12 @@ int ExGlobal::getCaliParam(const QString &caliName)
         result = FocusWidth;
     else if(caliName == "FocusHeight")
         result = FocusHeight;
-    else if(caliName == "LightX")
-        result = LightX;
-    else if(caliName == "LightY")
-        result = LightY;
-    else if(caliName == "LightWidth")
-        result = LightWidth;
-    else if(caliName == "LightHeight")
-        result = LightHeight;
+    else if(caliName == "LightCX")
+        result = LightCX;
+    else if(caliName == "LightCY")
+        result = LightCY;
+    else if(caliName == "LightR")
+        result = LightR;
     else if(caliName == "DryWet")
         result = DryWet;
     else if(caliName == "LiquidsHeight")
@@ -706,21 +706,23 @@ int ExGlobal::getItemCT(int Itemid){
 
 QList<int> ExGlobal::getBoxItemList(){
     QList<int> result;
-    getReagentBox(reagentBox());
-    for (int i = 0; i < 121; i++)
-        if (ReagentBox[i] > 2){
-            bool find = false;
-            for(int j = 0; j < result.size(); j++)
-            {
-                if (result[j] == ReagentBox[i])
+    QString sql = "SELECT * FROM ReagentPos where BoxCode='"+pTestModel->getCurrTestBoxCode()+"'";
+    QSqlQuery query = SqliteMgr::select(sql);
+    while(query.next()){
+        bool find = false;
+        int value = query.value(2).toInt();
+        if (value > 2){
+            for (int j = 0; j < result.size(); j++)
+                if (result[j] == value)
                 {
                     find = true;
                     break;
                 }
-            }
             if (find == false)
-                result<<ReagentBox[i];
+                result<<value;
         }
+    }
+
     sort(result.begin(),result.end());
     return result;
 }
@@ -848,4 +850,16 @@ void ExGlobal::setSampleCode(const QString &sampleCode){
         emit sampleCodeChanged();
     }
 
+}
+
+QStringList ExGlobal::getSampleTypeArr(){
+    return SampleTypeArr;
+}
+
+QString ExGlobal::getSampleTypeName(int type){
+    return SampleTypeArr[type];
+}
+
+QString ExGlobal::getCurrSampleName(){
+    return SampleTypeArr[SampleType];
 }

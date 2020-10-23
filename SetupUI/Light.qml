@@ -55,6 +55,27 @@ Page {
         }
     }
 
+    ComboBox {
+        id :panelcombo
+        width: 400
+        anchors.left: toReset.right
+        anchors.leftMargin: 100
+        anchors.verticalCenter: toReset.verticalCenter
+        model: Sequence.TestList
+    }
+
+    Button{
+        anchors.left: panelcombo.right
+        anchors.leftMargin: 30
+        anchors.verticalCenter: panelcombo.verticalCenter
+        text: qsTr("设置")
+        font.pixelSize: 30
+        onClicked: {
+            console.log("set onePointPanelIndex",panelcombo.currentIndex)
+            Sequence.setOnePointPanelIndex(panelcombo.currentIndex)
+        }
+    }
+
     Text {
         id: lbFocusRect
         text: qsTr("计算区域:")
@@ -66,7 +87,7 @@ Page {
 
     Text{
         id: lfoucsx
-        text:"x:"
+        text:"center  X:"
         anchors.left: lbFocusRect.left
         anchors.leftMargin: 80
         anchors.top: lbFocusRect.bottom
@@ -83,9 +104,9 @@ Page {
     }
     Text{
         id: lfoucsy
-        text:"y:"
+        text:"Y:"
         anchors.left: focusx.right
-        anchors.leftMargin: 200
+        anchors.leftMargin: 50
         anchors.verticalCenter: lfoucsx.verticalCenter
         font.pixelSize: 40
     }
@@ -97,53 +118,39 @@ Page {
         anchors.verticalCenter: lfoucsx.verticalCenter
     }
     Text{
-        id: lfoucswidth
-        text:"width:"
+        id: lfoucsr
+        text:"Radius:"
         anchors.right: lfoucsx.right
         anchors.top: lfoucsx.bottom
         anchors.topMargin: 20
         font.pixelSize: 40
     }
     TextField{
-        id: focuswidth
+        id: focusr
         width: 100
-        anchors.left: lfoucswidth.right
+        anchors.left: lfoucsr.right
         anchors.leftMargin: 10
-        anchors.verticalCenter: lfoucswidth.verticalCenter
+        anchors.verticalCenter: lfoucsr.verticalCenter
     }
-    Text{
-        id: lfoucsheight
-        text:"height:"
-        anchors.right: lfoucsy.right
-        anchors.verticalCenter: lfoucswidth.verticalCenter
-        font.pixelSize: 40
-    }
-    TextField{
-        id: focusheight
-        width: 100
-        anchors.left: lfoucsheight.right
-        anchors.leftMargin: 10
-        anchors.verticalCenter: lfoucsheight.verticalCenter
-    }
+
     Button{
         id:foucsrectBt
-        anchors.left: focusheight.right
-        anchors.leftMargin: 80
-        anchors.verticalCenter: lfoucsheight.verticalCenter
+        anchors.left: focusr.right
+        anchors.leftMargin: 220
+        anchors.verticalCenter: focusr.verticalCenter
         text: qsTr("设置")
         font.pixelSize: 40
         onClicked: {
-            ExGlobal.updateCaliParam("LightX",focusx.text)
-            ExGlobal.updateCaliParam("LightY",focusy.text)
-            ExGlobal.updateCaliParam("LightWidth",focuswidth.text)
-            ExGlobal.updateCaliParam("LightHeight",focusheight.text)
+            ExGlobal.updateCaliParam("LightCX",focusx.text)
+            ExGlobal.updateCaliParam("LightCY",focusy.text)
+            ExGlobal.updateCaliParam("LightR",focusr.text)
         }
     }
 
     Text{
         id: llight
         text:"荧光亮度"
-        anchors.top: focusheight.bottom
+        anchors.top: focusr.bottom
         anchors.topMargin: 100
         x:1400
         font.pixelSize: 45
@@ -192,10 +199,10 @@ Page {
 
     Component.onCompleted: {
         Sequence.changeTitle(qsTr("荧光亮度测试"))
-        focusx.text = ExGlobal.getCaliParam("LightX")
-        focusy.text = ExGlobal.getCaliParam("LightY")
-        focuswidth.text = ExGlobal.getCaliParam("LightWidth")
-        focusheight.text = ExGlobal.getCaliParam("LightHeight")
+        focusx.text = ExGlobal.getCaliParam("LightCX")
+        focusy.text = ExGlobal.getCaliParam("LightCY")
+        focusr.text = ExGlobal.getCaliParam("LightR")
+        panelcombo.currentIndex = Sequence.onePointPanelIndex()
     }
 
     Connections{

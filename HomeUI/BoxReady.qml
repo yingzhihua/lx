@@ -24,6 +24,7 @@ Page {
                 anchors.fill: parent
                 onClicked: {
                     //Sequence.sequenceDo(Sequence.Sequence_Test);
+                    ExGlobal.setSampleType(sampleTypecombo.currentIndex)
                     if (ExGlobal.diskCheck() === 1){
                         testcancelDialog.show(2)
                     }
@@ -56,9 +57,18 @@ Page {
         ThreeMessage{
             x:358
             y:224
-            text1: ExGlobal.panelName
-            text2: ExGlobal.panelCode
-            text3: ExGlobal.boxSerial()
+            text1: ExGlobal.panelName+ExGlobal.panelCode
+            text2: ExGlobal.boxSerial()
+        }
+
+        ComboBox {
+            id :sampleTypecombo
+            x:390
+            y:570
+            width: 300
+            height: 60
+            font.pixelSize: 40
+            model: ExGlobal.getSampleTypeArr()
         }
 
         ThreeMessage{
@@ -138,7 +148,7 @@ Page {
 
     Component.onCompleted: {
         Sequence.setTitle("boxready");
-        Sequence.uiStage = Sequence.Stage_ready;
+        Sequence.uiStage = Sequence.Stage_ready;        
         if (ExGlobal.sampleCode === "")
         {
             startbutton.source = "qrc:/images/UStartTest.png"

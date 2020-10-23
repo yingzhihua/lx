@@ -16,6 +16,8 @@ public:
     QString checker;
     QString sampInfo;
     QString sampCode;
+    QString sampRemark;
+    QString sampType;
     QString panelName;
 
 protected:

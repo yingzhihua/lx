@@ -26,6 +26,8 @@ public:
     QString ValidTime;
     QString SampleInfo;
     QString SampleId;
+    QString SampleRemark;
+    int SampleType;
     QString User;
     QString Checker;
     int ResultType;
@@ -45,6 +47,8 @@ public:
         RoleValidTime,
         RoleSampleInfo,
         RoleSampleId,
+        RoleSampleRemark,
+        RoleSampleType,
         RoleUser,
         RoleChecker,
         RoleResultType
@@ -60,9 +64,12 @@ public:
     QString getCurrValidDateTime(){return m_display_list[currTestIndex].ValidTime;}
     Q_INVOKABLE QString getCurrTestCode(){return m_display_list[currTestIndex].SampleId;}
     Q_INVOKABLE QString getCurrTestSerial(){return m_display_list[currTestIndex].SerialNo;}
-    Q_INVOKABLE QString getCurrTestInfo(){return m_display_list[currTestIndex].SampleInfo;}
-    QString getCurrTestUser(){return m_display_list[currTestIndex].User;}
+    Q_INVOKABLE QString getCurrTestInfo(){return m_display_list[currTestIndex].SampleInfo;}    
     QString getCurrTestChecker(){return m_display_list[currTestIndex].Checker;}
+    QString getCurrTestBoxCode(){return m_display_list[currTestIndex].BoxCode;}
+    QString getCurrTestRemark(){return m_display_list[currTestIndex].SampleRemark;}
+    int getCurrTestType(){return m_display_list[currTestIndex].SampleType;}
+    QString getCurrTestUser(){return m_display_list[currTestIndex].User;}
     Q_INVOKABLE QString getCurrTestPanelName(){return m_display_list[currTestIndex].PanelName;}
     Q_INVOKABLE QString getCurrTestPanelCode(){return m_display_list[currTestIndex].PanelCode;}
     Q_INVOKABLE void setCurrTest(int TestIndex);

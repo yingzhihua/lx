@@ -15,6 +15,8 @@ TestModel::TestModel(QObject *parent):QAbstractListModel (parent)
     roles[RolesBoxCode] = "BoxCode";
     roles[RoleResultType] = "ResultType";
     roles[RoleSampleInfo] = "SampleInfo";
+    roles[RoleSampleType] = "SampleType";
+    roles[RoleSampleRemark] = "SampleRemark";
     roles[RoleSampleId] = "SampleId";
     roles[RolesPanelCode] = "PanelCode";
     roles[RolesPanelName] = "PanelName";
@@ -53,6 +55,10 @@ QVariant TestModel::data(const QModelIndex &index, int role) const
         return test.SampleInfo;
     else if(role == RoleSampleId)
         return test.SampleId;
+    else if(role == RoleSampleRemark)
+        return test.SampleRemark;
+    else if(role == RoleSampleType)
+        return test.SampleType;
     else if(role == RolesPanelCode)
         return test.PanelCode;
     else if(role == RolesPanelName)
@@ -84,6 +90,8 @@ void TestModel::InitTest(){
         test.User = query.value(7).toString();
         test.Checker = query.value(8).toString();
         test.ResultType = query.value(9).toInt();
+        test.SampleRemark = query.value(11).toString();
+        test.SampleType = query.value(12).toInt();
         test.PanelName = Sequence::getPanelName(test.PanelCode);
         m_display_list<<test;
     }
@@ -106,6 +114,8 @@ void TestModel::AddTest(int testid){
             test.Checker = query.value(8).toString();
             test.ResultType = query.value(9).toInt();
             test.ValidTime = query.value(10).toString();
+            test.SampleRemark = query.value(11).toString();
+            test.SampleType = query.value(12).toInt();
             test.PanelName = Sequence::getPanelName(test.PanelCode);
             m_display_list<<test;
         }

@@ -317,6 +317,23 @@ static void FillTestData(int Testid, QHash<int, vector<Point> > &posArr){
     }
 }
 
+static void FillDirectData(int Testid, QHash<int, vector<Point> > &posArr){
+    QSqlQuery query = SqliteMgr::select(QString("select * from TestResult where Testid=%1").arg(Testid));
+    int PosIndexNu = query.record().indexOf("PosIndex");
+    int ItemidNu = query.record().indexOf("Itemid");
+    int cycleNu = query.record().indexOf("cycle");
+    int TestValueNu = query.record().indexOf("TestValue");
+
+    posArr.clear();
+    PosId.clear();
+
+    while(query.next()){
+        int TestValue = query.value(TestValueNu).toInt();
+        posArr[query.value(PosIndexNu).toInt()].push_back(Point(query.value(cycleNu).toInt()*10,TestValue*10));
+        PosId[query.value(PosIndexNu).toInt()] = query.value(ItemidNu).toInt();
+    }
+}
+
 static bool LoadTestData(QString filename, QHash<int, vector<Point> > &posArr){
     QFile file(filename);
     if (file.open(QIODevice::ReadOnly)){
@@ -492,6 +509,11 @@ bool DataHandler::HandleData(int testId, QHash<int, vector<Point>> &posArr){
     return true;
 }
 
+bool DataHandler::HandleOnePointData(int testId, QHash<int, vector<Point> > &posArr){
+    FillDirectData(testId,posArr);
+    return true;
+}
+
 bool DataHandler::LoadData(QString filename, QHash<int, vector<Point> > &posArr){
     if (LoadTestData(filename,posArr))
     {
@@ -518,5 +540,12 @@ bool DataHandler::SaveData(int testId){
     outputPos(Log::getDir()+"/LinuxData/Normalize.csv",posArr);
     BaseLineFit(posArr);
     outputPos(Log::getDir()+"/LinuxData/Baseline.csv",posArr,baseLine);
+    return true;
+}
+
+bool DataHandler::SaveOnePointData(int testId){
+    QHash<int, vector<Point> > posArr;
+    FillDirectData(testId,posArr);
+    outputPos(Log::getDir()+"/Raw.csv",posArr);
     return true;
 }

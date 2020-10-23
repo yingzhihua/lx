@@ -356,8 +356,8 @@ QString printmgr::CreatePDF(){
     painter->setFont(font);
     painter->drawText(SampleCodeRect,Qt::AlignVCenter,tr("样本编号：")+sampCode);
     painter->drawText(SampleInfoRect,Qt::AlignVCenter,tr("样本信息：")+sampInfo);
-    painter->drawText(SampleTypeRect,Qt::AlignVCenter,tr("样本类型：")+"鼻咽拭子");
-    painter->drawText(SampleRemarkRect,Qt::AlignVCenter,tr("样本备注："));
+    painter->drawText(SampleTypeRect,Qt::AlignVCenter,tr("样本类型：")+sampType);
+    painter->drawText(SampleRemarkRect,Qt::AlignVCenter,tr("样本备注：")+sampRemark);
     font.setPointSize(8);
     painter->setFont(font);
     painter->drawText(InnerRefRect,Qt::AlignVCenter,tr("内部参考品：")+tr("有效 √"));

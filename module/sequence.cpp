@@ -122,14 +122,35 @@ bool Sequence::sequenceInit(){
 QStringList Sequence::getTestList(){
     QStringList test;
     QDomElement root = doc.documentElement();
+    OnePointPanelIndex =-1;
     for (QDomElement e = root.firstChildElement("PanelTest"); !e.isNull(); e = e.nextSiblingElement("PanelTest"))
     {
         QString panelCode = e.attribute("PanelCode");
         if (panelCode.length() > 4 && panelCode.startsWith("90"))
             continue;
         test<<e.attribute("PanelName");
+        if (e.attribute("PanelCode") == ExGlobal::OnePointPanelCode)
+            OnePointPanelIndex = test.size()-1;
     }
     return test;
+}
+
+void Sequence::setOnePointPanelIndex(int index){
+    QStringList test;
+    QDomElement root = doc.documentElement();
+    OnePointPanelIndex =-1;
+    for (QDomElement e = root.firstChildElement("PanelTest"); !e.isNull(); e = e.nextSiblingElement("PanelTest"))
+    {
+        QString panelCode = e.attribute("PanelCode");
+        if (panelCode.length() > 4 && panelCode.startsWith("90"))
+            continue;
+        test<<e.attribute("PanelName");
+        if (test.size() == index+1)
+        {
+            ExGlobal::OnePointPanelCode = e.attribute("PanelCode");
+            break;
+        }
+    }
 }
 
 void Sequence::sequenceSetPanel(QString panelName)
@@ -446,16 +467,21 @@ void Sequence::ActionFinish(QByteArray data)
                     QVector<QVector<int>> PosValue = imageAna->getPosValueArr();
                     emit callQmlRefeshData(currCameraCycle,item,value);
 
-                    SqliteMgr::StartTransations();
-                    /*
-                    for(int i = 0; i < item.size(); i++){
-                        testMgr->InsertData(posIndex[i],item[i],currCameraCycle,value[i]);
+                    if (ExGlobal::panelCode() == ExGlobal::OnePointPanelCode){
+                        testMgr->InsertData(0,2,currCameraCycle,(int)imageAna->GetLLight(camera->getyData(),camera->getImageType()));
                     }
-                    */
-                    for (int i = 0; i < PosValue.size(); i++)
-                        testMgr->InsertData(currCameraCycle,PosValue[i]);
+                    else {
+                        SqliteMgr::StartTransations();
+                        /*
+                        for(int i = 0; i < item.size(); i++){
+                            testMgr->InsertData(posIndex[i],item[i],currCameraCycle,value[i]);
+                        }
+                        */
+                        for (int i = 0; i < PosValue.size(); i++)
+                            testMgr->InsertData(currCameraCycle,PosValue[i]);
 
-                    SqliteMgr::EndTransations();
+                        SqliteMgr::EndTransations();
+                    }
 
                     /*
                     QString saveStr;
@@ -513,6 +539,14 @@ void Sequence::ActionFinish(QByteArray data)
                     ExGlobal::setBoxSerial(QString("Lot# 20001"));
                     ExGlobal::validDateTime = QDateTime::currentDateTime().addDays(90);
                 }
+                emit sequenceFinish(SequenceResult::Result_Box_Valid);
+            }
+            if (ExGlobal::projectMode() == 4){
+                sequenceSetPanel(ExGlobal::OnePointPanelCode);
+                ExGlobal::setReagentBox("206");
+                ExGlobal::setBoxSerial(QString("Lot# 20002"));
+                ExGlobal::validDateTime = QDateTime::currentDateTime().addDays(90);
+
                 emit sequenceFinish(SequenceResult::Result_Box_Valid);
             }
             else if(data[2] == '\x0')
@@ -671,14 +705,21 @@ void Sequence::FinishSequence()
         currSequenceId = SequenceId::Sequence_Idle;
         qDebug()<<"Itemsize"<<imageAna->getItem().size();//imageCapture->openCamera();
         qDebug()<<"panelCode"<<ExGlobal::panelCode()<<ExGlobal::DemoPanelCode;
-        if (imageAna->getItem().size() > 45 || ExGlobal::panelCode() == ExGlobal::DemoPanelCode)
+        if (imageAna->getItem().size() > 45 || ExGlobal::panelCode() == ExGlobal::DemoPanelCode
+                || ExGlobal::panelCode() == ExGlobal::OnePointPanelCode)
         {
             int testid = testMgr->TestClose(2);
             qDebug()<<"testid"<<testid;
             ExGlobal::pTestModel->AddTest(testid);
             ExGlobal::pTestResultModel->setTestid(testid,ExGlobal::panelCode());
-            if (ExGlobal::panelCode() != ExGlobal::DemoPanelCode)
+            if (ExGlobal::panelCode() == ExGlobal::DemoPanelCode)
+            {
+            }
+            else if (ExGlobal::panelCode() == ExGlobal::OnePointPanelCode)
+                DataHandler::SaveOnePointData(testid);
+            else
                 DataHandler::SaveData(testid);
+
             out = SequenceResult::Result_Test_finish;
         }
         else
@@ -689,7 +730,6 @@ void Sequence::FinishSequence()
 
         testSecondTime->stop();
         Log::setDir(QCoreApplication::applicationDirPath());
-
     }
     else if(currSequenceId == SequenceId::Sequence_LoopTest)
     {
@@ -1513,6 +1553,8 @@ bool Sequence::printTest(){
     printer->validTime = ExGlobal::pTestModel->getCurrValidDateTime();
     printer->sampCode = ExGlobal::pTestModel->getCurrTestCode();
     printer->sampInfo = ExGlobal::pTestModel->getCurrTestInfo();
+    printer->sampRemark = ExGlobal::pTestModel->getCurrTestRemark();
+    printer->sampType = ExGlobal::getSampleTypeName(ExGlobal::pTestModel->getCurrTestType());
     printer->user = ExGlobal::pTestModel->getCurrTestUser();
     printer->checker = ExGlobal::pTestModel->getCurrTestChecker();
     printer->panelName = ExGlobal::pTestModel->getCurrTestPanelName();

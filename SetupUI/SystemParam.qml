@@ -41,6 +41,13 @@ Item {
                     ExGlobal.updateCaliParam("ProjectMode",3);
                 }
             }
+            RadioButton{
+                id:rb5
+                text: qsTr("送检测软件")
+                onClicked: {
+                    ExGlobal.updateCaliParam("ProjectMode",4);
+                }
+            }
         }
     }
 
@@ -58,6 +65,8 @@ Item {
             rb3.checked = true;
         else if (ExGlobal.getCaliParam("ProjectMode")===3)
             rb4.checked = true;
+        else if (ExGlobal.getCaliParam("ProjectMode")===4)
+            rb5.checked = true;
         else
             rb1.checked = true
     }

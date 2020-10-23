@@ -114,6 +114,11 @@ public:
     Q_INVOKABLE static QStringList getPosNameArray();
     Q_INVOKABLE static int getItemCT(int Itemid);    
     Q_INVOKABLE static QList<int> getBoxItemList();
+    Q_INVOKABLE static QStringList getSampleTypeArr();
+    static QString getSampleTypeName(int type);
+    Q_INVOKABLE static void setSampleType(int type){SampleType = type;}
+    Q_INVOKABLE static int getSampleType(){return SampleType;}
+    Q_INVOKABLE static QString getCurrSampleName();
 
     Q_INVOKABLE void qmlGlobalMessage(int code){GlobalMessage(code);}
 
@@ -201,10 +206,9 @@ public:
     static int FocusY;
     static int FocusWidth;
     static int FocusHeight;
-    static int LightX;
-    static int LightY;
-    static int LightWidth;
-    static int LightHeight;
+    static int LightCX;
+    static int LightCY;
+    static int LightR;
     static int DoorOut;
     static int DataEntry;
     static unsigned char *bufrgb;
@@ -220,6 +224,8 @@ public:
     static QString screenCapture();
 
     static QString DemoPanelCode;
+    static QString OnePointPanelCode;
+    static int SampleType;
     static QDateTime validDateTime;
 signals:
     void userChanged();
