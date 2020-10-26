@@ -13,6 +13,7 @@ public:
     DataHandler();
     static bool HandleData(int testId, QHash<int,vector<Point>> &posArr);
     static bool HandleOnePointData(int testId, QHash<int,vector<Point>> &posArr);
+    static bool HandleOnePointDataEx(int testId, QHash<int,vector<Point>> &posArr);
     static bool LoadData(QString filename, QHash<int,vector<Point>> &posArr);
     static bool SaveData(int testId);
     static bool SaveOnePointData(int testId);

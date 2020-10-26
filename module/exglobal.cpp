@@ -34,7 +34,7 @@ int ExGlobal::LanguageCode = 0;
 int ExGlobal::PanelBoxIndex = 1;
 
 QString ExGlobal::t_version = "V1";
-QString ExGlobal::build_version = "V1.0.14(build20201023)";
+QString ExGlobal::build_version = "V1.0.15(build20201026)";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
@@ -139,7 +139,7 @@ static ExGlobal *exGlobal = nullptr;
 static SystemCmd cmd;
 
 QString ExGlobal::DemoPanelCode = "20001";
-QString ExGlobal::OnePointPanelCode = "20002";
+QString ExGlobal::OnePointPanelCode = "30001";
 int ExGlobal::SampleType = 0;
 
 QDateTime ExGlobal::validDateTime = QDateTime::currentDateTime();

@@ -61,6 +61,7 @@ void TestResultModel::setCurrItem(int id){
                 result.PosIndex = posIndex;
                 result.Itemid = id;
                 result.cycle = i+1;
+                result.TestValue = dataPos[posIndex][i].y;
                 m_display_list<<result;
             }
         }
@@ -91,8 +92,16 @@ void TestResultModel::setTestid(int id,QString panelCode){
     Testid = id;
     if (panelCode == ExGlobal::DemoPanelCode)
         DataHandler::LoadData(QCoreApplication::applicationDirPath()+"/RawData.csv",dataPos);
-    else if(panelCode == ExGlobal::OnePointPanelCode)
+    else if(panelCode.startsWith("31"))
+    {
+        DataHandler::HandleOnePointDataEx(Testid,dataPos);
+        setCurrItem(2);
+    }
+    else if(panelCode.startsWith("30"))
+    {
         DataHandler::HandleOnePointData(Testid,dataPos);
+        setCurrItem(2);
+    }
     else
         DataHandler::HandleData(Testid,dataPos);
     PosId = DataHandler::getPosItemid();

@@ -329,7 +329,7 @@ static void FillDirectData(int Testid, QHash<int, vector<Point> > &posArr){
 
     while(query.next()){
         int TestValue = query.value(TestValueNu).toInt();
-        posArr[query.value(PosIndexNu).toInt()].push_back(Point(query.value(cycleNu).toInt()*10,TestValue*10));
+        posArr[query.value(PosIndexNu).toInt()].push_back(Point(query.value(cycleNu).toInt()*10,TestValue));
         PosId[query.value(PosIndexNu).toInt()] = query.value(ItemidNu).toInt();
     }
 }
@@ -511,6 +511,12 @@ bool DataHandler::HandleData(int testId, QHash<int, vector<Point>> &posArr){
 
 bool DataHandler::HandleOnePointData(int testId, QHash<int, vector<Point> > &posArr){
     FillDirectData(testId,posArr);
+    return true;
+}
+
+bool DataHandler::HandleOnePointDataEx(int testId, QHash<int, vector<Point> > &posArr){
+    FillDirectData(testId,posArr);
+    RemoveNoise(posArr);
     return true;
 }
 

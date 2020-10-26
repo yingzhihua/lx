@@ -108,6 +108,7 @@ public:
     Q_INVOKABLE void openErr(QString err){emit errOccur(err);}
     QStringList getTestList();
     QStringList getLoopTestList();
+    Q_INVOKABLE QStringList onePointTestList();
     bool readBoxState(){return bBoxState;}
     bool readDoorState(){return bDoorState;}
 

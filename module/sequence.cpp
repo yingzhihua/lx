@@ -139,12 +139,14 @@ void Sequence::setOnePointPanelIndex(int index){
     QStringList test;
     QDomElement root = doc.documentElement();
     OnePointPanelIndex =-1;
+    qDebug()<<"setOnePointPanelIndex"<<index;
     for (QDomElement e = root.firstChildElement("PanelTest"); !e.isNull(); e = e.nextSiblingElement("PanelTest"))
     {
         QString panelCode = e.attribute("PanelCode");
-        if (panelCode.length() > 4 && panelCode.startsWith("90"))
+        if (!panelCode.startsWith("3"))
             continue;
         test<<e.attribute("PanelName");
+        qDebug()<<"test size"<<test.size()<<e.attribute("PanelCode");
         if (test.size() == index+1)
         {
             ExGlobal::OnePointPanelCode = e.attribute("PanelCode");
@@ -1645,6 +1647,18 @@ QStringList Sequence::getLoopTestList(){
     {
         QString panelCode = e.attribute("PanelCode");
         if (panelCode.length() > 4 && panelCode.startsWith("90"))
+            test<<e.attribute("PanelName");
+    }
+    return test;
+}
+
+QStringList Sequence::onePointTestList(){
+    QStringList test;
+    QDomElement root = doc.documentElement();
+    for (QDomElement e = root.firstChildElement("PanelTest"); !e.isNull(); e = e.nextSiblingElement("PanelTest"))
+    {
+        QString panelCode = e.attribute("PanelCode");
+        if (panelCode.startsWith("3"))
             test<<e.attribute("PanelName");
     }
     return test;

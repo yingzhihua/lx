@@ -104,7 +104,10 @@ Page {
                 else{
                     headerMsg.text = "测试完成！";
                     mainView.pop();
-                    mainView.push("qrc:/DataUI/DataView.qml");
+                    if (ExGlobal.panelCode.substring(0,1) === "3")
+                        mainView.push("qrc:/DataUI/OneDataLine.qml")
+                    else
+                        mainView.push("qrc:/DataUI/DataView.qml");
                     ExGlobal.setDataEntry(1);
                 }
             }

@@ -163,5 +163,6 @@
         <file>images/loading.gif</file>
         <file>components/Loading.qml</file>
         <file>SetupUI/Light.qml</file>
+        <file>DataUI/OneDataLine.qml</file>
     </qresource>
 </RCC>

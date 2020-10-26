@@ -61,7 +61,7 @@ Page {
         anchors.left: toReset.right
         anchors.leftMargin: 100
         anchors.verticalCenter: toReset.verticalCenter
-        model: Sequence.TestList
+        model: Sequence.onePointTestList()
     }
 
     Button{

@@ -74,7 +74,10 @@ Rectangle {
                             busyIndicator.running = true;
                             console.log("click:"+index);
                             testModel.setCurrTest(index);
-                            if (ResultType==2)
+                            if (testModel.getCurrTestPanelCode().substring(0,1) === "3"){
+                                mainView.push("qrc:/DataUI/OneDataLine.qml")
+                            }
+                            else if (ResultType==2)
                                 mainView.push("qrc:/DataUI/DataView.qml");
                             else
                                 mainView.push("qrc:/DataUI/DataInvaildView.qml");
