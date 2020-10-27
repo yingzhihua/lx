@@ -34,7 +34,7 @@ int ExGlobal::LanguageCode = 0;
 int ExGlobal::PanelBoxIndex = 1;
 
 QString ExGlobal::t_version = "V1";
-QString ExGlobal::build_version = "V1.0.15(build20201026)";
+QString ExGlobal::build_version = "V1.0.16(build20201027)";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 

@@ -470,7 +470,7 @@ void Sequence::ActionFinish(QByteArray data)
                     emit callQmlRefeshData(currCameraCycle,item,value);
 
                     if (ExGlobal::panelCode() == ExGlobal::OnePointPanelCode){
-                        testMgr->InsertData(0,2,currCameraCycle,(int)imageAna->GetLLight(camera->getyData(),camera->getImageType()));
+                        testMgr->InsertData(0,2,currCameraCycle,(int)(imageAna->GetLLight(camera->getyData(),camera->getImageType())*100));
                     }
                     else {
                         SqliteMgr::StartTransations();

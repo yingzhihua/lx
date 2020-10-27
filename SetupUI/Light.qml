@@ -217,7 +217,7 @@ Page {
         }
         onRefreshLightValue:{
             doingBox.close()
-            lightvalue.text = Sequence.getLLight().toFixed(1)
+            lightvalue.text = Sequence.getLLight().toFixed(2)
         }
     }
 }

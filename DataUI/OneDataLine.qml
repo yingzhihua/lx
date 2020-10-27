@@ -10,7 +10,7 @@ Page {
     ChartView {
         id: chartView
         title: "实时测试曲线"
-        x:100
+        x:50
         y:0
         height: 800
         width: 1200
@@ -30,10 +30,9 @@ Page {
         ValueAxis{
             id:axisY
             min:0
-            max:200
+            max:20
             tickCount: 11
             minorTickCount: 4
-            labelFormat: "%d"
             titleText: "brightness"
         }
     }
@@ -41,14 +40,14 @@ Page {
     Grid{
         y:80
         anchors.left: chartView.right
-        anchors.leftMargin: 80
+        anchors.leftMargin: 50
         flow: Grid.TopToBottom
         rows: 15
-        columnSpacing: 80
+        columnSpacing: 50
         Repeater{
             model: testResultModel
             Text{
-                text: cycle+", "+TestValue
+                text: cycle+", "+(TestValue/100)
             }
         }
     }
@@ -69,7 +68,7 @@ Page {
         for (var i = 0; i < testResultModel.rowCount(); i++){
             var seriesName = "R"+Math.floor(testResultModel.getField(i,"PosIndex")/11+1)+"C"+(testResultModel.getField(i,"PosIndex")%11+1);
             var newline =chartView.series(seriesName);
-            var value = testResultModel.getField(i,"TestValue");
+            var value = testResultModel.getField(i,"TestValue")/100;
             var cycle = testResultModel.getField(i,"cycle");
             //console.debug("setChart,",value)
             if (newline === null)
