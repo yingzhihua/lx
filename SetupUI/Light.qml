@@ -59,7 +59,7 @@ Page {
         id :panelcombo
         width: 400
         anchors.left: toReset.right
-        anchors.leftMargin: 100
+        anchors.leftMargin: 100        
         anchors.verticalCenter: toReset.verticalCenter
         model: Sequence.onePointTestList()
     }

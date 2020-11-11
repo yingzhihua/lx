@@ -256,11 +256,13 @@ ApplicationWindow {
     StackView{
         id: mainView
         anchors.fill: parent
-        initialItem: ExGlobal.debug?"qrc:/HomeUI/Login.qml":"qrc:/HomeUI/Startup.qml"
+        initialItem: "qrc:/Empty.qml"
+        //initialItem: "qrc:/HomeUI/Login.qml"
+        //initialItem: ExGlobal.debug?"qrc:/HomeUI/Login.qml":"qrc:/HomeUI/Startup.qml"
     }
 
     function btclick(index){
-        mainView.clear()
+        mainView.pop(mainView.initialItem);
         if (index === 0){
             setupbt.source = "qrc:/images/setuppress.png"
             homebt.source = "qrc:/images/homerelease.png"
@@ -419,6 +421,10 @@ ApplicationWindow {
         //console.log("lengxing",Qt.locale("en_US").nativeLanguageName)
         //VirtualKeyboardSettings.styleName = "retro"
         //VirtualKeyboardSettings.wordCandidateList.alwaysVisable = true;
+        if (ExGlobal.debug)
+            mainView.push("qrc:/HomeUI/Login.qml")
+        else
+            mainView.push("qrc:/HomeUI/Startup.qml")
     }
 
     onWaitMsgChanged: {

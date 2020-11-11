@@ -543,7 +543,7 @@ void Sequence::ActionFinish(QByteArray data)
                 }
                 emit sequenceFinish(SequenceResult::Result_Box_Valid);
             }
-            if (ExGlobal::projectMode() == 4){
+            else if (ExGlobal::projectMode() == 4){
                 sequenceSetPanel(ExGlobal::OnePointPanelCode);
                 ExGlobal::setReagentBox("206");
                 ExGlobal::setBoxSerial(QString("Lot# 20002"));
@@ -668,6 +668,7 @@ void Sequence::PrintFinish(QByteArray data){
             emit sequenceFinish(SequenceResult::Result_Print_Error);
     }
 }
+
 void Sequence::FinishSequence()
 {
     SequenceResult out = SequenceResult::Result_NULL;

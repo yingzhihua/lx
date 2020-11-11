@@ -46,6 +46,7 @@ void printmgr::run(){
         int result = 0;
         result = ExGlobal::SysCommand(QString("lp -d dxprinter %1").arg(filename));
         qDebug()<<"print result = "<<result;
+        msleep(3000);
     }
 
 

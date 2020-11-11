@@ -200,22 +200,32 @@ void UsbModel::updateSoft(){
         }
         if (QFile::exists("/mnt/data.db"))
         {
-            QFile::remove("/opt/data.cpy");
-            QFile::copy("/mnt/data.db","/opt/data.cpy");
+            QFile::remove(QCoreApplication::applicationDirPath()+"/data.p");
+            QFile::rename(QCoreApplication::applicationDirPath()+"/data.db",QCoreApplication::applicationDirPath()+"/data.p");
+            QFile::copy("/mnt/data.db",QCoreApplication::applicationDirPath()+"/data.db");
         }
         if (QFile::exists("/mnt/FLASHDXcn.xml"))
         {
-            QFile::remove("/opt/FLASHDXcn.cpy");
-            QFile::copy("/mnt/FLASHDXcn.xml","/opt/FLASHDXcn.cpy");
+            QFile::remove(QCoreApplication::applicationDirPath()+"/FLASHDXcn.p");
+            QFile::rename(QCoreApplication::applicationDirPath()+"/FLASHDXcn.xml",QCoreApplication::applicationDirPath()+"/FLASHDXcn.p");
+            QFile::copy("/mnt/FLASHDXcn.xml",QCoreApplication::applicationDirPath()+"/FLASHDXcn.xml");
+        }
+        if (QFile::exists("/mnt/FLASHDXen.xml"))
+        {
+            QFile::remove(QCoreApplication::applicationDirPath()+"/FLASHDXen.p");
+            QFile::rename(QCoreApplication::applicationDirPath()+"/FLASHDXen.xml",QCoreApplication::applicationDirPath()+"/FLASHDXen.p");
+            QFile::copy("/mnt/FLASHDXen.xml",QCoreApplication::applicationDirPath()+"/FLASHDXen.xml");
         }
         if (QFile::exists("/mnt/RawData.csv"))
         {
-            QFile::remove(QCoreApplication::applicationDirPath()+"/RawData.csv");
+            QFile::remove(QCoreApplication::applicationDirPath()+"/RawData.p");
+            QFile::rename(QCoreApplication::applicationDirPath()+"/RawData.csv",QCoreApplication::applicationDirPath()+"/RawData.p");
             QFile::copy("/mnt/RawData.csv",QCoreApplication::applicationDirPath()+"/RawData.csv");
         }
         if (QFile::exists("/mnt/en_US.qm"))
         {
-            QFile::remove(QCoreApplication::applicationDirPath()+"/en_US.qm");
+            QFile::remove(QCoreApplication::applicationDirPath()+"/en_US.p");
+            QFile::rename(QCoreApplication::applicationDirPath()+"/en_US.qm",QCoreApplication::applicationDirPath()+"/en_US.p");
             QFile::copy("/mnt/en_US.qm",QCoreApplication::applicationDirPath()+"/en_US.qm");
         }
         system("sync");

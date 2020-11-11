@@ -51,6 +51,7 @@ Page {
     }
 
     Component.onCompleted: {
+        console.log("Startup Completed","depth=",mainView.depth);
         changeTimer.stop();        
         //changeTimer.start();
         Sequence.setTitle("startup");
@@ -105,10 +106,9 @@ Page {
             if (result == Sequence.Result_SelfCheck_ok)
             {
                 changeTimer.stop();
-                pagequit = true;
-                //stackView.pop();
-                mainView.pop();
-                mainView.push("qrc:/HomeUI/Login.qml");
+                pagequit = true;                
+                mainView.pop();                
+                mainView.push("qrc:/HomeUI/Login.qml");                
             }
             if (result == Sequence.Result_OpenBox_ok)
             {                

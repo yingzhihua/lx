@@ -138,6 +138,7 @@ bool CKCamera::stopCamera(){
 
 static bool saverawimage = true;
 
+
 uint32_t CKCamera::CKGetFrame(){
     CameraSdkStatus status;
     HANDLE hBuf;

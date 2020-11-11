@@ -48,6 +48,7 @@ public:
     Q_INVOKABLE QString getCurPassword(){return m_display_list[currIndex].Password;}
     Q_INVOKABLE int getCurUserType(){return m_display_list[currIndex].UserType;}
     Q_INVOKABLE void setCurrIndex(int index){currIndex = index;}
+    Q_INVOKABLE QStringList getLogUser();
 
 protected:
     QHash<int, QByteArray> roleNames() const;

@@ -34,7 +34,7 @@ int ExGlobal::LanguageCode = 0;
 int ExGlobal::PanelBoxIndex = 1;
 
 QString ExGlobal::t_version = "V1";
-QString ExGlobal::build_version = "V1.0.16(build20201027)";
+QString ExGlobal::build_version = "V1.0.17(build20201012)";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
@@ -110,7 +110,7 @@ int ExGlobal::FocusY = 670;
 int ExGlobal::FocusWidth = 600;
 int ExGlobal::FocusHeight = 600;
 int ExGlobal::LightCX = 1300;
-int ExGlobal::LightCY = 100;
+int ExGlobal::LightCY = 1000;
 int ExGlobal::LightR = 300;
 int ExGlobal::DoorOut = 300;
 int ExGlobal::DataEntry = 0;
@@ -139,7 +139,7 @@ static ExGlobal *exGlobal = nullptr;
 static SystemCmd cmd;
 
 QString ExGlobal::DemoPanelCode = "20001";
-QString ExGlobal::OnePointPanelCode = "30001";
+QString ExGlobal::OnePointPanelCode = "31001";
 int ExGlobal::SampleType = 0;
 
 QDateTime ExGlobal::validDateTime = QDateTime::currentDateTime();
@@ -225,7 +225,7 @@ QString ExGlobal::getMac(){
 }
 
 QString ExGlobal::getSerial(){
-    return "flashdx123456";
+    return "002001002";
 }
 
 QStringList ExGlobal::getNetWork(){

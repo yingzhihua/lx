@@ -22,8 +22,8 @@ Item {
         anchors.left: selectlabel.right
         anchors.leftMargin: 10
         anchors.verticalCenter: selectlabel.verticalCenter
-        currentIndex: 0
-        model: Sequence.TestList;
+        currentIndex: 0        
+        model: Sequence.TestList
     }
     Button {
         id: btSet          

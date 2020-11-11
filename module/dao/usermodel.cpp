@@ -144,6 +144,7 @@ int UserModel::login(QString name, QString password){
     qDebug()<<"login:"<<sql;
 
     ExGlobal::User = name.toLower();
+    ExGlobal::DisplayUser = name;
     while(query.next())
     {        
         ExGlobal::UserType = query.value(4).toInt();
@@ -177,9 +178,11 @@ int UserModel::login(QString name, QString password){
     if (ExGlobal::projectMode() == 0)
     {
         if (name.length() == 0)
+        {
             ExGlobal::User = "user";
-        ExGlobal::UserType = 1;
-        ExGlobal::DisplayUser = "User";
+            ExGlobal::DisplayUser = "User";
+        }
+        ExGlobal::UserType = 1;        
         ExGlobal::getPtr()->userChanged();
         ExGlobal::setLogin();
         return 0;
@@ -217,4 +220,24 @@ bool UserModel::updatePassword(QString oldpassword, QString newpassword){
         }
     }
     return false;
+}
+
+QStringList UserModel::getLogUser(){
+    QStringList userArr;
+    vector<int> logId;
+    QHash<int,QString> user;
+    //QSqlQuery query = SqliteMgr::select("select tParam1,Logid from Log where LogType = 2 and iParam1 = 0");
+    QSqlQuery query = SqliteMgr::select("select tParam1,Logid from (select tParam1,Logid from Log where LogType = 2 and iParam1 = 0 order by Logid desc) tt group by tParam1");
+    while(query.next())
+    {
+        user[query.value(1).toInt()] = query.value(0).toString();
+        logId.push_back(query.value(1).toInt());
+    }
+    if (logId.size()>0){
+        int user_size = logId.size();
+        std::sort(logId.begin(),logId.end());
+        for (int i = 0; i < user_size && i < 8; i++)
+            userArr<<user[logId[user_size-i-1]];
+    }
+    return userArr;
 }

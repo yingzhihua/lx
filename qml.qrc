@@ -164,5 +164,7 @@
         <file>components/Loading.qml</file>
         <file>SetupUI/Light.qml</file>
         <file>DataUI/OneDataLine.qml</file>
+        <file>images/xiala.png</file>
+        <file>Empty.qml</file>
     </qresource>
 </RCC>

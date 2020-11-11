@@ -9,7 +9,7 @@ static quint8 nserial = 0;
  *  data[11]=1B Pump硬件复位 data[11]=1A Pump位移
  *  data[11]=28 Door硬件复位
  * data[7] == 0x2A Lamp,byte[11]:0-2,对应蓝绿红,byte[12]:0,关闭,1,打开；byte[13-14]:灯点亮时间;byte[15-16]:灯熄灭时间
- *
+ * data[7] == 0x32 check sensor state
  *
  */
 ActionParser::ActionParser()
