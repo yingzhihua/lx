@@ -34,7 +34,7 @@ int ExGlobal::LanguageCode = 0;
 int ExGlobal::PanelBoxIndex = 1;
 
 QString ExGlobal::t_version = "V1";
-QString ExGlobal::build_version = "V1.0.17(build20201012)";
+QString ExGlobal::build_version = "V1.0.18(build20201113)";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
@@ -382,6 +382,7 @@ void ExGlobal::CaliParamInit()
     updateLockTime();
 
     Log::Logdb(LOGTYPE_POWERON);
+    qDebug()<<"CaliParamInit end";
 }
 
 uchar* ExGlobal::getReagentBox(QString boxCode){

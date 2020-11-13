@@ -233,8 +233,8 @@ Page {
         Sequence.uiStage = Sequence.Stage_login;
         Sequence.setTitle("login");
         Sequence.updateFooter(false,false,false);
-        labelMessage.text = "";        
-        console.log("Login Completed","depth=",mainView.depth);        
+        labelMessage.text = "";
+        Sequence.checkParam(false);
     }
 
     Connections{

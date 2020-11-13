@@ -109,6 +109,7 @@ Page {
                     else
                         mainView.push("qrc:/DataUI/DataView.qml");
                     ExGlobal.setDataEntry(1);
+                    Sequence.uiStage = Sequence.Stage_idle;
                 }
             }
             else if(result == Sequence.Result_Test_unfinish){

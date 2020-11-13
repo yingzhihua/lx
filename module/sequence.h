@@ -157,6 +157,7 @@ public:
     Q_INVOKABLE int boxParam(){return boxparam;}    
     Q_INVOKABLE int onePointPanelIndex(){return OnePointPanelIndex;}
     Q_INVOKABLE void setOnePointPanelIndex(int index);
+    Q_INVOKABLE void checkParam(bool update);
     static QString getPanelName(QString panelCode);
     Q_PROPERTY(StageState uiStage READ readStage WRITE setStage NOTIFY stageChanged)
     StageState readStage(){return stage;}
@@ -268,6 +269,7 @@ private:
     bool continueLoopTest();
 
     bool dirctAction(QString device, int value, int param1, int param2, int param3);
+    void updateParam(QByteArray param);
 
     double dryMeanValue,fillMeanValue;
     StageState stage;

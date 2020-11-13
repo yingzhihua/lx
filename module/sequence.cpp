@@ -92,21 +92,10 @@ Sequence::Sequence(QObject *parent) : QObject(parent)
 
     stage = StageState::Stage_selfcheck;
     //actionDo("Sensor",0,0,0);
-    serialMgr->serialWrite(ActionParser::ParamToByte("AutoData",1,0,0,0));
-    //ReadMask(QCoreApplication::applicationDirPath()+"/pos");
-    //imageAna->SetMask(ExGlobal::getReagentBox("201"),0);
-
-    t_fan1Speed = t_fan2Speed = t_fan3Speed = 0;
-#if 0
-    qDebug()<<"startTrans:"<<sqlitemgrinstance->StartTransations();
-    testMgr->TestCreate("123456","201");
-    for (int i = 0; i < 121; i++)
-        testMgr->InsertData(i,5,1,120+i);
-    qDebug()<<"endTrans:"<<sqlitemgrinstance->EndTransations();
-#endif
+    serialMgr->serialWrite(ActionParser::ParamToByte("AutoData",1,0,0,0));    
 }
 
-bool Sequence::sequenceInit(){
+bool Sequence::sequenceInit(){    
     if (!ReadTestProcess(QCoreApplication::applicationDirPath()+"/FLASHDXcn"))    
         return false;
     ExGlobal::pTestModel->InitTest();
@@ -370,6 +359,9 @@ void Sequence::ActionFinish(QByteArray data)
         }
         return;
     }
+    else if(data.length()>11 && data[7] == '\x82' && data[1] == '\x02'){
+        updateParam(data);
+    }
 
     if (currOrder != data[7])
         return;
@@ -382,7 +374,7 @@ void Sequence::ActionFinish(QByteArray data)
                 ExGlobal::settempversion(data.mid(13,5).data());
             }
             else if(data[7] == '\x20'){
-            }
+            }            
             else if(data[7] == '\x1F'){
                 if (data[12] == '\x00')
                     fan1SetSpeed((data[13]<<8)+data[14]);
@@ -469,7 +461,7 @@ void Sequence::ActionFinish(QByteArray data)
                     QVector<QVector<int>> PosValue = imageAna->getPosValueArr();
                     emit callQmlRefeshData(currCameraCycle,item,value);
 
-                    if (ExGlobal::panelCode() == ExGlobal::OnePointPanelCode){
+                    if (ExGlobal::panelCode().startsWith("3")){
                         testMgr->InsertData(0,2,currCameraCycle,(int)(imageAna->GetLLight(camera->getyData(),camera->getImageType())*100));
                     }
                     else {
@@ -709,7 +701,7 @@ void Sequence::FinishSequence()
         qDebug()<<"Itemsize"<<imageAna->getItem().size();//imageCapture->openCamera();
         qDebug()<<"panelCode"<<ExGlobal::panelCode()<<ExGlobal::DemoPanelCode;
         if (imageAna->getItem().size() > 45 || ExGlobal::panelCode() == ExGlobal::DemoPanelCode
-                || ExGlobal::panelCode() == ExGlobal::OnePointPanelCode)
+                || ExGlobal::panelCode().startsWith("3"))
         {
             int testid = testMgr->TestClose(2);
             qDebug()<<"testid"<<testid;
@@ -718,7 +710,7 @@ void Sequence::FinishSequence()
             if (ExGlobal::panelCode() == ExGlobal::DemoPanelCode)
             {
             }
-            else if (ExGlobal::panelCode() == ExGlobal::OnePointPanelCode)
+            else if (ExGlobal::panelCode().startsWith("3"))
                 DataHandler::SaveOnePointData(testid);
             else
                 DataHandler::SaveData(testid);
@@ -1689,9 +1681,79 @@ QString Sequence::getPanelName(QString panelCode){
     {
         if (e.attribute("PanelCode") == panelCode)
         {
-            qDebug()<<"ok"<<e.attribute("PanelName");
+            //qDebug()<<"ok"<<e.attribute("PanelName");
             return e.attribute("PanelName");
         }
     }
     return "";
+}
+
+typedef struct
+{
+    int V1ToolHomeX;
+    int V1WorkX;
+    int V1SoftHomeX;
+    int V2ToolHomeX;
+    int V2WorkX;
+    int V2SoftHomeX;
+    int V3ToolHomeX;
+    int V3WorkX;
+    int V3SoftHomeX;
+    int VPToolHomeX;
+    int VPWorkX;
+    int VPSoftHomeX;
+    int VDWorkX;
+    int PumpToolHomeX;
+    int PumpSoftHomeX;
+} intParam;
+
+void Sequence::checkParam(bool update){
+    intParam param;
+    if (QString::compare("V2.15",ExGlobal::tempversion())>0) return;
+    param.V1ToolHomeX = ExGlobal::V1ToolHomeX;
+    param.V1WorkX = ExGlobal::V1WorkX;
+    param.V1SoftHomeX = ExGlobal::V1SoftHomeX;
+    param.V2ToolHomeX = ExGlobal::V2ToolHomeX;
+    param.V2WorkX = ExGlobal::V2WorkX;
+    param.V2SoftHomeX = ExGlobal::V2SoftHomeX;
+    param.V3ToolHomeX = ExGlobal::V3ToolHomeX;
+    param.V3WorkX = ExGlobal::V3WorkX;
+    param.V3SoftHomeX = ExGlobal::V3SoftHomeX;
+    param.VPToolHomeX = ExGlobal::VPToolHomeX;
+    param.VPWorkX = ExGlobal::VPWorkX;
+    param.VPSoftHomeX = ExGlobal::VPSoftHomeX;
+    param.VDWorkX = ExGlobal::VDWorkX;
+    param.PumpToolHomeX = ExGlobal::PumpToolHomeX;
+    param.PumpSoftHomeX = ExGlobal::PumpSoftHomeX;
+
+    QByteArray byteParam;
+    byteParam.append((char*)&param,sizeof(intParam));
+    if (update)
+        serialMgr->serialWrite(ActionParser::ParamArrToByte(byteParam,2));
+    else
+        serialMgr->serialWrite(ActionParser::ParamArrToByte(byteParam,1));
+}
+
+void Sequence::updateParam(QByteArray param){
+    qDebug()<<"updateParam:"<<QString::number(param[11],16);
+    if (param[11] == '\x1' && QString::number(param[9]).toInt() == sizeof(intParam)+2){
+        intParam iparam;
+        memcpy((char *)&iparam,param.mid(12),sizeof(intParam));
+        qDebug()<<"V1="<<iparam.V1WorkX<<iparam.V1ToolHomeX<<iparam.V1SoftHomeX;
+        ExGlobal::updateCaliParam("V1ToolHomeX",iparam.V1ToolHomeX);
+        ExGlobal::updateCaliParam("V1WorkX",iparam.V1WorkX);
+        ExGlobal::updateCaliParam("V1SoftHomeX",iparam.V1SoftHomeX);
+        ExGlobal::updateCaliParam("V2ToolHomeX",iparam.V2ToolHomeX);
+        ExGlobal::updateCaliParam("V2WorkX",iparam.V2WorkX);
+        ExGlobal::updateCaliParam("V2SoftHomeX",iparam.V2SoftHomeX);
+        ExGlobal::updateCaliParam("V3ToolHomeX",iparam.V3ToolHomeX);
+        ExGlobal::updateCaliParam("V3WorkX",iparam.V3WorkX);
+        ExGlobal::updateCaliParam("V3SoftHomeX",iparam.V3SoftHomeX);
+        ExGlobal::updateCaliParam("VPToolHomeX",iparam.VPToolHomeX);
+        ExGlobal::updateCaliParam("VPWorkX",iparam.VPWorkX);
+        ExGlobal::updateCaliParam("VPSoftHomeX",iparam.VPSoftHomeX);
+        ExGlobal::updateCaliParam("VDWorkX",iparam.VDWorkX);
+        ExGlobal::updateCaliParam("PumpToolHomeX",iparam.PumpToolHomeX);
+        ExGlobal::updateCaliParam("PumpSoftHomeX",iparam.PumpSoftHomeX);
+    }
 }

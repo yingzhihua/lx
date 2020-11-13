@@ -16,7 +16,7 @@ Page {
         x:10
         y:10
         width:  1040//652
-        height: 780//490
+        height: 760//490
         color:"lightskyblue"
 
         Text{
@@ -76,7 +76,7 @@ Page {
         id: message
         height: 100
         width: parent.width - 40
-        text:"ExGlobal.s"
+        text:""
         font.pixelSize: 20
         anchors.left: parent.left
         anchors.leftMargin: 20
@@ -228,10 +228,14 @@ Page {
             }
             else if(result == Sequence.Result_Test_finish){
                 headerMsg.text = "测试完成！";
-                mainView.pop();
-                //mainView.push("qrc:/HomeUI/Idle.qml");
-                mainView.push("qrc:/DataUI/DataView.qml");
+                mainView.pop();                
+
+                if (ExGlobal.panelCode.substring(0,1) === "3")
+                    mainView.push("qrc:/DataUI/OneDataLine.qml")
+                else
+                    mainView.push("qrc:/DataUI/DataView.qml");
                 ExGlobal.setDataEntry(1);
+
                 Sequence.uiStage = Sequence.Stage_idle;
             }
             else if(result == Sequence.Result_Test_unfinish){

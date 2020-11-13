@@ -158,6 +158,7 @@ Rectangle {
                 ExGlobal.updateCaliParam("V1WorkX",dev1Sp.value-ExGlobal.getCaliParam("V1SoftHomeOffset")+ExGlobal.getCaliParam("V1WorkOffset"));
                 ExGlobal.updateCaliParam("V1SoftHomeX",dev1Sp.value-ExGlobal.getCaliParam("V1SoftHomeOffset"));
                 dev1Text.text = ExGlobal.getCaliParam("V1ToolHomeX");
+                Sequence.checkParam(true);
             }
         }
         Text{
@@ -227,6 +228,7 @@ Rectangle {
                 ExGlobal.updateCaliParam("V2WorkX",dev2Sp.value-ExGlobal.getCaliParam("V2SoftHomeOffset")+ExGlobal.getCaliParam("V2WorkOffset"));
                 ExGlobal.updateCaliParam("V2SoftHomeX",dev2Sp.value-ExGlobal.getCaliParam("V2SoftHomeOffset"));
                 dev2Text.text = ExGlobal.getCaliParam("V2ToolHomeX");
+                Sequence.checkParam(true);
                 console.log("dev2Save,"+dev2Sp.value+",V2SoftHomeOffset:"+ExGlobal.getCaliParam("V2SoftHomeOffset")+"V2WorkOffset:"+ExGlobal.getCaliParam("V2WorkOffset"));
             }
         }
@@ -299,6 +301,7 @@ Rectangle {
                 ExGlobal.updateCaliParam("V3WorkX",dev3Sp.value-ExGlobal.getCaliParam("V3SoftHomeOffset")+ExGlobal.getCaliParam("V3WorkOffset"));
                 ExGlobal.updateCaliParam("V3SoftHomeX",dev3Sp.value-ExGlobal.getCaliParam("V3SoftHomeOffset"));
                 dev3Text.text = ExGlobal.getCaliParam("V3ToolHomeX");
+                Sequence.checkParam(true);
             }
         }
 
@@ -370,6 +373,7 @@ Rectangle {
                 ExGlobal.updateCaliParam("VPWorkX",dev4Sp.value-ExGlobal.getCaliParam("VPSoftHomeOffset")+ExGlobal.getCaliParam("VPWorkOffset"));
                 ExGlobal.updateCaliParam("VPSoftHomeX",dev4Sp.value-ExGlobal.getCaliParam("VPSoftHomeOffset"));
                 dev4Text.text = ExGlobal.getCaliParam("VPToolHomeX");
+                Sequence.checkParam(true);
             }
         }
 
@@ -450,6 +454,7 @@ Rectangle {
             onClicked: {
                 ExGlobal.updateCaliParam("VDWorkX",dev5Sp.value);
                 dev5Text.text = ExGlobal.getCaliParam("VDWorkX");
+                Sequence.checkParam(true);
             }
         }
 
@@ -521,6 +526,7 @@ Rectangle {
                 ExGlobal.updateCaliParam("PumpToolHomeX",dev6Sp.value);
                 ExGlobal.updateCaliParam("PumpSoftHomeX",dev6Sp.value-ExGlobal.getCaliParam("PumpSoftHomeOffset"));
                 dev6Text.text = ExGlobal.getCaliParam("PumpToolHomeX");
+                Sequence.checkParam(true);
             }
         }
 

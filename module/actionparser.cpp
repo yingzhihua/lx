@@ -662,6 +662,24 @@ QByteArray ActionParser::ParamToByte(const QString &action, int value, int param
     return data;
 }
 
+QByteArray ActionParser::ParamArrToByte(QByteArray param, int value){
+    QByteArray data;
+    data.resize(param.length()+11);
+    data[6] = 0;
+    data[7] = 0x82;
+
+    if(value == 1)
+        data[7] = 0x82;
+    else if(value == 2)
+        data[7] = 0x83;
+
+    data[8] = 0;
+    data[9] = param.length()&0xFF;
+    memcpy(data.data()+10,param.data(),param.length());
+    FormatBytes(0x02,data);
+    return data;
+}
+
 QByteArray ActionParser::ActionToByte(const QDomElement &action)
 {
     return ParamToByte(action.attribute("Device"),action.attribute("ActionValue").toInt(),action.attribute("ActionParam1").toInt(),
