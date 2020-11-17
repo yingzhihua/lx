@@ -25,7 +25,7 @@ int ExGlobal::UserType = 0;
 QString ExGlobal::BoxCode = "";
 bool ExGlobal::test = false;
 
-QString ExGlobal::SysName = "样机02";
+QString ExGlobal::SysName = "无名机";
 QString ExGlobal::HospitalName = "";
 int ExGlobal::PrintType = 0;
 
@@ -143,6 +143,7 @@ QString ExGlobal::OnePointPanelCode = "31001";
 int ExGlobal::SampleType = 0;
 
 QDateTime ExGlobal::validDateTime = QDateTime::currentDateTime();
+QList<int> ExGlobal::UIParam;
 
 static QStringList SampleTypeArr;
 QObject *ExGlobal::exglobal_provider(QQmlEngine *engine, QJSEngine *scriptEngine){
@@ -164,6 +165,7 @@ ExGlobal::ExGlobal(QObject *parent) : QObject(parent)
 {
     //qDebug()<<"ExGlobal";
     SampleTypeArr<<"鼻咽拭子"<<"咽拭子";
+    UISetDefaultParam();
 }
 
 void ExGlobal::GlobalMessage(int code){
@@ -787,7 +789,10 @@ void ExGlobal::setSysLanguageCode(int code){
         //QApplication::removeTranslator(&tor);
         qDebug()<<"setLanguage"<<code;
         if (code == 0)
+        {
             app->removeTranslator(&tor);
+            setUIParam(0);
+        }
         else
             Translator(code);
 
@@ -803,6 +808,7 @@ void ExGlobal::Translator(int language){
         tor.load(QCoreApplication::applicationDirPath()+"/en_US.qm");
         app->installTranslator(&tor);
     }
+    setUIParam(language);
 }
 
 void ExGlobal::updateLockTime(){
@@ -863,4 +869,38 @@ QString ExGlobal::getSampleTypeName(int type){
 
 QString ExGlobal::getCurrSampleName(){
     return SampleTypeArr[SampleType];
+}
+
+static QDomDocument UIXml;
+void ExGlobal::UISetDefaultParam(){
+    UIParam<<40;        //UI_LOGIN_SUBMIT_FONT
+
+    QFile xmlfile(QCoreApplication::applicationDirPath()+"/UIParam.xml");
+    if (!xmlfile.open(QFile::ReadOnly))
+        return;
+    UIXml.setContent(&xmlfile);
+    xmlfile.close();
+}
+
+void ExGlobal::setUIParam(int language){
+    if (UIXml.isNull())
+        return;
+    QDomElement root = UIXml.documentElement();
+    if (root.isNull())
+        return;
+    QDomElement param;
+    if (language == 0)
+        param = root.firstChildElement("cn");
+    else if(language == 1)
+        param = root.firstChildElement("en");
+    if (param.isNull())
+        return;
+    QDomNode node = param.firstChild();
+    while(!node.isNull()){
+        QDomElement e = node.toElement();
+        if (!e.isNull())
+            if (e.tagName() == "UI_LOGIN_SUBMIT_FONT")
+                UIParam[UI_LOGIN_SUBMIT_FONT] = e.text().toInt();
+        node = node.nextSibling();
+    }
 }

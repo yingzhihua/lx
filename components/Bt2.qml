@@ -7,6 +7,7 @@ Rectangle {
     property int textoffsetx: 0
     property int textoffsety: 0
     property alias textcolor: bttext.color
+    property alias textfont: bttext.font.pixelSize
     signal clicked    
     color: "transparent"
     Image {

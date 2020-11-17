@@ -164,6 +164,7 @@ Page {
                 textcolor: "#ffffff"
                 textoffsetx: 35
                 textoffsety: -4
+                textfont: ExGlobal.uiParam[ExGlobal.UI_LOGIN_SUBMIT_FONT]
                 onClicked: login()
             }
 
@@ -235,6 +236,8 @@ Page {
         Sequence.updateFooter(false,false,false);
         labelMessage.text = "";
         Sequence.checkParam(false);
+
+        console.log("UIParam",ExGlobal.uiParam.length,ExGlobal.uiParam[0],ExGlobal.uiParam[1])
     }
 
     Connections{

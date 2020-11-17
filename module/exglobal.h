@@ -40,8 +40,15 @@ class ExGlobal : public QObject
     Q_PROPERTY(bool childImage READ childImage WRITE setChildImage NOTIFY childImageChanged)
     Q_PROPERTY(int autoFocus READ autoFocus WRITE setAutoFocus NOTIFY autoFocusChanged)
     Q_PROPERTY(int qrCode READ qrCode WRITE setQrCode NOTIFY qrCodeChanged)
+    Q_PROPERTY(QList<int> uiParam READ getUIParam NOTIFY uiParamChanged)
 
 public:
+    enum UI_PARAM:int16_t{
+        UI_LOGIN_SUBMIT_FONT,
+        UI_PARAM_LENGTH
+    };
+    Q_ENUM(UI_PARAM)
+
     explicit ExGlobal(QObject *parent = nullptr);
     static QObject *exglobal_provider(QQmlEngine *engine, QJSEngine *scriptEngine);
     static ExGlobal *getPtr();
@@ -221,12 +228,15 @@ public:
     static QApplication *app;
     static QQmlApplicationEngine *qml;
     static void Translator(int language);
+    static void setUIParam(int language);
     static QString screenCapture();
 
     static QString DemoPanelCode;
     static QString OnePointPanelCode;
     static int SampleType;
     static QDateTime validDateTime;
+    static QList<int> UIParam;
+    QList<int> getUIParam(){return UIParam;}
 signals:
     void userChanged();
     void panelNameChanged();
@@ -250,6 +260,7 @@ signals:
     void lockTimeChanged();
     void lockscreenOpenChanged();
     void exglobalMessage(int code);
+    void uiParamChanged();
 
 private:
     static QString t_panelCode;
@@ -273,6 +284,7 @@ private:
     static void SetTextParam(const QString &textName, QString textValue);
     static void LoadReagentBox();
     static void updateLockTime();
+    static void UISetDefaultParam();
 
 public:
     void GlobalMessage(int code);
