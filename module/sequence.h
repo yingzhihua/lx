@@ -28,6 +28,7 @@ public:
         Sequence_Idle,
         Sequence_SelfCheck,
         Sequence_OpenBox,
+        Sequence_ErrOpenBox,
         Sequence_CloseBox,
         Sequence_DoorToWork,
         Sequence_DoorFromWork,
@@ -158,6 +159,7 @@ public:
     Q_INVOKABLE int onePointPanelIndex(){return OnePointPanelIndex;}
     Q_INVOKABLE void setOnePointPanelIndex(int index);
     Q_INVOKABLE void checkParam(bool update);
+    Q_INVOKABLE bool doorError(){return bDoorState!=bDoorState2;}
     static QString getPanelName(QString panelCode);
     Q_PROPERTY(StageState uiStage READ readStage WRITE setStage NOTIFY stageChanged)
     StageState readStage(){return stage;}
@@ -231,6 +233,7 @@ private:
     bool firstCapture;    
     bool bCannelSequence;
     bool bDoorState;
+    bool bDoorState2;
     bool bBoxState;
     bool bValidBox;
 
@@ -242,7 +245,7 @@ private:
     void qrDect();
     int decodeQr(QString strQr);
     void PierceDect();
-    void SwitchDoor();
+    void SwitchDoor(bool error);
     void DoorToWork(bool toWork);
     bool bQrOpenLight = true;
     bool bAutoFocus = false;

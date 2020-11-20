@@ -108,6 +108,7 @@ Page {
                     verticalAlignment: Text.AlignVCenter
                     placeholderText: qsTr("用户名")
                     placeholderTextColor:"#ffffff"
+                    maximumLength:20
                     background: Rectangle{radius: 5; color: "#e6e6e6"}
                 }
                 background: Rectangle {
@@ -146,6 +147,7 @@ Page {
                 echoMode: TextInput.Password
                 placeholderText: qsTr("密码")
                 placeholderTextColor:"#ffffff"
+                maximumLength:20
                 background: Rectangle{
                     //border.color: "darkgray"
                     radius: 5
@@ -236,8 +238,7 @@ Page {
         Sequence.updateFooter(false,false,false);
         labelMessage.text = "";
         Sequence.checkParam(false);
-
-        console.log("UIParam",ExGlobal.uiParam.length,ExGlobal.uiParam[0],ExGlobal.uiParam[1])
+        console.log("UI_LOGIN_SUBMIT_FONT",ExGlobal.uiParam[ExGlobal.UI_LOGIN_SUBMIT_FONT])
     }
 
     Connections{

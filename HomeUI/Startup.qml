@@ -59,12 +59,14 @@ Page {
         openDoor.visible = false;
         boxTips.visible = false;
         Sequence.sequenceInit();
+        /*
         if (ExGlobal.projectMode() === 0)
         {
             Sequence.sequenceDo(Sequence.Sequence_SelfCheck);
             changeTimer.start();
         }
         else
+        */
             Sequence.actionDo("Query",3,0,0,0);
     }
 
@@ -137,12 +139,17 @@ Page {
                     Sequence.setTitle("startup_error")
                     boxTips.text = qsTr("请取出试剂盒 然后关闭舱门")
                 }
+                else if (Sequence.doorError())
+                {
+                    Sequence.setTitle("startup_error")
+                    boxTips.text = qsTr("请恢复舱门")
+                }
                 else if (Sequence.door){
                     Sequence.setTitle("startup_error")
                     boxTips.text = qsTr("请关闭舱门")
                 }
 
-                if (Sequence.box || Sequence.door){
+                if (Sequence.doorError() || (ExGlobal.projectMode() !== 0 && (Sequence.box || Sequence.door))){
                     appicon.visible = false;
                     openDoor.visible = true;
                     boxTips.visible = true;
@@ -155,7 +162,7 @@ Page {
                     Sequence.sequenceDo(Sequence.Sequence_SelfCheck);
                     changeTimer.start();
                 }
-                console.log("box",Sequence.box,"door",Sequence.door)
+                console.log("box",Sequence.box,"door",Sequence.door,"doorError",Sequence.doorError())
             }
 
             console.log("Startup.qml,result:"+result);
@@ -212,7 +219,21 @@ Page {
     }
 
     function switchDoor(){
-        if (Sequence.door == false)
+        if (Sequence.doorError())
+        {
+            if (Sequence.sequenceDo(Sequence.Sequence_ErrOpenBox))
+            {
+                /*
+                busyIndicator.running = true;
+                busyDes.text = qsTr("正在开仓");
+                busyDes.visible = true;
+                /*/
+                openDoor.playing = true
+                openDoor.enabled = false
+                //*/
+            }
+        }
+        else if (Sequence.door == false)
         {
             if (Sequence.sequenceDo(Sequence.Sequence_OpenBox))
             {

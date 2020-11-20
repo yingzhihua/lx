@@ -93,6 +93,7 @@ Sequence::Sequence(QObject *parent) : QObject(parent)
     stage = StageState::Stage_selfcheck;
     //actionDo("Sensor",0,0,0);
     serialMgr->serialWrite(ActionParser::ParamToByte("AutoData",1,0,0,0));    
+//    serialMgr->serialWrite(ActionParser::ParamToByte("Door",3,12000,0,0));
 }
 
 bool Sequence::sequenceInit(){    
@@ -213,12 +214,17 @@ bool Sequence::sequenceDo(SequenceId id)
     else if(id == SequenceId::Sequence_OpenBox)
     {
         //sequenceAction = root.firstChildElement("OpenDoor");
-        SwitchDoor();
+        SwitchDoor(false);
+        return true;
+    }
+    else if(id == SequenceId::Sequence_ErrOpenBox)
+    {
+        SwitchDoor(true);
         return true;
     }
     else if(id == SequenceId::Sequence_CloseBox){
         //sequenceAction = root.firstChildElement("CloseDoor");
-        SwitchDoor();
+        SwitchDoor(false);
         return true;
     }
     else if(id == SequenceId::Sequence_DoorToWork){
@@ -584,7 +590,8 @@ void Sequence::ActionFinish(QByteArray data)
     }
     else if (currSequenceId == SequenceId::Sequence_QrDecode || currSequenceId == SequenceId::Sequence_Pierce
              ||currSequenceId == SequenceId::Sequence_OpenBox || currSequenceId == SequenceId::Sequence_CloseBox
-             ||currSequenceId == SequenceId::Sequence_DoorToWork ||currSequenceId == SequenceId::Sequence_DoorFromWork){
+             ||currSequenceId == SequenceId::Sequence_DoorToWork ||currSequenceId == SequenceId::Sequence_DoorFromWork
+             ||currSequenceId == SequenceId::Sequence_ErrOpenBox){
         if (!listNextAction(false))
         {
             FinishSequence();
@@ -675,7 +682,7 @@ void Sequence::FinishSequence()
         bDoorState = false;
         out = SequenceResult::Result_CloseBox_ok;
     }
-    else if(currSequenceId == SequenceId::Sequence_OpenBox)
+    else if(currSequenceId == SequenceId::Sequence_OpenBox || currSequenceId == SequenceId::Sequence_ErrOpenBox)
     {
         bDoorState = true;
         out = SequenceResult::Result_OpenBox_ok;
@@ -1117,12 +1124,7 @@ void Sequence::setSenorState(char char1, char char2)
         bBoxState = sensor;
         emit boxStateChanged();
     }
-    /*
-    if (char2&0x80)
-        sensor = true;
-    else
-        sensor = false;
-        */
+
     if (char1&0x02)
         sensor = false;
     else
@@ -1132,6 +1134,13 @@ void Sequence::setSenorState(char char1, char char2)
         bDoorState = sensor;
         emit doorStateChanged();
     }
+
+//opendoor sensor
+    if (char2&0x80)
+        bDoorState2 = true;
+    else
+        bDoorState2 = false;
+
     FirstCheckSensor = false;
     //qDebug()<<"bDoorState:"<<bDoorState<<"bBoxState:"<<bBoxState;
 }
@@ -1391,6 +1400,26 @@ bool Sequence::listNextAction(bool first){
             currOrder = send[7];
             serialMgr->serialWrite(send);
         }
+        else if(act.device == "ErrOpenDoor"){
+            if (!bDoorState2){
+                act.device = "Query";
+                act.value = 3;
+                actList.append(act);
+
+                act.device = "ErrOpenDoor";
+                actList.append(act);
+
+                act.device = "Door";
+                act.value = 3;
+                act.param1 = 1000;
+
+                QByteArray send = ActionParser::ParamToByte(act.device,act.value,act.param1,act.param2,act.param3);
+                currOrder = send[7];
+                serialMgr->serialWrite(send);
+            }
+            else
+                return false;
+        }
         else {
             QByteArray send = ActionParser::ParamToByte(act.device,act.value,act.param1,act.param2,act.param3);
             currOrder = send[7];
@@ -1470,7 +1499,7 @@ int Sequence::decodeQr(QString strQr){
     return 2;
 }
 
-void Sequence::SwitchDoor(){
+void Sequence::SwitchDoor(bool error){
     actList.clear();
     action act;
 
@@ -1478,7 +1507,10 @@ void Sequence::SwitchDoor(){
     act.value = 3;
     actList.append(act);
 
-    act.device = "SwitchDoor";
+    if (error)
+        act.device = "ErrOpenDoor";
+    else
+        act.device = "SwitchDoor";
     actList.append(act);
 
     listNextAction(true);

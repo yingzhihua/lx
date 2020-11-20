@@ -201,9 +201,9 @@ ApplicationWindow {
         Text {
             id: setuptext
             anchors.centerIn: setupbt
-            anchors.horizontalCenterOffset: 40
+            anchors.horizontalCenterOffset: ExGlobal.uiParam[ExGlobal.UI_MAIN_MENU_HORIZONTALOFFSET]
             anchors.verticalCenterOffset: -4
-            font.pixelSize: 60
+            font.pixelSize: ExGlobal.uiParam[ExGlobal.UI_MAIN_MENU_FONT]
             color: "#A7A7A7"
             text: qsTr("设置")
         }
@@ -223,9 +223,9 @@ ApplicationWindow {
         Text {
             id: hometext
             anchors.centerIn: homebt
-            anchors.horizontalCenterOffset: 40
+            anchors.horizontalCenterOffset: ExGlobal.uiParam[ExGlobal.UI_MAIN_MENU_HORIZONTALOFFSET]
             anchors.verticalCenterOffset: -4
-            font.pixelSize: 60
+            font.pixelSize: ExGlobal.uiParam[ExGlobal.UI_MAIN_MENU_FONT]
             color: "#A7A7A7"
             text: qsTr("主页")
         }
@@ -245,9 +245,9 @@ ApplicationWindow {
         Text {
             id: datatext
             anchors.centerIn: databt
-            anchors.horizontalCenterOffset: 40
+            anchors.horizontalCenterOffset: ExGlobal.uiParam[ExGlobal.UI_MAIN_MENU_HORIZONTALOFFSET]
             anchors.verticalCenterOffset: -4
-            font.pixelSize: 60
+            font.pixelSize: ExGlobal.uiParam[ExGlobal.UI_MAIN_MENU_FONT]
             color: "#A7A7A7"
             text: qsTr("数据")
         }

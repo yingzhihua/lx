@@ -94,6 +94,7 @@ Page {
         textoffsety: -4
         image: "qrc:/images/btclose.png"
         text: qsTr("关机")
+        textfont: ExGlobal.uiParam[ExGlobal.UI_IDLE_SHUTDOWN_FONT]
         onClicked: confirmDlg.show(qsTr("您将关机？"))
     }
 
@@ -106,6 +107,7 @@ Page {
         width: 299
         textoffsetx: 30
         textoffsety: -4
+        textfont: ExGlobal.uiParam[ExGlobal.UI_IDLE_EXITLOGIN_FONT]
         image: "qrc:/images/loginquit.png"
         text:qsTr("退出登录")
         onClicked: {
@@ -297,7 +299,19 @@ Page {
                 if (ExGlobal.projectMode() === 0)
                     promptDlg.show(qsTr("试剂盒错误，是否继续？"))
                 else
-                    promptClose.show(qsTr("试剂盒错误，取消测试"))
+                {
+                    //promptClose.show(qsTr("试剂盒错误，取消测试"))
+                    if (Sequence.boxParam() === 1)
+                        promptClose.show(qsTr("试剂盒已使用，取消测试"))
+                    else if (Sequence.boxParam() === 3)
+                        promptClose.show(qsTr("试剂盒不能识别，取消测试"))
+                    else if (Sequence.boxParam() === 4)
+                        promptClose.show(qsTr("试剂盒未检测到二维码，取消测试"))
+                    else if (Sequence.boxParam() === 2)
+                        promptClose.show(qsTr("空试剂盒，取消测试"))
+                    else if (Sequence.boxParam() === 5)
+                        promptClose.show(qsTr("试剂盒已过期，取消测试"))
+                }
             }
 
 

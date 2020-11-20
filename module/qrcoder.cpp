@@ -20,6 +20,8 @@ QImage QRcoder::img3;
 const int scaleX = 520;
 const int scaleY = 180;
 const int scalewide = 500;
+const int QUIDS_WIDTH = 120;
+const int QUIDS_HEIGHT = 800;
 
 //#define USE_QZXING
 #define USE_ZBAR
@@ -94,7 +96,6 @@ void QRcoder::run(){
     cap.set(CAP_PROP_FRAME_HEIGHT,1080);
     cap.set(CAP_PROP_AUTO_EXPOSURE,1);
     cap.set(CAP_PROP_EXPOSURE,poxValue);
-    //cap.set(CAP_PROP_EXPOSURE,2000);
 
     qDebug()<<"width:"<<cap.get(CAP_PROP_FRAME_WIDTH)<<" height:"<<cap.get(CAP_PROP_FRAME_HEIGHT)<<" Frame:"<<cap.get(CAP_PROP_FPS)<<" auto_expoure:"<<cap.get(CAP_PROP_AUTO_EXPOSURE)<<" exp:"<<cap.get(CAP_PROP_EXPOSURE);
     strQr.clear();
@@ -113,24 +114,29 @@ void QRcoder::run(){
 
         Mat handleFrame = Mat(sourceFrame.rows,sourceFrame.cols,CV_8UC1,ExGlobal::hbufrgb);
         cvtColor(sourceFrame, handleFrame, COLOR_RGB2GRAY);
-
+#if 0
         initX = 650;
         initY = 300;
-        if (haveQrcode(handleFrame)){
+#endif
+        initX = 1060;
+        initY = 60;
+        if (haveQrcode(handleFrame,sourceFrame)){
             qDebug()<<"haveQrcode";
             res[2] = 1;
         }
         else if(++count < TRY_COUNT)
             continue;
-
+#if 0
         initX += 600;
         initY -= 100;
+#endif
+        initX += 300;
         qDebug()<<"initX="<<initX<<"initY="<<initY;
-        if (initX > 0 && initX < (1920-200) && initY > 0 && initY < (1080-500))
+        if (initX > 0 && initX < (1920-QUIDS_WIDTH) && initY > 0 && initY < (1080-QUIDS_HEIGHT))
         {
             saveImage(handleFrame,"Qr",true);
-            handleFrame = Mat(500,120,CV_8UC1,ExGlobal::hbufrgb);
-            cvtColor(sourceFrame(Rect(initX,initY,120,500)), handleFrame, COLOR_RGB2GRAY);
+            handleFrame = Mat(QUIDS_HEIGHT,QUIDS_WIDTH,CV_8UC1,ExGlobal::hbufrgb);
+            cvtColor(sourceFrame(Rect(initX,initY,QUIDS_WIDTH,QUIDS_HEIGHT)), handleFrame, COLOR_RGB2GRAY);
 
             if (haveliquids(handleFrame)){
                 qDebug()<<"haveliquids";
@@ -139,7 +145,7 @@ void QRcoder::run(){
             else
                 res[3] = 0;
 
-            Mat liquids = sourceFrame(Rect(initX,initY,120,500)).clone();
+            Mat liquids = sourceFrame(Rect(initX,initY,QUIDS_WIDTH,QUIDS_HEIGHT)).clone();
             img2 = QImage((const uchar*)liquids.data,liquids.cols,liquids.rows,QImage::Format_RGB888);
         }
         img3 = QImage((const uchar*)handleFrame.data,handleFrame.cols,handleFrame.rows,QImage::Format_Grayscale8);
@@ -513,16 +519,17 @@ bool QRcoder::havehole(Mat &image){
     return result;
 }
 
-bool QRcoder::haveQrcode(Mat &image){
+bool QRcoder::haveQrcode(Mat &image, Mat &source){
     bool result = false;
-
+/*
     QRCodeDetector qrcode;
     vector<Point> transform;
     bool result_detection = qrcode.detect(image,transform);
     Mat straight_barcode;
-    if(qrcode.detect(image,transform)){
+    if(result_detection){
         initX = transform[0].x;
         initY = transform[0].y;
+        qDebug()<<"haveQrcode detect "<<initX<<initY;
         string decode_info = qrcode.decode(image,transform,straight_barcode);
         if (!decode_info.empty()){
             strQr = QString::fromStdString(decode_info);
@@ -533,21 +540,31 @@ bool QRcoder::haveQrcode(Mat &image){
     qDebug()<<"haveQrcode"<<result_detection<<"posnum"<<transform.size();
     for (int i = 0; i < transform.size();i++)
         qDebug()<<"i="<<i<<"x="<<transform[i].x<<"y="<<transform[i].y;
-
+*/
     zbar::ImageScanner scanner;
     scanner.set_config(zbar::ZBAR_NONE,zbar::ZBAR_CFG_ENABLE,1);
 
     zbar::Image imageZbar(image.cols,image.rows,"Y800",image.data,image.cols*image.rows);
-    scanner.scan(imageZbar);
+    scanner.scan(imageZbar);    
     zbar::Image::SymbolIterator symbol = imageZbar.symbol_begin();
     if (imageZbar.symbol_begin()==imageZbar.symbol_end()){
         qDebug()<<"zbar scan fail";
         Log::LogCam("zbar scan fail");
     }
     else {
-        strQr = QString::fromStdString(imageZbar.symbol_begin()->get_data());
+        strQr = QString::fromStdString(imageZbar.symbol_begin()->get_data());        
         result = true;
-        qDebug()<<"decode_info:"<<strQr;
+        if (symbol->get_location_size() >= 4){
+            initX = symbol->get_location_x(3);
+            initY = symbol->get_location_y(3);
+        }
+        qDebug()<<"decode_info:"<<strQr<<"point size"<<symbol->get_location_size();
+        for(int i = 0; i < symbol->get_location_size(); i++)
+        {
+            circle(source,Point(symbol->get_location_x(i),symbol->get_location_y(i)),10,Scalar(0,0,255),3);
+            //circle(image,spos[0],10,Scalar(0,0,255),3);
+            qDebug()<<"point "<<symbol->get_location_x(i)<<symbol->get_location_y(i);
+        }
         Log::LogCam("decode_info:"+strQr);
     }
     return result;

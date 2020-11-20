@@ -34,7 +34,8 @@ int ExGlobal::LanguageCode = 0;
 int ExGlobal::PanelBoxIndex = 1;
 
 QString ExGlobal::t_version = "V1";
-QString ExGlobal::build_version = "V1.0.18(build20201113)";
+QString ExGlobal::build_version = "V1.0.19(build20201120)";
+//QString ExGlobal::build_version = "V1.0.16(build20201012)";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
@@ -799,6 +800,7 @@ void ExGlobal::setSysLanguageCode(int code){
         qml->retranslate();
         updateCaliParam("LanguageCode",code);
         emit sysLanguageCodeChanged();
+        emit uiParamChanged();
     }
 }
 
@@ -873,7 +875,23 @@ QString ExGlobal::getCurrSampleName(){
 
 static QDomDocument UIXml;
 void ExGlobal::UISetDefaultParam(){
+    qDebug()<<"UISetDefaultParam";
+    UIParam<<60;        //UI_MAIN_MENU_FONT
+    UIParam<<40;        //UI_MAIN_MENU_HORIZONTALOFFSET
     UIParam<<40;        //UI_LOGIN_SUBMIT_FONT
+    UIParam<<40;        //UI_IDLE_EXITLOGIN_FONT
+    UIParam<<40;        //UI_IDLE_SHUTDOWN_FONT
+    UIParam<<45;        //UI_BOXREADY_BUTTOM_PROMPT_FONT
+    UIParam<<40;        //UI_BOXREADY_TEST_CANCEL_FONT
+    UIParam<<40;        //UI_LOGIN_SUBMIT_FONT
+    UIParam<<40;        //UI_LOGIN_SUBMIT_FONT
+    UIParam<<40;        //UI_LOGIN_SUBMIT_FONT
+    UIParam<<40;        //UI_LOGIN_SUBMIT_FONT
+    UIParam<<40;        //UI_LOGIN_SUBMIT_FONT
+    UIParam<<40;        //UI_LOGIN_SUBMIT_FONT
+    UIParam<<40;        //UI_LOGIN_SUBMIT_FONT
+    UIParam<<40;        //UI_LOGIN_SUBMIT_FONT
+
 
     QFile xmlfile(QCoreApplication::applicationDirPath()+"/UIParam.xml");
     if (!xmlfile.open(QFile::ReadOnly))
@@ -884,7 +902,10 @@ void ExGlobal::UISetDefaultParam(){
 
 void ExGlobal::setUIParam(int language){
     if (UIXml.isNull())
+    {
+        qDebug()<<"UIXml is null";
         return;
+    }
     QDomElement root = UIXml.documentElement();
     if (root.isNull())
         return;
@@ -894,13 +915,31 @@ void ExGlobal::setUIParam(int language){
     else if(language == 1)
         param = root.firstChildElement("en");
     if (param.isNull())
+    {
+        qDebug()<<"param is null";
         return;
+    }
     QDomNode node = param.firstChild();
     while(!node.isNull()){
         QDomElement e = node.toElement();
         if (!e.isNull())
-            if (e.tagName() == "UI_LOGIN_SUBMIT_FONT")
+        {
+            qDebug()<<e.tagName()<<e.text().toInt();
+            if (e.tagName() == "UI_MAIN_MENU_FONT")
+                UIParam[UI_MAIN_MENU_FONT] = e.text().toInt();
+            else if(e.tagName() == "UI_MAIN_MENU_HORIZONTALOFFSET")
+                UIParam[UI_MAIN_MENU_HORIZONTALOFFSET] = e.text().toInt();
+            else if(e.tagName() == "UI_LOGIN_SUBMIT_FONT")
                 UIParam[UI_LOGIN_SUBMIT_FONT] = e.text().toInt();
+            else if(e.tagName() == "UI_IDLE_EXITLOGIN_FONT")
+                UIParam[UI_IDLE_EXITLOGIN_FONT] = e.text().toInt();
+            else if(e.tagName() == "UI_IDLE_SHUTDOWN_FONT")
+                UIParam[UI_IDLE_SHUTDOWN_FONT] = e.text().toInt();
+            else if(e.tagName() == "UI_BOXREADY_BUTTOM_PROMPT_FONT")
+                UIParam[UI_BOXREADY_BUTTOM_PROMPT_FONT] = e.text().toInt();
+            else if(e.tagName() == "UI_BOXREADY_TEST_CANCEL_FONT")
+                UIParam[UI_BOXREADY_TEST_CANCEL_FONT] = e.text().toInt();
+        }
         node = node.nextSibling();
     }
 }

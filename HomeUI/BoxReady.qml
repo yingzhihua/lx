@@ -42,7 +42,7 @@ Page {
         }
         Text{
             id:readyTips
-            font.pixelSize: 45
+            font.pixelSize: ExGlobal.uiParam[ExGlobal.UI_BOXREADY_BUTTOM_PROMPT_FONT]
             font.bold: true
             anchors.top: startbutton.bottom
             anchors.topMargin: 28
@@ -123,6 +123,7 @@ Page {
             image: "qrc:/images/CancelTest.png"
             text: qsTr("取消测试")
             textcolor: "#323232"
+            textfont: ExGlobal.uiParam[ExGlobal.UI_BOXREADY_TEST_CANCEL_FONT]
             onClicked: testcancelDialog.show(0)
         }
     }
@@ -156,6 +157,7 @@ Page {
             readyTips.text = qsTr("样本号不能为空 请输入样本号")
             readyTips.color = "#FC7052"
         }
+        console.log("UI_BOXREADY_BUTTOM_PROMPT_FONT",ExGlobal.uiParam[ExGlobal.UI_BOXREADY_BUTTOM_PROMPT_FONT]);
     }
 
     Connections{

@@ -44,7 +44,13 @@ class ExGlobal : public QObject
 
 public:
     enum UI_PARAM:int16_t{
+        UI_MAIN_MENU_FONT,
+        UI_MAIN_MENU_HORIZONTALOFFSET,
         UI_LOGIN_SUBMIT_FONT,
+        UI_IDLE_EXITLOGIN_FONT,
+        UI_IDLE_SHUTDOWN_FONT,
+        UI_BOXREADY_BUTTOM_PROMPT_FONT,
+        UI_BOXREADY_TEST_CANCEL_FONT,
         UI_PARAM_LENGTH
     };
     Q_ENUM(UI_PARAM)

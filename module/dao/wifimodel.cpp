@@ -44,7 +44,7 @@ static void disWifi(){
 }
 
 static bool connectWifi(QString ssid, QString password){
-    QString connectNetWorkStr = QString("nmcli dev wifi connect %1 password %2").arg(ssid).arg(password);
+    QString connectNetWorkStr = QString("nmcli dev wifi connect \"%1\" password \"%2\"").arg(ssid).arg(password);
     qDebug()<<connectNetWorkStr;
     QTime time;
     time.start();

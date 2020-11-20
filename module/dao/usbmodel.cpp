@@ -228,6 +228,12 @@ void UsbModel::updateSoft(){
             QFile::rename(QCoreApplication::applicationDirPath()+"/en_US.qm",QCoreApplication::applicationDirPath()+"/en_US.p");
             QFile::copy("/mnt/en_US.qm",QCoreApplication::applicationDirPath()+"/en_US.qm");
         }
+        if (QFile::exists("/mnt/UIParam.xml"))
+        {
+            QFile::remove(QCoreApplication::applicationDirPath()+"/UIParam.p");
+            QFile::rename(QCoreApplication::applicationDirPath()+"/UIParam.xml",QCoreApplication::applicationDirPath()+"/UIParam.p");
+            QFile::copy("/mnt/UIParam.xml",QCoreApplication::applicationDirPath()+"/UIParam.xml");
+        }
         system("sync");
         system("umount -l /mnt");
     }

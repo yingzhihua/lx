@@ -52,7 +52,7 @@ private:
     QString QrDecode(Mat &image);
     bool haveliquids(Mat &image);
     bool havehole(Mat &image);
-    bool haveQrcode(Mat &image);
+    bool haveQrcode(Mat &image, Mat &source);
 
     bool OpenCamera(int index, VideoCapture &cap);
 };
