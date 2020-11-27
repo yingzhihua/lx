@@ -58,7 +58,7 @@ bool GlobalApplication::notify(QObject *obj, QEvent *e){
             QKeyEvent *keyEvent = static_cast<QKeyEvent *>(e);
             if (keyEvent->key() == Qt::Key_Return)
             {
-                if (sampleCode.length() > 3)
+                if (sampleCode.length() > 3 || (sampleCode.length() == 1 && (sampleCode[0] == 'p' || sampleCode[0] == 'P')))
                     global->setSampleCode(sampleCode);
                 qDebug()<<sampleCode;
                 sampleCode = "";

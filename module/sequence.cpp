@@ -1741,6 +1741,7 @@ typedef struct
 
 void Sequence::checkParam(bool update){
     intParam param;
+    qDebug()<<"checkParam version="<<ExGlobal::tempversion();
     if (QString::compare("V2.15",ExGlobal::tempversion())>0) return;
     param.V1ToolHomeX = ExGlobal::V1ToolHomeX;
     param.V1WorkX = ExGlobal::V1WorkX;

@@ -34,8 +34,8 @@ int ExGlobal::LanguageCode = 0;
 int ExGlobal::PanelBoxIndex = 1;
 
 QString ExGlobal::t_version = "V1";
-QString ExGlobal::build_version = "V1.0.19(build20201120)";
-//QString ExGlobal::build_version = "V1.0.16(build20201012)";
+//QString ExGlobal::build_version = "V1.0.19(build20201120)";
+QString ExGlobal::build_version = "V1.0.16(build20201012)";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
 
@@ -100,7 +100,7 @@ int ExGlobal::QrX4 = 456;
 int ExGlobal::QrY4 = 715;
 #endif
 
-int ExGlobal::ProjectMode = 0;
+int ExGlobal::ProjectMode = 1;
 int ExGlobal::MachineMode = 0;
 int ExGlobal::ClearMode = 0;
 int ExGlobal::LiquidsHeight = 70;
@@ -228,7 +228,9 @@ QString ExGlobal::getMac(){
 }
 
 QString ExGlobal::getSerial(){
-    return "002001002";
+    //return "002001002";
+    //return "001001003";
+    return "001008003";
 }
 
 QStringList ExGlobal::getNetWork(){

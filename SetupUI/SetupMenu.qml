@@ -128,6 +128,7 @@ Rectangle {
             removeItem("TestSetup");
             removeItem("TestLoop");
             removeItem("ProjectParam")
+            removeItem("Light")
         }
 
         //Sequence.changeTitle(qsTr("设置"));
