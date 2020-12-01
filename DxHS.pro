@@ -130,8 +130,8 @@ LIBS += /opt/opencv-4.1.1L/lib/libopencv_highgui.so \
 INCLUDEPATH += /opt/zbar-0.10L/include
 LIBS += /opt/zbar-0.10L/lib/libzbar.so
 
-INCLUDEPATH += /opt/DVPCameraL
-LIBS += /opt/DVPCameraL/libdvp.so
+#INCLUDEPATH += /opt/DVPCameraL
+#LIBS += /opt/DVPCameraL/libdvp.so
 
 INCLUDEPATH += /opt/CKCameraL/include
 LIBS += /opt/CKCameraL/libCKCameraSDK_x64.so
