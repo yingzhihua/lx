@@ -25,6 +25,8 @@ static int currCameraCycle = 0;
 static QDateTime testStartTime;
 static QMetaEnum metaEnum = QMetaEnum::fromType<Sequence::SequenceId>();
 
+static int ErrOpenDoorCount = 0;
+#define ERROPENDOOR_MAXLENGTH 10000
 static Sequence *sequence = nullptr;
 QObject *Sequence::sequence_provider(QQmlEngine *engine, QJSEngine *scriptEngine){
     Q_UNUSED(engine);
@@ -1402,6 +1404,10 @@ bool Sequence::listNextAction(bool first){
         }
         else if(act.device == "ErrOpenDoor"){
             if (!bDoorState2){
+                ErrOpenDoorCount += 500;
+                if (ErrOpenDoorCount > ERROPENDOOR_MAXLENGTH)
+                    return false;
+
                 act.device = "Query";
                 act.value = 3;
                 actList.append(act);
@@ -1411,7 +1417,7 @@ bool Sequence::listNextAction(bool first){
 
                 act.device = "Door";
                 act.value = 3;
-                act.param1 = 1000;
+                act.param1 = 500;
 
                 QByteArray send = ActionParser::ParamToByte(act.device,act.value,act.param1,act.param2,act.param3);
                 currOrder = send[7];
@@ -1508,7 +1514,10 @@ void Sequence::SwitchDoor(bool error){
     actList.append(act);
 
     if (error)
+    {
         act.device = "ErrOpenDoor";
+        ErrOpenDoorCount = 0;
+    }
     else
         act.device = "SwitchDoor";
     actList.append(act);
@@ -1569,7 +1578,7 @@ void Sequence::autoFocus(){
 void Sequence::startLight(){
     bCaptureLight = true;
     autoFocus_JumpStep = 0;
-    dirctAction("Light",2,0,0,0);
+    dirctAction("Light",4,0,0,0);
     camera->preview(2);
 }
 

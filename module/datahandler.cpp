@@ -16,6 +16,8 @@ static int baseDataCount = 10;
 static int ReferenceValue = 1;
 
 static QHash<int,int> PosId;
+static QHash<int,float> PosIntercept;
+
 static QHash<int,Vec2f> baseLine;
 static QHash<int,vector<int>> posBG;
 static QHash<int,int> bgMean;
@@ -227,6 +229,68 @@ static void BaseLineFit(QHash<int, vector<Point>> &posArr){
     }
 }
 
+static void BaseLineFitEx(QHash<int, vector<Point>> &posArr){
+    size_t cycle = 0;
+    foreach(int posIndex, posArr.keys()){
+        cycle = posArr[posIndex].size();
+        if (cycle > 30){
+            vector<Point> points = posArr[posIndex];
+            vector<Point> tempPoint;
+            Vec4f line_para;            
+            vector<double> dyArr;
+            QString posStr;
+            for (int i = 0; i < points.size(); i++)
+                posStr.append(","+QString::number(points[i].y));
+            qDebug()<<"posArr"<<posStr;
+            for (int i = 0; i < cycle-baseDataCount; i++){
+                tempPoint.assign(points.begin()+i,points.begin()+i+baseDataCount);
+                fitLine(tempPoint,line_para,cv::DIST_L2,0,1e-2,1e-2);
+                double dy = 0;
+                for (int j = 0; j < tempPoint.size(); j++)
+                {
+                    double dv = line_para[1]/line_para[0]*(tempPoint[j].x-line_para[2])+line_para[3];
+                    dy += fabs(tempPoint[j].y-dv);
+                }
+                dyArr.push_back(dy);
+            }
+            int minIndex = distance(dyArr.begin(),min_element(dyArr.begin(),dyArr.end()));
+            qDebug()<<"dyArr"<<dyArr<<minIndex;
+            double minValue = dyArr.at(minIndex);
+            tempPoint.assign(points.begin()+minIndex,points.begin()+minIndex+baseDataCount);
+            fitLine(tempPoint,line_para,cv::DIST_L2,0,1e-2,1e-2);
+            dyArr.clear();
+            for (int j = 0; j < points.size(); j++)
+            {
+                double dv = line_para[1]/line_para[0]*(points[j].x-line_para[2])+line_para[3];
+                dyArr.push_back(fabs(points[j].y-dv));
+            }
+            qDebug()<<"points="<<dyArr;
+            int startIndex,endIndex;
+            for (startIndex = minIndex; startIndex > 0; startIndex--)
+            {
+                if(dyArr.at(startIndex) > minValue)
+                    break;
+            }
+            for (endIndex = minIndex+baseDataCount; endIndex < points.size(); endIndex++)
+            {
+                if(dyArr.at(endIndex) > minValue)
+                    break;
+            }
+            qDebug()<<"startIndex="<<startIndex<<"endIndex="<<endIndex;
+            tempPoint.assign(points.begin()+startIndex,points.begin()+endIndex);
+            fitLine(tempPoint,line_para,cv::DIST_L2,0,1e-2,1e-2);
+
+            float k = line_para[1]/line_para[0];
+            float intercept = k*(0-line_para[2]) + line_para[3];
+            qDebug()<<"k="<<k<<"intercept="<<intercept;
+            for (int i = 0; i < posArr[posIndex].size();i++){
+                posArr[posIndex][i].y = posArr[posIndex][i].y - (posArr[posIndex][i].x*k + intercept);
+            }
+            PosIntercept[posIndex] = intercept;
+        }
+    }
+}
+
 static bool PloyCurveFit(vector<Point> &pos, int n, Mat &A){
     int N = pos.size();
     Mat X = Mat::zeros(n+1,n+1,CV_64FC1);
@@ -289,6 +353,8 @@ static void FillTestData(int Testid, QHash<int, vector<Point> > &posArr){
 
     posArr.clear();
     PosId.clear();
+    PosIntercept.clear();
+
     rawData.clear();
     posBG.clear();
     BGMax = 0;
@@ -326,12 +392,13 @@ static void FillDirectData(int Testid, QHash<int, vector<Point> > &posArr){
 
     posArr.clear();
     PosId.clear();
+    PosIntercept.clear();
 
     while(query.next()){
         int TestValue = query.value(TestValueNu).toInt();
         posArr[query.value(PosIndexNu).toInt()].push_back(Point(query.value(cycleNu).toInt()*10,TestValue));
         PosId[query.value(PosIndexNu).toInt()] = query.value(ItemidNu).toInt();
-    }
+    }    
 }
 
 static bool LoadTestData(QString filename, QHash<int, vector<Point> > &posArr){
@@ -499,13 +566,17 @@ QHash<int,int> DataHandler::getPosItemid(){
     return PosId;
 }
 
+QHash<int,float> DataHandler::getPosIntercept(){
+    return PosIntercept;
+}
+
 bool DataHandler::HandleData(int testId, QHash<int, vector<Point>> &posArr){
     FillTestData(testId,posArr);
     RefPosFit(posArr);
     NormalizeFit(posArr);
     RemoveNoise(posArr);
     //CurveFit(posArr);
-    BaseLineFit(posArr);
+    BaseLineFitEx(posArr);
     return true;
 }
 
@@ -517,6 +588,7 @@ bool DataHandler::HandleOnePointData(int testId, QHash<int, vector<Point> > &pos
 bool DataHandler::HandleOnePointDataEx(int testId, QHash<int, vector<Point> > &posArr){
     FillDirectData(testId,posArr);
     RemoveNoise(posArr);
+    BaseLineFitEx(posArr);
     return true;
 }
 
@@ -526,7 +598,7 @@ bool DataHandler::LoadData(QString filename, QHash<int, vector<Point> > &posArr)
         RefPosFit(posArr);
         NormalizeFit(posArr);
         RemoveNoise(posArr);
-        BaseLineFit(posArr);
+        BaseLineFitEx(posArr);
         return true;
     }
     return false;
@@ -544,7 +616,7 @@ bool DataHandler::SaveData(int testId){
     NormalizeFit(posArr);
     RemoveNoise(posArr);
     outputPos(Log::getDir()+"/LinuxData/Normalize.csv",posArr);
-    BaseLineFit(posArr);
+    BaseLineFitEx(posArr);
     outputPos(Log::getDir()+"/LinuxData/Baseline.csv",posArr,baseLine);
     return true;
 }

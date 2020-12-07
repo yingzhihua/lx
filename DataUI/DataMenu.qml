@@ -63,10 +63,10 @@ Rectangle {
                 MouseArea{
                     anchors.fill: parent
                     onPressed: {
-                        console.log("Pressed:"+index);
+                        //console.log("Pressed:"+index);
                     }
                     onReleased: {
-                        console.log("Released:"+index);
+                        //console.log("Released:"+index);
                     }
 
                     onClicked: {

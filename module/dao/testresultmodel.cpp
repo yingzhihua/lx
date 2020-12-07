@@ -5,7 +5,7 @@
 
 #include<QDebug>
 static QHash<int,int> PosId;
-
+static QHash<int,float> PosIntercept;
 TestResultModel::TestResultModel(QObject *parent):QAbstractListModel (parent)
 {    
     roles[RolesPosIndex] = "PosIndex";
@@ -89,6 +89,7 @@ QVariant TestResultModel::getField(int row,QString field) const{
 }
 
 void TestResultModel::setTestid(int id,QString panelCode){
+    qDebug()<<"setTestid"<<id<<panelCode;
     Testid = id;
     if (panelCode == ExGlobal::DemoPanelCode)
         DataHandler::LoadData(QCoreApplication::applicationDirPath()+"/RawData.csv",dataPos);
@@ -105,6 +106,7 @@ void TestResultModel::setTestid(int id,QString panelCode){
     else
         DataHandler::HandleData(Testid,dataPos);
     PosId = DataHandler::getPosItemid();
+    PosIntercept = DataHandler::getPosIntercept();
 }
 
 int TestResultModel::getItemResult(int testid, int itemid){
@@ -112,8 +114,10 @@ int TestResultModel::getItemResult(int testid, int itemid){
     {
         foreach(int dataKey, PosId.keys()){
             if (PosId[dataKey] == itemid && dataPos[dataKey].size()>20){
+                float intercept = PosIntercept[dataKey]*1.1;
                 for(int i = 10; i < dataPos[dataKey].size(); i++)
-                    if (dataPos[dataKey][i].y > ExGlobal::getItemCT(itemid))
+                    //if (dataPos[dataKey][i].y > ExGlobal::getItemCT(itemid))
+                    if (dataPos[dataKey][i].y > intercept)
                         return i;
             }
         }
@@ -126,7 +130,9 @@ QList<int> TestResultModel::getCurrItemResult(){
     foreach(int dataKey, PosId.keys()){
         if (PosId[dataKey] == currItemid && dataPos[dataKey].size()>20){
             int t_result = 0;
-            int ct = ExGlobal::getItemCT(currItemid);
+            //int ct = ExGlobal::getItemCT(currItemid);
+            int ct = PosIntercept[dataKey]*0.1;
+            qDebug()<<"getCurrItemResult,"<<dataKey<<"ct="<<ct;
             for(int i = 10; i < dataPos[dataKey].size(); i++)
                 if (dataPos[dataKey][i].y > ct)
                 {

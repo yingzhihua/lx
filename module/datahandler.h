@@ -18,6 +18,7 @@ public:
     static bool SaveData(int testId);
     static bool SaveOnePointData(int testId);
     static QHash<int,int> getPosItemid();
+    static QHash<int,float> getPosIntercept();
     static void setAssayItem(QMap<int, QString> assayItem);
 };
 

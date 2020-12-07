@@ -7,6 +7,7 @@ import Dx.Global 1.0
 
 import "../components"
 Page {    
+    property var itemList:[]
     ChartView {
         id: chartView
         title: "实时测试曲线"
@@ -35,6 +36,15 @@ Page {
             minorTickCount: 4
             titleText: "brightness"
         }
+    }
+
+    Text {
+        id: ctValue
+        anchors.top: chartView.bottom
+        anchors.topMargin: 20
+        anchors.horizontalCenter: chartView.horizontalCenter
+        anchors.horizontalCenterOffset: 60
+        font.pixelSize: 45
     }
 
     Grid{
@@ -88,6 +98,9 @@ Page {
 
     Component.onCompleted: {
         Sequence.setTitle("datamenu");
+        itemList = testResultModel.getCurrItemResult()
         setChart()
+        ctValue.text = "CT:"+itemList[0]%1000/10
+        console.debug(itemList)
     }
 }
