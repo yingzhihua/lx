@@ -114,15 +114,23 @@ int TestResultModel::getItemResult(int testid, int itemid){
     {
         foreach(int dataKey, PosId.keys()){
             if (PosId[dataKey] == itemid && dataPos[dataKey].size()>20){
-                float intercept = PosIntercept[dataKey]*1.1;
+                //float intercept = PosIntercept[dataKey]*1.1;
                 for(int i = 10; i < dataPos[dataKey].size(); i++)
-                    //if (dataPos[dataKey][i].y > ExGlobal::getItemCT(itemid))
-                    if (dataPos[dataKey][i].y > intercept)
+                    if (dataPos[dataKey][i].y > ExGlobal::getItemCT(itemid))
+                    //if (dataPos[dataKey][i].y > intercept)
                         return i;
             }
         }
     }
     return 0;
+}
+static int getCt(vector<Point> &posArr)
+{
+    int value = 0;
+    for (int i = 0; i < posArr.size(); i++)
+        if (posArr[i].y > value)
+            value = posArr[i].y;
+    return value/15;
 }
 
 QList<int> TestResultModel::getCurrItemResult(){
@@ -131,7 +139,8 @@ QList<int> TestResultModel::getCurrItemResult(){
         if (PosId[dataKey] == currItemid && dataPos[dataKey].size()>20){
             int t_result = 0;
             //int ct = ExGlobal::getItemCT(currItemid);
-            int ct = PosIntercept[dataKey]*0.1;
+            //int ct = PosIntercept[dataKey]*0.1;
+            int ct = getCt(dataPos[dataKey]);
             qDebug()<<"getCurrItemResult,"<<dataKey<<"ct="<<ct;
             for(int i = 10; i < dataPos[dataKey].size(); i++)
                 if (dataPos[dataKey][i].y > ct)

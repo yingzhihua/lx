@@ -511,9 +511,18 @@ void Sequence::ActionFinish(QByteArray data)
                 else if(currCameraCaptureType == 3){
                     fillMeanValue = imageAna->GetMeanLight(camera->getyData(),camera->getImageType());
                     //Log::LogTime(QString("Dry Mean Value:%1,Fill Mean Value:%2").arg(dryMeanValue).arg(fillMeanValue));
-                    Log::LogCData(QString("Dry Value/Fill Value = %1/%2 = %3 (reference value > %4/10)").arg(dryMeanValue).arg(fillMeanValue).arg(dryMeanValue/fillMeanValue).arg(ExGlobal::DryWet));
-                    if (dryMeanValue > 3 && fillMeanValue > 3 && dryMeanValue*10/fillMeanValue < ExGlobal::DryWet)
-                        emit sequenceFinish(SequenceResult::Result_Test_DryFillErr);
+                    if (ExGlobal::panelCode().startsWith("3"))
+                    {
+                        //注册检测试湿片比干片更亮,暂时定标准>1.5
+                        Log::LogCData(QString("Fill Value/Dry Value = %1/%2 = %3 (reference value > %4/10)").arg(fillMeanValue).arg(dryMeanValue).arg(fillMeanValue/dryMeanValue).arg(15));
+                        if (dryMeanValue > 3 && fillMeanValue > 3 && fillMeanValue*10/dryMeanValue < 15)
+                            emit sequenceFinish(SequenceResult::Result_Test_DryFillErr);
+                    }
+                    else{
+                        Log::LogCData(QString("Dry Value/Fill Value = %1/%2 = %3 (reference value > %4/10)").arg(dryMeanValue).arg(fillMeanValue).arg(dryMeanValue/fillMeanValue).arg(ExGlobal::DryWet));
+                        if (dryMeanValue > 3 && fillMeanValue > 3 && dryMeanValue*10/fillMeanValue < ExGlobal::DryWet)
+                            emit sequenceFinish(SequenceResult::Result_Test_DryFillErr);
+                    }
                 }
             }
             else if(data[7] == '\xa0' && data[10] != '\x00'){
@@ -535,6 +544,12 @@ void Sequence::ActionFinish(QByteArray data)
         else if(data[7] == '\xB1'){ //刺穿识别 data[2]=1:识别出二维码;data[3]=1:有试剂液体
             if (ExGlobal::projectMode() == 3){
                 //if (data[2] == '\x0' && decodeQr(data.mid(10)) == 2)
+                if (data[2] != '\x0')
+                {
+                    decodeQr(data.mid(10));
+                    ExGlobal::setReagentBox("205");
+                }
+                else
                 {
                     sequenceSetPanel("20001");
                     ExGlobal::setReagentBox("205");
@@ -544,10 +559,17 @@ void Sequence::ActionFinish(QByteArray data)
                 emit sequenceFinish(SequenceResult::Result_Box_Valid);
             }
             else if (ExGlobal::projectMode() == 4){
-                sequenceSetPanel(ExGlobal::OnePointPanelCode);
-                ExGlobal::setReagentBox("206");
-                ExGlobal::setBoxSerial(QString("Lot# 20002"));
-                ExGlobal::validDateTime = QDateTime::currentDateTime().addDays(90);
+                if (data[2] != '\x0')
+                {
+                    decodeQr(data.mid(10));
+                    ExGlobal::setReagentBox("206");
+                }
+                else {
+                    sequenceSetPanel(ExGlobal::OnePointPanelCode);
+                    ExGlobal::setReagentBox("206");
+                    ExGlobal::setBoxSerial(QString("Lot# 20002"));
+                    ExGlobal::validDateTime = QDateTime::currentDateTime().addDays(90);
+                }
 
                 emit sequenceFinish(SequenceResult::Result_Box_Valid);
             }

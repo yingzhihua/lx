@@ -576,7 +576,7 @@ bool DataHandler::HandleData(int testId, QHash<int, vector<Point>> &posArr){
     NormalizeFit(posArr);
     RemoveNoise(posArr);
     //CurveFit(posArr);
-    BaseLineFitEx(posArr);
+    BaseLineFit(posArr);
     return true;
 }
 
@@ -598,7 +598,7 @@ bool DataHandler::LoadData(QString filename, QHash<int, vector<Point> > &posArr)
         RefPosFit(posArr);
         NormalizeFit(posArr);
         RemoveNoise(posArr);
-        BaseLineFitEx(posArr);
+        BaseLineFit(posArr);
         return true;
     }
     return false;
@@ -616,7 +616,7 @@ bool DataHandler::SaveData(int testId){
     NormalizeFit(posArr);
     RemoveNoise(posArr);
     outputPos(Log::getDir()+"/LinuxData/Normalize.csv",posArr);
-    BaseLineFitEx(posArr);
+    BaseLineFit(posArr);
     outputPos(Log::getDir()+"/LinuxData/Baseline.csv",posArr,baseLine);
     return true;
 }

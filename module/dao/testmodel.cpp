@@ -100,7 +100,8 @@ void TestModel::AddTest(int testid){
     if (!ExistTest(testid)){
         QString sql = QString("select * from PanelTest where ResultType = 2 and Testid = %1 order by Testid DESC").arg(testid);
         QSqlQuery query = SqliteMgr::select(sql);
-        beginInsertRows(QModelIndex(),rowCount(),rowCount());
+        //beginInsertRows(QModelIndex(),rowCount(),rowCount());
+        beginInsertRows(QModelIndex(),0,0);
         if (query.next()){
             Test test;
             test.Testid = query.value(0).toInt();
@@ -117,9 +118,10 @@ void TestModel::AddTest(int testid){
             test.SampleRemark = query.value(11).toString();
             test.SampleType = query.value(12).toInt();
             test.PanelName = Sequence::getPanelName(test.PanelCode);
-            m_display_list<<test;
+            //m_display_list<<test;
+            m_display_list.prepend(test);
         }
-        currTestIndex = m_display_list.count() - 1;
+        currTestIndex = 0;
         currTestid = m_display_list[currTestIndex].Testid;
         endInsertRows();
     }

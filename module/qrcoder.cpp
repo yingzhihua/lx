@@ -521,6 +521,7 @@ bool QRcoder::havehole(Mat &image){
 
 bool QRcoder::haveQrcode(Mat &image, Mat &source){
     bool result = false;
+
 /*
     QRCodeDetector qrcode;
     vector<Point> transform;
@@ -534,13 +535,15 @@ bool QRcoder::haveQrcode(Mat &image, Mat &source){
         if (!decode_info.empty()){
             strQr = QString::fromStdString(decode_info);
             qDebug()<<"decode_info"<<strQr;
-            return true;
+            //return true;
         }
     }
+
     qDebug()<<"haveQrcode"<<result_detection<<"posnum"<<transform.size();
     for (int i = 0; i < transform.size();i++)
         qDebug()<<"i="<<i<<"x="<<transform[i].x<<"y="<<transform[i].y;
-*/
+//*/
+
     zbar::ImageScanner scanner;
     scanner.set_config(zbar::ZBAR_NONE,zbar::ZBAR_CFG_ENABLE,1);
 

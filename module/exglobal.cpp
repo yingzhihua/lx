@@ -34,7 +34,7 @@ int ExGlobal::LanguageCode = 0;
 int ExGlobal::PanelBoxIndex = 1;
 
 QString ExGlobal::t_version = "V1";
-QString ExGlobal::build_version = "V1.0.20(build20201207)";
+QString ExGlobal::build_version = "V1.0.22(build20201216)";
 //QString ExGlobal::build_version = "V1.0.16(build20201012)";
 QString ExGlobal::temp_version = "V0.00";
 QString ExGlobal::ctrl_version = "V0.00";
@@ -101,7 +101,7 @@ int ExGlobal::QrY4 = 715;
 #endif
 
 int ExGlobal::ProjectMode = 1;
-int ExGlobal::MachineMode = 0;
+int ExGlobal::MachineMode = 1;
 int ExGlobal::ClearMode = 0;
 int ExGlobal::LiquidsHeight = 70;
 int ExGlobal::DryWet = 11;
